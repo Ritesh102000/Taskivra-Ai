@@ -46,3 +46,8 @@ docs/phase8/evidence/
 /captures/
 /recordings/
 /screenshots/
+
+# Local documentation-hosting metadata and visual QA intermediates.
+.vercel/
+.playwright-mcp/
+/tmp/pdfs/

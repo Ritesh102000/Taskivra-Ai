@@ -1,0 +1,1498 @@
+{
+  "title": "Taskivra AI",
+  "subtitle": "The complete beginner guide",
+  "version": "0.9.9",
+  "date": "1 October 2026",
+  "sections": [
+    {
+      "id": "start-here",
+      "title": "Start here: what this product does",
+      "summary": "A plain-language introduction before you touch any settings.",
+      "group": "Start here",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Taskivra AI is a desktop application for your Mac. You give an AI helper a piece of work, give it the information and access it needs, and review what it produces. You can have several helpers with different jobs. The application saves their tasks and progress so you can supervise the work."
+        },
+        {
+          "type": "p",
+          "text": "An agent is an AI helper with a name, instructions, private files, and a browser session. It uses a model - the AI service that reads context and proposes the next step. The application checks those proposed actions before using its tools. A task is one specific job given to an agent."
+        },
+        {
+          "type": "heading",
+          "text": "A simple example"
+        },
+        {
+          "type": "p",
+          "text": "You create an agent called Research Assistant. You give it two company website links and ask it to compare their pricing. It reads permitted pages, writes a report, and asks you if it needs missing information. You review the report and decide whether it is useful. It does not become correct merely because the task says Complete."
+        },
+        {
+          "type": "heading",
+          "text": "What the application name means"
+        },
+        {
+          "type": "p",
+          "text": "This repository is called Taskivra-Ai and this guide calls the product Taskivra AI. The current desktop window and local application still say Agent Workspaces. They are the same project. Storage and internal names have been kept so existing work is not disrupted."
+        },
+        {
+          "type": "heading",
+          "text": "Desktop application versus this guide website"
+        },
+        {
+          "type": "p",
+          "text": "The Vercel website hosts this guide and its PDF. It is documentation, not a cloud version of the application. Your agents, database, files, browser sessions, and Docker jobs run through the local Mac application. Hosted AI providers process the context sent to their APIs."
+        },
+        {
+          "type": "note",
+          "title": "Current stage",
+          "text": "Version 0.9.9 is a local pre-release. Apple Silicon Mac is the validated development platform. A public installer, Windows/Linux support, Intel Mac support, automatic updates, and clean-machine installation have not been validated."
+        },
+        {
+          "type": "heading",
+          "text": "How to read this guide"
+        },
+        {
+          "type": "list",
+          "items": [
+            "If the app is not installed, start with Install and open the application, then Connect the AI model.",
+            "If someone has already prepared your Mac, start with Create your first agent, then Your first task.",
+            "Choose a use-case walkthrough to see exactly what to type and how to review its output.",
+            "Use the clickable contents, subsection links, and PDF bookmarks to move around. Every ordinary PDF page has a Contents link."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Related chapters: <a href=\"#create-agent\">Create your first agent</a>, <a href=\"#first-task\">Your first task</a>, and <a href=\"#fleets\">Understand Fleets</a>."
+        }
+      ]
+    },
+    {
+      "id": "words-and-screens",
+      "title": "Understand the words and screens",
+      "summary": "Know what you are looking at and what each part is for.",
+      "group": "Start here",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "Word",
+            "Plain-language meaning"
+          ],
+          "rows": [
+            [
+              "Agent",
+              "A named helper with reusable instructions, its own private workspace, and a separate browser session."
+            ],
+            [
+              "Task",
+              "One job with an objective, completion criteria, allowed access, model, and limits."
+            ],
+            [
+              "Objective",
+              "The outcome you want. Example: compare two sales files and explain the change."
+            ],
+            [
+              "Completion criteria",
+              "What a usable finished result should contain. This is your definition of done."
+            ],
+            [
+              "Project",
+              "An area of work such as one client, business, or personal topic. Sharing stays within that project."
+            ],
+            [
+              "Private workspace",
+              "Managed task files and outputs available only through authorized access. It is not unrestricted access to your Mac."
+            ],
+            [
+              "Shared library",
+              "Files deliberately published to the project so authorized agents can use them. Shared does not mean public on the internet."
+            ],
+            [
+              "Version",
+              "An exact saved copy of a file. A task pins that copy so later changes cannot silently alter its evidence."
+            ],
+            [
+              "Workflow",
+              "A reusable starter that asks for the information needed for a common job."
+            ],
+            [
+              "Fleet",
+              "A bounded team organized around one objective, with a lead and specialists."
+            ],
+            [
+              "Model / provider",
+              "The AI model is the reasoning service; the provider is the service or local server that makes it available."
+            ],
+            [
+              "API key",
+              "A credential that lets the application call a provider. Enter it only in the model connection form."
+            ],
+            [
+              "Tool",
+              "An action the app permits, such as observing a page, reading a selected file, or running isolated code."
+            ],
+            [
+              "Receipt / evidence",
+              "A saved record of an observation, source, or exact output identity. It helps you check how a report was produced."
+            ],
+            [
+              "Token",
+              "A unit of model input/output text. Token limits bound request size and help estimate provider use."
+            ],
+            [
+              "Checkpoint",
+              "Saved progress used when reviewing and resuming interrupted work."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Where to go in the app"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Screen",
+            "Use it for"
+          ],
+          "rows": [
+            [
+              "Projects",
+              "Create an area of work, add its agents, and keep the brief and sharing scoped."
+            ],
+            [
+              "Workflows",
+              "Choose a starter such as Compare competitors or Review unread Gmail."
+            ],
+            [
+              "Agent / task view",
+              "Open a job, inspect Activity and files, run it, pause it, or respond to a request."
+            ],
+            [
+              "Requests",
+              "See what an agent needs from you: files, clarification, or a connection."
+            ],
+            [
+              "Shared library / Shared board / Agent inboxes",
+              "Find published project files, dependencies, and scoped coordination."
+            ],
+            [
+              "Fleets",
+              "Prepare one objective for a team and inspect roles, claims, messages, and results."
+            ],
+            [
+              "Results",
+              "Review the exact output, checks, acceptance state, and export options."
+            ],
+            [
+              "Routines",
+              "Set up eligible recurring read-only jobs and optional content-change alerts."
+            ],
+            [
+              "Automatic recovery",
+              "Inspect recorded transient-read incidents and their bounded retry history."
+            ],
+            [
+              "Settings",
+              "Configure model connections, Google accounts, browser setup, and backup/recovery."
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "title": "A useful distinction",
+          "text": "Agent instructions describe how a helper should generally work. A task objective describes what it should do this time. Neither is a password or a replacement for the app's permission controls."
+        }
+      ]
+    },
+    {
+      "id": "install",
+      "title": "Install and open the application",
+      "summary": "Prepare a source checkout on a Mac, or open an app that has already been prepared.",
+      "group": "Setup",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "If you already have the app"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open Agent Workspaces",
+              "text": "Open the local application your developer prepared. It currently uses the older product name. Read any setup status shown in Settings. A window opening does not mean its model, browser, or container tools are ready."
+            },
+            {
+              "title": "Check the model connection",
+              "text": "Before live work, open Settings and check Models and providers. Continue with the next chapter if no usable connection is configured."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "If you are installing from this repository"
+        },
+        {
+          "type": "p",
+          "text": "The repository is source code, not an automatically configured installer. These steps are for the person preparing the Mac. Terminal is the Mac application used to enter the commands below. A beginner can ask a developer to complete this section, then use the interface for ordinary tasks."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Use an Apple Silicon Mac, with Node.js 24.14.0 or newer and npm installed. Node/npm build and install the source dependencies.",
+            "Apple Command Line Tools provide the compiler for the native helpers. Install them with xcode-select --install if missing.",
+            "Install Google Chrome if ordinary browser tasks will use the dedicated Chrome backend.",
+            "Install and start Docker Desktop only if code execution or the optional container browser is needed. The local lab browser itself does not need Docker."
+          ]
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Download the source",
+              "text": "Open Terminal in a suitable folder, then run the download and install commands below. npm ci installs the versions recorded by the repository lockfile."
+            },
+            {
+              "title": "Compile native helpers",
+              "text": "Run the helper commands. They compile the Mac components used for Keychain and the Chrome bridge. They do not sign in, read saved secrets, or connect an account."
+            },
+            {
+              "title": "Start the app",
+              "text": "Run npm start from the repository folder. It builds the interface and opens Electron, the desktop runtime."
+            },
+            {
+              "title": "Complete capability setup",
+              "text": "Connect a model. Prepare the selected agent's Chrome profile if needed. Provision the code image if a workflow requires calculations. Each capability has a separate chapter."
+            }
+          ]
+        },
+        {
+          "type": "code",
+          "text": "git clone https://github.com/Ritesh102000/Taskivra-Ai.git\ncd Taskivra-Ai\nnpm ci\nnpm run model:setup\nnpm run gmail:setup\nnode packages/google-workspace/setup.mjs\nnpm run browser:native:setup\nnpm start"
+        },
+        {
+          "type": "note",
+          "title": "Disk space and installation limits",
+          "text": "Code-image setup checks for at least 8 GiB free host disk; local app packaging checks for at least 2 GiB. These are separate minimums, not the total space needed. Docker/browser images can use more. Clean-Mac installation and a public signed/notarized distribution are still release work."
+        },
+        {
+          "type": "p",
+          "text": "If npm or a helper is missing, resolve that setup issue before starting a task. Do not paste API keys or your Mac password into Terminal commands. See <a href=\"#troubleshooting\">Troubleshooting</a>."
+        }
+      ]
+    },
+    {
+      "id": "models",
+      "title": "Connect the AI model",
+      "summary": "Give the app a supported AI service or a local model server.",
+      "group": "Setup",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Choose cloud or local"
+        },
+        {
+          "type": "p",
+          "text": "A cloud connection sends task context to a provider over the network and may charge for use. A local connection points to a model server you already run on the Mac. The application does not download models or install Ollama/LM Studio for you."
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Choice",
+            "What you need"
+          ],
+          "rows": [
+            [
+              "OpenAI or Claude / Anthropic",
+              "An API account, exact supported model ID, API key, and current declared prices. A consumer chat subscription is not API access."
+            ],
+            [
+              "Ollama on this Mac",
+              "A running Ollama server and installed model with its explicit tag. Choose a model/server that supports the app's structured tool calls."
+            ],
+            [
+              "LM Studio or another compatible server",
+              "A running compatible server, its API base URL, exact model ID, and any authentication it requires."
+            ],
+            [
+              "OpenRouter, Together AI, Groq, LiteLLM, or another gateway",
+              "A compatible endpoint, credentials if required, an exact model, and declared metered prices when cloud charges apply."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Add a connection step by step"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open Settings",
+              "text": "Find Models and providers, then choose Add connection. Pause running tasks before changing model connections."
+            },
+            {
+              "title": "Choose Provider or server",
+              "text": "Use a preset that matches the service. The preset fills some protocol settings; it does not install or test the model."
+            },
+            {
+              "title": "Enter Connection name and Exact model ID",
+              "text": "Give the connection a name you recognize. Copy the exact model identifier from your provider/server. Do not use a guessed model name."
+            },
+            {
+              "title": "Check API base URL, Authentication, and Billing",
+              "text": "The base URL is the address of the model service. Remote services require HTTPS. Local HTTP is supported only for loopback. A local gateway that calls paid cloud models should still be metered."
+            },
+            {
+              "title": "Enter a key and declare prices if needed",
+              "text": "Use the password-style API key field. Metered connections need input/output prices per million tokens. Check current prices with your provider rather than treating an example as a live quote."
+            },
+            {
+              "title": "Review per-call token limits",
+              "text": "Reserved input tokens per call is the allowance reserved before a request. Maximum output tokens per call limits the answer. Keep both within the model's capacity."
+            },
+            {
+              "title": "Confirm structured tool support and save",
+              "text": "Confirm that the chosen model supports structured tool calls, then select Save connection. The app says no model request was sent."
+            },
+            {
+              "title": "Select this model for the task",
+              "text": "When preparing a task or fleet, choose the saved connection. A small harmless first task can reveal account/protocol problems; it is live use and may cost money."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Understand task limits"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Limit",
+            "Why it matters"
+          ],
+          "rows": [
+            [
+              "Model spend",
+              "Maximum declared model spend allowed for the task. Settled usage plus uncertain reservations count."
+            ],
+            [
+              "Model calls",
+              "How many model generation attempts the task may use."
+            ],
+            [
+              "Tool steps",
+              "How many tool actions it may perform."
+            ],
+            [
+              "Total tokens",
+              "The task's input/output token budget."
+            ],
+            [
+              "Active seconds",
+              "Time spent actively working. Waiting for human input is distinct."
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "title": "Configured is not tested",
+          "text": "Supported protocols are OpenAI Responses, Anthropic Messages, native Ollama chat, and compatible Chat Completions. The current contract supports text and at most one valid client tool call per turn. Some model dialects are incompatible. Saved settings do not prove a working account/server. Editing a connection creates a new revision; saved tasks retain the previous revision."
+        },
+        {
+          "type": "p",
+          "text": "Keys are stored in macOS Keychain. Unknown provider outcomes retain a budget reservation and are not blindly retried. Declared-price accounting is local; invoices and gateway fees can differ. See <a href=\"#data-recovery\">Data and recovery</a>."
+        }
+      ]
+    },
+    {
+      "id": "create-agent",
+      "title": "Create your first agent",
+      "summary": "Give a helper a name, reusable instructions, and the right project.",
+      "group": "Everyday use",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Create a project first when you need separation"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open Projects",
+              "text": "A project keeps a client or topic's shared files, task membership, and coordination separate. You can use the existing personal workspace for a first simple task."
+            },
+            {
+              "title": "Create project",
+              "text": "In New project, enter a Name such as Practice workspace and an optional Description. Choose Create project."
+            },
+            {
+              "title": "Add an agent inside that project",
+              "text": "Use its Add an agent form to create the helper in the correct project. Existing agents cannot currently be moved between projects."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Create an agent from the main agent list"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Choose the plus beside YOUR AGENTS",
+              "text": "This opens Create an agent. For client-specific work, use the project's Add an agent form instead so membership is explicit."
+            },
+            {
+              "title": "Enter Agent name",
+              "text": "Use a job-oriented name such as Research Assistant, Data Analyst, or Mail Assistant. The name does not grant tools or account access."
+            },
+            {
+              "title": "Enter Instructions",
+              "text": "Describe its normal working style and constraints. This is reusable guidance, not the particular task. Instructions are optional, but clear ones make the purpose easier to review."
+            },
+            {
+              "title": "Choose Create agent",
+              "text": "The helper appears in the agent list with a private workspace. Creating it does not launch a paid model task or sign in a browser."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "A copyable instruction example"
+        },
+        {
+          "type": "code",
+          "text": "Work carefully and explain your sources.\nAsk me when essential information is missing.\nDistinguish observed facts from assumptions.\nDo not claim to have read content you could not access.\nWrite a clear result with limitations and next steps."
+        },
+        {
+          "type": "heading",
+          "text": "What is separate for each agent"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Private task files and outputs are scoped rather than shared automatically.",
+            "Browser cookies and tabs belong to the agent session/profile, not your personal browser.",
+            "Tasks have their own objectives, model selections, access, and limits.",
+            "Publishing a file is an explicit way to let approved project peers use an exact copy."
+          ]
+        },
+        {
+          "type": "note",
+          "title": "Keep secrets out of instructions",
+          "text": "Do not put your API key, Google password, Mac password, or personal browser cookies here. Use Settings and direct sign-in when a connection or login is needed."
+        },
+        {
+          "type": "p",
+          "text": "Next: <a href=\"#first-task\">give the helper its first task</a>. Use-case chapters later provide a suitable name and instructions for each example."
+        }
+      ]
+    },
+    {
+      "id": "first-task",
+      "title": "Give an agent its first task",
+      "summary": "Turn a vague request into a saved job you can inspect and run.",
+      "group": "Everyday use",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "The easier route: a workflow"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open Workflows",
+              "text": "Select a starter that matches the job, such as Compare competitors, Compare two CSV files, Review code files, or Review unread Gmail."
+            },
+            {
+              "title": "Choose Use workflow",
+              "text": "Read the requested fields and enter the job-specific information. A workflow is a form plus a saved procedure, not a guarantee of a good result."
+            },
+            {
+              "title": "Choose the project agent and model",
+              "text": "Select the helper that should do the job and its configured model. Review the permissions and budget controls shown."
+            },
+            {
+              "title": "Review task, then Save task",
+              "text": "Review the prepared objective, criteria, and allowed access. Saving prepares the job; it does not mean the model has completed it."
+            },
+            {
+              "title": "Resolve readiness",
+              "text": "Open the saved task. Assign required files or configure the missing browser, model, or account. Readiness reports what is missing."
+            },
+            {
+              "title": "Choose Run agent",
+              "text": "This starts live model calls and permitted tools. Keep the app available. Inspect Activity as it works."
+            },
+            {
+              "title": "Respond when it needs you",
+              "text": "Open the request, answer only the missing information, or complete browser/account setup. Paused or cancelled work stays under your control."
+            },
+            {
+              "title": "Review Results",
+              "text": "Open the exact output and check its sources and coverage. Accept it if useful, or request changes with a precise correction."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "The manual route: New task"
+        },
+        {
+          "type": "p",
+          "text": "Use New task on the selected agent when no starter fits. Choose Live agent for real model/tool use, enter What should the agent accomplish? and What does done look like?, select the model, and review access/limits. Save live task, then resolve readiness and run. Live mode is different from Simulation."
+        },
+        {
+          "type": "heading",
+          "text": "How to write a useful objective"
+        },
+        {
+          "type": "code",
+          "text": "Compare the public pricing pages I approved for Company A\nand Company B. Summarize the plans, important differences,\nand any information you could not verify."
+        },
+        {
+          "type": "heading",
+          "text": "How to define done"
+        },
+        {
+          "type": "code",
+          "text": "A private Markdown report with a comparison table,\nlinks to the pages actually read, uncertainties,\nand three questions I should investigate next."
+        },
+        {
+          "type": "heading",
+          "text": "Understand progress states"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "State",
+            "What it means"
+          ],
+          "rows": [
+            [
+              "Draft / prepared / ready to run",
+              "Saved configuration exists; live work has not necessarily started."
+            ],
+            [
+              "Queued / working",
+              "The job is waiting for capacity or actively using its configured model/tools."
+            ],
+            [
+              "Needs input / waiting",
+              "An agent needs a file, answer, or connection. This is not a completed task."
+            ],
+            [
+              "Paused",
+              "Execution is stopped temporarily. Review saved progress before resuming."
+            ],
+            [
+              "Complete",
+              "The application accepted the completion path and saved an output. You still need to review its accuracy."
+            ],
+            [
+              "Failed / stopped",
+              "The job cannot continue or was ended. Historical progress and errors remain available."
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "title": "Try simulation if you only want to learn the controls",
+          "text": "Simulation uses scripted local scenarios such as asking clarification, completing, or failing. It makes no model calls. It does not demonstrate that a live AI has performed the same work."
+        },
+        {
+          "type": "p",
+          "text": "For complete examples, choose a <a href=\"#case-competitor-research\">research walkthrough</a> or the <a href=\"#case-csv-analysis\">CSV walkthrough</a>."
+        }
+      ]
+    },
+    {
+      "id": "files-requests",
+      "title": "Files and human requests",
+      "summary": "Give the right inputs without sharing your whole computer.",
+      "group": "Everyday use",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Import a private file"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open the intended task",
+              "text": "Choose the job that should use the file. Importing into an unrelated task does not grant this job access."
+            },
+            {
+              "title": "Use the file picker or supported file drop",
+              "text": "Select only the files needed. The app imports managed copies and validates format/size. Agents do not browse arbitrary host folders."
+            },
+            {
+              "title": "Check the saved version",
+              "text": "A version is the exact imported copy. Later edits to the original file on your Mac do not silently change it."
+            },
+            {
+              "title": "Assign named workflow slots if present",
+              "text": "In Activity, open Ready for this job? and Assign the files for this run. Give each required slot the correct version, such as the earlier and later CSV. Read the validation result."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "When the agent requests a file"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Read the request and slot names",
+              "text": "A slot explains the particular file or format needed. Do not assume any file satisfies it."
+            },
+            {
+              "title": "Supply the requested input",
+              "text": "Choose a matching file through the owner interface. Do not paste a local file path as a substitute for importing the content."
+            },
+            {
+              "title": "Resolve rejected slots",
+              "text": "A wrong format or missing slot remains blocked. Replace the rejected input; already accepted slots remain saved."
+            },
+            {
+              "title": "Review continuation",
+              "text": "Once all required inputs are fulfilled, the eligible task can receive one continuation from saved progress. An owner pause or cancellation is not overridden."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Clarification and reduced scope"
+        },
+        {
+          "type": "p",
+          "text": "A clarification request asks a question such as which date range to analyze. Answer with the specific missing information. If the agent cannot complete the original scope, it can ask you to accept a smaller scope. The application requires your acceptance rather than silently calling incomplete work done."
+        },
+        {
+          "type": "heading",
+          "text": "Publish only when another agent needs the file"
+        },
+        {
+          "type": "p",
+          "text": "A private output stays private until deliberately published. Publish an exact project version, then authorize a peer task to consume it. The shared library is a project sharing area, not a public website. If you publish a later copy, tasks already using the earlier version keep their original evidence."
+        },
+        {
+          "type": "note",
+          "title": "Bounds and supported formats",
+          "text": "Default import bounds include 100 MiB per file, 250 MiB per batch, and 32 files per batch. A workflow, preview, Google import, or fleet can impose smaller limits. PDF/XLSX extraction uses a separately prepared document image and supports ordinary bounded files; it does not run macros or perform OCR."
+        },
+        {
+          "type": "p",
+          "text": "Related: <a href=\"#collaboration\">sharing and collaboration</a>, <a href=\"#code-tools\">isolated calculations</a>."
+        }
+      ]
+    },
+    {
+      "id": "browsers",
+      "title": "Browser setup, sign-in, and takeover",
+      "summary": "Let an agent browse separately while you keep using your own browser.",
+      "group": "Setup",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Choose the right browser path"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Path",
+            "Use and limits"
+          ],
+          "rows": [
+            [
+              "Dedicated Chrome",
+              "Ordinary agent websites, a separate local profile per agent, and direct owner login. It runs on the Mac and uses normal host networking."
+            ],
+            [
+              "Optional container browser",
+              "Docker-isolated browser with managed file-transfer support and optional encrypted login checkpoints. Fresh-machine base-image setup is not complete."
+            ],
+            [
+              "Local lab browser",
+              "Temporary independent Electron sessions for the bundled fictional website only. No Chrome extension is needed; closing clears login storage."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Prepare dedicated Chrome"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Install Chrome and compile the bridge",
+              "text": "Chrome is expected at /Applications/Google Chrome.app. The source helper is built with npm run browser:native:setup."
+            },
+            {
+              "title": "Open the selected agent's Browser setup",
+              "text": "Prepare its dedicated profile, then select Open Chrome setup. Use that agent's Chrome window, not your personal profile."
+            },
+            {
+              "title": "Open chrome://extensions",
+              "text": "Enable Developer mode, choose Load unpacked, and select extensions/agent-browser inside this checkout."
+            },
+            {
+              "title": "Return to the app and refresh status",
+              "text": "The bridge connects that particular agent profile. Each new profile needs its own extension setup."
+            },
+            {
+              "title": "Reload after changing extension source",
+              "text": "Close the task browser, Reload the extension in its Extensions page, then reopen the browser. Rebuilding the app alone does not reload an unpacked extension."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Take control for login"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open the agent browser",
+              "text": "Inspect the task's browser state. If the task requests login, read which account/site it needs."
+            },
+            {
+              "title": "Choose Take control",
+              "text": "The app transfers exclusive control to you. Use the actual dedicated Chrome window for navigation, password entry, and MFA."
+            },
+            {
+              "title": "Finish the intended login",
+              "text": "Credentials stay out of task messages and saved page traces. Do not import your personal Chrome profile or enable personal profile sync."
+            },
+            {
+              "title": "Choose Return to agent",
+              "text": "The app adopts allowed relevant tabs and requires a fresh observation before agent actions resume. The task still respects its allowed sites and saved scope."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Can you work while the agent works?"
+        },
+        {
+          "type": "p",
+          "text": "Ordinary agent operations use their managed tabs rather than the Mac's global mouse/keyboard. You can use your own browser while agents work in separate sessions. Explicit inspection/takeover can bring the agent window forward. Human takeover blocks agent reads, previews, and inputs until you return control."
+        },
+        {
+          "type": "note",
+          "title": "Login compatibility is not guaranteed",
+          "text": "A dedicated Chrome profile separates cookies from your personal browser, but it is not a container/network sandbox. A site can still reject login or ask additional checks. Gmail has a supported read-only OAuth alternative. Native managed upload/download is unavailable; manual downloads do not automatically become task inputs."
+        },
+        {
+          "type": "p",
+          "text": "There are two active browser slots and up to six managed tabs per session. Backends do not migrate cookies when switched. For Google accounts see <a href=\"#google-inputs\">Google connections</a>."
+        }
+      ]
+    },
+    {
+      "id": "code-tools",
+      "title": "Understand the code and command tools",
+      "summary": "Calculations happen in isolated jobs, not an unrestricted terminal on your Mac.",
+      "group": "Setup",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Some tasks need calculations or file transformation. Python and Node.js are programming runtimes; shell is a command language. The app can execute these inside a disposable Docker container. A container is a separate execution environment with bounded resources."
+        },
+        {
+          "type": "heading",
+          "text": "Prepare the code runtime"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Install and start Docker Desktop",
+              "text": "Docker must be running before the app can prepare or launch jobs. The app does not install it automatically."
+            },
+            {
+              "title": "Explicitly provision the portable image",
+              "text": "On a fresh Apple Silicon Mac, run the command below. Network access is allowed during this owner-controlled image build, not during agent payload jobs."
+            },
+            {
+              "title": "Check readiness",
+              "text": "Run npm run code:check and resolve the reported issue if not ready."
+            },
+            {
+              "title": "Run only an authorized task",
+              "text": "The task receives verified snapshots of approved input versions. It can create bounded work/output files; exported files are verified before commitment."
+            }
+          ]
+        },
+        {
+          "type": "code",
+          "text": "node packages/code-runtime/setup.mjs --build \\\n  --bootstrap-base --allow-network\nnpm run code:check"
+        },
+        {
+          "type": "heading",
+          "text": "What the agent can and cannot reach"
+        },
+        {
+          "type": "list",
+          "items": [
+            "Jobs run offline with no task-time network. They do not receive host folders, browser cookies, model keys, or the Docker socket.",
+            "Standard images have Python/Node standard libraries. Additional packages require a reviewed pinned dependency recipe.",
+            "Default job limits include one CPU, 1 GiB memory, a 120-second payload deadline, and bounded logs/output.",
+            "Stop interrupts the owned container and fences late output commitment. A clean exit alone is insufficient; export must also verify."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "The lab command tool is different"
+        },
+        {
+          "type": "p",
+          "text": "In the local website fleet, lab_command accepts a small curl-shaped JSON request to the same verified training site. It performs one bounded HTTP request using that agent's synthetic session. It does not start a host shell, execute the Mac's curl, read host files, or contact arbitrary targets. Offline code in that mode can process permitted fleet reports only."
+        },
+        {
+          "type": "note",
+          "title": "Fresh setup distinction",
+          "text": "npm run code:setup is the older offline build path and expects the exact retained Phase 0 base. A missing base on a new machine requires the explicit portable provisioning command above. The optional container browser has a separate setup gap."
+        }
+      ]
+    },
+    {
+      "id": "collaboration",
+      "title": "Share work and coordinate agents",
+      "summary": "Understand what becomes visible and how handoffs stay reproducible.",
+      "group": "Teamwork",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Private first, shared deliberately"
+        },
+        {
+          "type": "p",
+          "text": "Agents do not automatically see each other's private files, objectives, browser pages, or unpublished outputs. A project gives them a shared library, task awareness, and scoped inboxes. Publishing and task authorization decide what evidence another agent can use."
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Produce or import the source",
+              "text": "Keep it in the relevant project/task. Check that it contains only what the peer needs."
+            },
+            {
+              "title": "Publish its exact version",
+              "text": "This creates a shared immutable project copy. Publish does not upload it to the public internet."
+            },
+            {
+              "title": "Select that version for the receiving job",
+              "text": "The peer works from the pinned copy. Describe what it should do with it and define a useful output."
+            },
+            {
+              "title": "Use messages for coordination",
+              "text": "Send scoped status/findings through the permitted coordination surface. General messages primarily share references and summaries; they do not automatically grant private file or browser access."
+            },
+            {
+              "title": "Review dependencies",
+              "text": "A dependent task needs the upstream work to complete. Cycles and unfinished/failed upstream dependencies remain visible rather than being treated as satisfied."
+            },
+            {
+              "title": "Review the handed-over output",
+              "text": "Record exact report versions and source coverage. Do not assume a peer message proves a conclusion."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Ordinary coordination versus Fleets"
+        },
+        {
+          "type": "p",
+          "text": "Ordinary agents can coordinate within authorized peers/projects. Fleets add an automatically organized bounded lead-and-specialist workflow. A fleet lead plans items and dependencies, workers exclusively claim eligible work, scoped messages carry bounded finding text, and exact completed reports are staged for the lead or dependent workers."
+        },
+        {
+          "type": "note",
+          "title": "Version pinning matters",
+          "text": "If a report changes tomorrow, yesterday's task does not silently consume the new report. A new input selection or handoff records the intended exact copy. This makes it easier to reproduce what each agent actually saw."
+        },
+        {
+          "type": "p",
+          "text": "For a single objective handled by a team, continue with <a href=\"#fleets\">Understand Fleets</a>."
+        }
+      ]
+    },
+    {
+      "id": "google-inputs",
+      "title": "Google accounts: Gmail, Drive, and Sheets",
+      "summary": "Connect explicitly and understand exactly what is read.",
+      "group": "Setup",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Why Gmail uses a separate connection"
+        },
+        {
+          "type": "p",
+          "text": "Google can reject sign-in inside an embedded automated browser. The supported Gmail path uses a Desktop OAuth connection: you sign in and consent in the system browser, then the app reads through a bounded API. OAuth means granting a specific application permission without placing your Google password in a task."
+        },
+        {
+          "type": "heading",
+          "text": "Connect Gmail step by step"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Prepare your Google Cloud project",
+              "text": "In Google Cloud Console, create/select the project that will own this connection. Enable Gmail API."
+            },
+            {
+              "title": "Configure the consent audience",
+              "text": "Set up app branding/contact details and the appropriate audience. If it is in Testing, list the exact intended Gmail address as a test user."
+            },
+            {
+              "title": "Choose the read-only scope",
+              "text": "Configure gmail.readonly. The app has no Gmail send, archive, delete, modify, or mark-read operation."
+            },
+            {
+              "title": "Create a Desktop app client",
+              "text": "Create an OAuth client with application type Desktop app and download its JSON. A Web client or service-account key is not the required format."
+            },
+            {
+              "title": "Prepare and save the Gmail task",
+              "text": "Open Workflows → Review unread Gmail → Use workflow. Select the intended agent, enter your exact Gmail address and what matters to you, choose a configured model, and review the limits. Choose Review task, leave detailed review disabled for a headers-and-snippets brief, then choose Save task. A saved live task naming the account is required before Connect Gmail becomes available. Saving does not read mail or start model calls."
+            },
+            {
+              "title": "Import and connect in Settings",
+              "text": "In Settings → Gmail connection, import the JSON through the native picker. If several saved mail tasks exist, select the intended Saved Gmail task. Choose Connect Gmail and complete sign-in/consent in the system browser with the exact account saved on that task."
+            },
+            {
+              "title": "Verify the account and approve project use",
+              "text": "Choose Verify account for project use, then open Projects and select the project containing the agent. Under Approved accounts → Gmail, choose Approve followed by the verified address. The exact account must match the saved task/project requirement; a different account cannot release that blocker. After restart, Verify account checks identity without listing mail. Return to the saved task and check its readiness before choosing Run agent."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Basic and detailed mail reads"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Mode",
+            "What it reads"
+          ],
+          "rows": [
+            [
+              "Unread brief",
+              "Up to 50 unread message headers/snippets with pagination and truncation disclosed. Reading preserves unread status."
+            ],
+            [
+              "Explicit detailed task",
+              "Bounded search, selected plain-text thread reads, and supported selected attachment imports. Full-body tools are not added to older tasks automatically."
+            ],
+            [
+              "What neither mode does",
+              "Send, archive, delete, mark read, fetch remote images, or execute active email HTML."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Selected Drive and Sheets imports"
+        },
+        {
+          "type": "p",
+          "text": "Drive/Sheets use a separate connection and separate project account approval. Enable the relevant APIs, import a Desktop client through the Google-inputs flow, and choose one exact supported file or finite named-sheet A1 range. The app imports an immutable local snapshot with source identity, retrieval time, hash, and omissions. It does not modify or continually synchronize the source."
+        },
+        {
+          "type": "note",
+          "title": "Account permission versus selected resource",
+          "text": "The current Drive read-only OAuth scope is broad. The application broker restricts which selected resource it imports; it is not a Google-issued per-file grant. Gmail tokens do not grant Drive authority. The original downloaded client JSON remains where you saved it, so keep it private."
+        },
+        {
+          "type": "p",
+          "text": "Expired or revoked authorization requires reconnection. Provider setup/verification for a widely distributed app is separate release work. See the <a href=\"#case-gmail-review\">email walkthrough</a> for a copyable first task."
+        }
+      ]
+    },
+    {
+      "id": "results-routines",
+      "title": "Review results and repeat useful work",
+      "summary": "Completion, acceptance, export, and scheduling mean different things.",
+      "group": "Everyday use",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Review the result"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open Results or the completed task",
+              "text": "Read the exact output version, rather than only the progress summary."
+            },
+            {
+              "title": "Read coverage and evidence",
+              "text": "Check which pages/files/messages were read and what was omitted. Confirm important assertions against their sources."
+            },
+            {
+              "title": "Inspect quality checks",
+              "text": "They can catch malformed JSON/CSV, missing required headings, empty output, or receipt references outside the task. Passing does not prove facts or calculations."
+            },
+            {
+              "title": "Accept or request changes",
+              "text": "Accept records your judgment. If something is wrong, ask for a specific correction and retain the original version history. Fleet result revisions follow their own scoped workflow."
+            },
+            {
+              "title": "Export if needed",
+              "text": "Use the available exact-original export or a supported formatted report export. The native save dialog selects a destination and refuses replacement of an existing file."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Choose an export"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Output",
+            "Supported formatted export"
+          ],
+          "rows": [
+            [
+              "Markdown / plain text",
+              "PDF or Word DOCX with source/version identity. External resources and scripts are not loaded."
+            ],
+            [
+              "CSV",
+              "Excel XLSX with literal text cells, filters, and a source-record sheet; formulas are not executed."
+            ],
+            [
+              "Unsupported or oversized content",
+              "Exact original export. A formatted export that cannot fully represent the content is rejected rather than silently clipped."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Save a reusable workflow"
+        },
+        {
+          "type": "p",
+          "text": "Save a suitable live task as a workflow when you want the same reviewed brief again. A reusable procedure can keep named input fields and output requirements, while each use requires fresh inputs. It does not copy private files, messages, account sessions, or existing grants. Review a brief for personal details before reusing it."
+        },
+        {
+          "type": "heading",
+          "text": "Set up a routine carefully"
+        },
+        {
+          "type": "p",
+          "text": "Routines schedule eligible accepted read-only workflows with per-run/monthly limits and no overlap. This Mac and app must be available; it is not an always-on cloud scheduler. Missed, uncertain, or interrupted occurrences are not blindly replayed. Optional in-app alerts compare a new exact output with an earlier accepted baseline."
+        },
+        {
+          "type": "note",
+          "title": "An alert does not prove the world changed",
+          "text": "It detects content differences, which can include different model wording. Imported files/Google snapshots do not automatically refresh. Acknowledge an alert to mark it reviewed; that does not accept its output."
+        },
+        {
+          "type": "p",
+          "text": "See <a href=\"#data-recovery\">backup and recovery</a> before moving or restoring work."
+        }
+      ]
+    },
+    {
+      "id": "fleets",
+      "title": "Understand Fleets before starting one",
+      "summary": "One objective can create a team, but tools and limits still apply.",
+      "group": "Teamwork",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "How a fleet works"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "You set one objective",
+              "text": "Choose the project, mode, exact allowed evidence where needed, lead/worker models, and team/task limits."
+            },
+            {
+              "title": "The lead plans",
+              "text": "It proposes bounded specialist roles, work items, and dependencies. Creating a plan does not mean the items are completed."
+            },
+            {
+              "title": "Workers claim eligible items",
+              "text": "A claim makes one worker responsible for an item. Independent items can work concurrently if the plan and available capacity permit it."
+            },
+            {
+              "title": "Agents exchange findings and reports",
+              "text": "Scoped messages coordinate the team. Exact completed report versions are published/staged for the lead or dependent workers."
+            },
+            {
+              "title": "The lead revises or waits",
+              "text": "It can add bounded follow-up work when evidence calls for it. Dependencies and limits still apply; it releases browser capacity while waiting."
+            },
+            {
+              "title": "The lead produces a combined result",
+              "text": "Once required items finish, the lead can synthesize the reports. The owner still reviews source support and coverage."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Choose a mode"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Mode",
+            "Starting inputs and available work"
+          ],
+          "rows": [
+            [
+              "Review published files",
+              "Selected immutable text evidence and fleet reports. No live browser, network target, or code execution. Static concerns must be labeled as potential rather than live-verified flaws."
+            ],
+            [
+              "Test local website",
+              "The app-owned fictional Harbor Desk URL. Real separate ephemeral lab browsers, a bounded local HTTP checker, and offline code over fleet reports if its container is ready. No attached site source or hidden answer key."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Draft versus start"
+        },
+        {
+          "type": "p",
+          "text": "Save draft makes no model calls. Start fleet authorizes planning and internal handoffs within the saved models, scope, and limits. It does not grant unrestricted tools or remove the need for compatible models."
+        },
+        {
+          "type": "heading",
+          "text": "Default team and task limits"
+        },
+        {
+          "type": "table",
+          "headers": [
+            "Default",
+            "Team / fleet",
+            "Each task"
+          ],
+          "rows": [
+            [
+              "Agents / concurrency",
+              "4 including lead / 2 working tasks",
+              "One executing task per agent"
+            ],
+            [
+              "Model spend",
+              "USD 5",
+              "USD 2"
+            ],
+            [
+              "Model calls",
+              "100",
+              "30"
+            ],
+            [
+              "Tokens",
+              "500,000",
+              "150,000"
+            ],
+            [
+              "Active seconds",
+              "1,800 combined",
+              "600"
+            ],
+            [
+              "Other bounds",
+              "8 work items; 3 plan revisions",
+              "50 tool steps"
+            ]
+          ]
+        },
+        {
+          "type": "p",
+          "text": "These are editable defaults inside validated maximums, not a suggested bill or guaranteed completed run. Team and task limits both apply. Settled spend and uncertain reservations count. Handoffs and new work do not reset budgets."
+        },
+        {
+          "type": "heading",
+          "text": "Pause, stop, and restart"
+        },
+        {
+          "type": "p",
+          "text": "Pause fleet preserves progress and closes lab browsers. Stop fleet is final for execution and leaves the history. Restart, sleep, or backup requires explicit review/resume. Lab cookies and website state are temporary, even when task plans and reports are durable."
+        },
+        {
+          "type": "note",
+          "title": "What has and has not been demonstrated",
+          "text": "Scripted integration tests demonstrate overlapping workers, claims, messages, report handoffs, and synthesis through the real application mechanics. The paid local-website assessment is paused and incomplete: no final report, verified model-discovered flaw, or simultaneous live specialist proof. Model quality and its plan determine actual outcomes."
+        },
+        {
+          "type": "p",
+          "text": "Walkthroughs: <a href=\"#case-file-fleet\">published evidence fleet</a> and <a href=\"#case-local-lab\">local website fleet</a>."
+        }
+      ]
+    },
+    {
+      "id": "data-recovery",
+      "title": "Data, privacy, pause, and backup",
+      "summary": "Know what stays on the Mac and what can leave it.",
+      "group": "Reference",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Where work is saved"
+        },
+        {
+          "type": "p",
+          "text": "The default persistent root is ~/Library/Application Support/Agent Workspaces. SQLite stores task/run history, requests, receipts, usage, projects, and fleet state. Managed directories store exact artifacts and workspace revisions. This local data is not the public source repository."
+        },
+        {
+          "type": "heading",
+          "text": "What a model receives"
+        },
+        {
+          "type": "p",
+          "text": "A hosted model receives the selected task context and authorized content needed for its requests. A local model server processes requests through the chosen endpoint. Private by default refers to app sharing boundaries; it does not mean content is never sent to a configured cloud provider."
+        },
+        {
+          "type": "list",
+          "items": [
+            "Model API keys and Google connection/client tokens use macOS Keychain and are excluded from ordinary task files and portable backups.",
+            "Native Chrome manages its own dedicated profile storage; container browser checkpoints are encrypted. They are different stores.",
+            "Files and messages you supply can contain secrets. The app does not automatically redact every possible sensitive item.",
+            "Local portable backups contain private tasks/files and are not encrypted or content-redacted. Keep them private."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Create and verify a backup"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Open Settings: Backup and recovery",
+              "text": "Choose Create backup. This pauses work while the app makes a verified copy."
+            },
+            {
+              "title": "Choose a new destination in the Mac dialog",
+              "text": "The app writes to a new child location and refuses replacement. Keep the backup somewhere private with enough space."
+            },
+            {
+              "title": "Use Check backup",
+              "text": "Verification checks exact hashes, referenced files, database integrity, and foreign-key consistency."
+            },
+            {
+              "title": "Restore to new folder when needed",
+              "text": "Restore creates a new verified location; it does not overwrite the active workspace or automatically switch to it. Credentials and browser logins are not transferred."
+            },
+            {
+              "title": "Review before reactivating",
+              "text": "Restored tasks and routines stay paused/disabled until reviewed. Accounts and browser sessions require appropriate fresh setup."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "What automatic recovery handles"
+        },
+        {
+          "type": "p",
+          "text": "The recovery service can retry transient browser observations within durable finite allowances. It does not blindly retry login/MFA, paid model requests, uncertain navigation, clicks, or other writes. Inspect Automatic recovery for the saved history. Acknowledge marks an incident reviewed; it does not reset its retry allowance."
+        },
+        {
+          "type": "note",
+          "title": "Protected system prompts",
+          "text": "Complete macOS Keychain access dialogs yourself after reviewing them. Do not send your Mac password to an agent or paste it into messages. Rebuilt apps can be treated as changed by macOS."
+        }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting and realistic expectations",
+      "summary": "Use the saved error and readiness state to choose the next step.",
+      "group": "Reference",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "If you see this",
+            "What to do"
+          ],
+          "rows": [
+            [
+              "App opens but tasks cannot run",
+              "Open readiness and Settings. A saved model, native helper, browser profile, Google account, or code image may still be missing."
+            ],
+            [
+              "Model connection not tested",
+              "The configuration is saved, not proven. Check exact model/protocol, credential, usable token counts, and the app's single-tool contract. A live harmless probe may cost money."
+            ],
+            [
+              "Chrome disconnected",
+              "Check the extension in the correct dedicated agent profile. Reload changed source and reopen the task browser; allow a reconnect interval."
+            ],
+            [
+              "Gmail login rejected",
+              "Use Desktop OAuth through the system browser. The app cannot promise to bypass a provider's login decision."
+            ],
+            [
+              "Google wrong account / expired consent",
+              "Verify the exact account/project binding and reconnect. A different account does not satisfy the original request."
+            ],
+            [
+              "Pinned code base missing",
+              "Run the explicit portable --bootstrap-base --allow-network provisioning path after checking Docker/disk space."
+            ],
+            [
+              "Container browser base missing",
+              "It has a separate unresolved fresh-machine provisioning dependency. Native Chrome may serve an ordinary browsing task."
+            ],
+            [
+              "File input remains blocked",
+              "Read the named slot validation. Replace only invalid/missing inputs and preserve accepted versions."
+            ],
+            [
+              "Task waits after a response",
+              "Check whether it remains owner-paused, cancelled, missing another input, or blocked by upstream work."
+            ],
+            [
+              "Fleet does not work concurrently",
+              "Concurrency is a ceiling. Dependent items can be serialized by the model's plan; inspect dependencies, claims, and capacity."
+            ],
+            [
+              "Fleet reaches a budget or unknown outcome",
+              "Inspect settled and reserved usage. Review history before resuming. New work must not be used to evade saved limits."
+            ],
+            [
+              "Lab cannot start on port 4318",
+              "Another service may own the port. The app refuses it rather than treating it as the verified lab or terminating it."
+            ],
+            [
+              "Formatted export unavailable",
+              "Check format and complete coverage bounds; use exact-original export for unsupported/oversized content."
+            ]
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "What to include in an issue report"
+        },
+        {
+          "type": "list",
+          "items": [
+            "The app version, browser/model backend, task mode, and the precise visible error.",
+            "What you expected, what happened, and minimal steps using harmless synthetic files.",
+            "Which setup checks were performed and which remain unverified.",
+            "Redacted context only: no keys, OAuth JSON, mailbox contents, passwords, browser profiles, or private backups."
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Current evidence"
+        },
+        {
+          "type": "p",
+          "text": "On 1 October 2026, publication checks passed type checking, the production build, and 663 Electron regression tests, with 18 optional skips and no failures. Skips are not live proof. The latest lab navigation readiness change still needs its dedicated real-browser harness rerun; the paid model assessment remains incomplete."
+        },
+        {
+          "type": "note",
+          "title": "Judge the result, not the animation",
+          "text": "A busy progress view, a valid tool receipt, or a passed structure check does not prove a correct conclusion. Check sources, reproduced observations, calculations, and explicit coverage before accepting important work."
+        }
+      ]
+    }
+  ],
+  "referenceSection": {
+    "id": "reference-links",
+    "title": "Further reading and developer commands",
+    "summary": "Use these sources when you need the implementation detail behind the guide.",
+    "group": "Reference",
+    "blocks": [
+      {
+        "type": "p",
+        "text": "This guide describes the implemented local pre-release. Original planning documents contain proposals and provisional defaults. Read the architecture, design, and implementation plan in that order. design-preview.html is an interactive planning mockup, not the working app."
+      },
+      {
+        "type": "heading",
+        "text": "Repository documentation"
+      },
+      {
+        "type": "list",
+        "items": [
+          "<a href=\"https://github.com/Ritesh102000/Taskivra-Ai\">Source repository and README</a>",
+          "<a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/main/architecture.md\">Original architecture baseline</a>",
+          "<a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/main/design.md\">Original product design</a>",
+          "<a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/main/implementation-plan.md\">Original implementation plan</a>",
+          "<a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/main/docs/phase8-providers.md\">Model-provider contract and limitations</a>",
+          "<a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/main/docs/fleet-lab-implementation-status.md\">Fleet website lab: implementation and incomplete live-run evidence</a>",
+          "<a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/main/docs/phase7-release-foundations.md\">Portable code setup and backup/recovery foundations</a>"
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Developer verification"
+      },
+      {
+        "type": "p",
+        "text": "These commands are for source maintainers. Default Electron tests use temporary data, scripted models, and synthetic fixtures. Separate opt-in tests can require Docker, Chrome, Keychain, or paid provider calls; read their scope before enabling them."
+      },
+      {
+        "type": "code",
+        "text": "npm run typecheck\nnpm run build\nnpm run test:electron\nnpm run test:fleet:electron"
+      },
+      {
+        "type": "heading",
+        "text": "Local packaging"
+      },
+      {
+        "type": "p",
+        "text": "Build all native helpers first, then validate the package inventory. npm run package:mac produces an Apple Silicon local application and manifest in a new directory. It is ad-hoc signed, not a public notarized installer. It includes neither models/accounts nor Docker images."
+      },
+      {
+        "type": "code",
+        "text": "node scripts/package-mac.mjs --check\nnpm run package:mac"
+      },
+      {
+        "type": "heading",
+        "text": "Guide edition"
+      },
+      {
+        "type": "p",
+        "text": "Prepared 1 October 2026 for version 0.9.9. The online page and PDF share the same guide content. Examples are instructional prompts and fictional data, not claims of completed live runs. Confirm UI/source changes against the current repository before following a later release."
+      },
+      {
+        "type": "heading",
+        "text": "Your first-session checklist",
+        "pageBreakBefore": true
+      },
+      {
+        "type": "list",
+        "items": [
+          "I can open the local desktop app and recognize its current Agent Workspaces name.",
+          "I understand which project the work belongs to and have created an agent with useful general instructions.",
+          "I know whether my selected model runs locally or sends task content to a cloud provider.",
+          "I chose an example workflow, adapted its question, and reviewed the prepared objective and definition of done.",
+          "I assigned the required file versions or approved websites/account. I resolved the readiness items that matter for this job.",
+          "I reviewed model spend, calls, tokens, tool steps, and active-time limits before deciding to run live work.",
+          "I know where to answer requests, take browser control, pause, and stop. I will enter credentials only through the proper settings or sign-in flow.",
+          "I will read the exact output, evidence, and coverage before accepting it. I will keep any private backup and exported data safe."
+        ]
+      },
+      {
+        "type": "note",
+        "title": "A good first attempt",
+        "text": "Choose a small harmless job with inputs you understand. A blocked request or clearly reported limitation is useful information. Improve the brief and setup based on observed results; do not judge success only by whether the app reaches Complete."
+      }
+    ]
+  }
+}

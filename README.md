@@ -12,6 +12,7 @@ This repository contains the implemented application, runtime workers, tests, a 
 
 ## Contents
 
+- [Beginner guide](#beginner-guide)
 - [What you can do](#what-you-can-do)
 - [Current verification and limits](#current-verification-and-limits)
 - [Requirements](#requirements)
@@ -29,6 +30,14 @@ This repository contains the implemented application, runtime workers, tests, a 
 - [Troubleshooting](#troubleshooting)
 - [Project documents and implementation history](#project-documents-and-implementation-history)
 - [Contributing and licensing](#contributing-and-licensing)
+
+## Beginner guide
+
+New to the project? Start with the **[complete beginner guide](https://taskivra-ai-guide.vercel.app)** or **[open/download the linked PDF](https://taskivra-ai-guide.vercel.app/Taskivra-AI-Guide.pdf)**. The guide assumes no prior knowledge of this application: it explains the terminology and screens, Mac setup, model connections, creating an agent, giving it a task, supplying files, answering requests, browser control, results, collaboration, and Fleets.
+
+The 57-page edition for version 0.9.9 includes 24 chapters, a clickable contents page and PDF bookmarks, plus eight step-by-step examples: competitor research, CSV analysis, a read-only Gmail brief, supplied-code review, website usability review, decision research, a fleet reviewing published files, and the fictional local website lab. Each example includes agent instructions, task inputs, what a useful result should contain, numbered steps, review questions, and limitations. Examples are instructional; they do not claim completed live runs.
+
+The website hosts documentation and the PDF. The application runs locally on your Mac. A repository copy of the PDF is in [output/pdf/Taskivra-AI-Guide.pdf](output/pdf/Taskivra-AI-Guide.pdf); [guide sources and regeneration instructions](docs/guide/README.md) keep the web and PDF editions together.
 
 ## What you can do
 
@@ -107,7 +116,7 @@ Persistent data defaults to:
 ~/Library/Application Support/Agent Workspaces
 ```
 
-Use **Settings → Model connections** to configure your model before starting live work. For a first task, choose a workflow, review its permissions and limits, and save its draft before running it. Simulation and scripted fixtures are labeled separately from live execution.
+Use **Settings → Models and providers** to configure your model before starting live work. For a first task, choose a workflow, review its permissions and limits, and save its draft before running it. Simulation and scripted fixtures are labeled separately from live execution.
 
 ## Connect a model
 
@@ -210,9 +219,9 @@ Google connections use an owner-imported **Desktop OAuth client JSON**, system-b
 1. Create/select your project in Google Cloud Console and enable **Gmail API**.
 2. Configure the consent screen and intended test users where applicable.
 3. Create an OAuth client of type **Desktop app** and download its JSON.
-4. In **Settings → Gmail connection**, import the JSON and choose **Connect Gmail** for the intended account.
-5. Complete consent in the system browser, then verify/bind the account to the relevant project.
-6. Start **Review unread Gmail** with your priorities and limits.
+4. Create an agent, prepare **Review unread Gmail** with the exact intended account and your priorities, and save the live task with a configured model. A saved live Gmail task is required before the connection can start.
+5. In **Settings → Gmail connection**, select that task, import the JSON, and choose **Connect Gmail** for the intended account.
+6. Complete consent in the system browser, then verify/bind the account to the relevant project. Resolve readiness checks and run the saved task.
 
 The baseline workflow reads bounded headers and snippets, preserves unread status, and discloses pagination/truncation. A separately opted-in detailed task can search, read selected plain-text threads, and import supported selected attachments. HTML and remote content are excluded from detailed reads.
 

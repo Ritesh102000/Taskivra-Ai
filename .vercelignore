@@ -1,0 +1,42 @@
+# Publish documentation only. The Vercel project root is guide-site.
+# Keep application code and local data out of CLI deployment inputs.
+# Review `vercel deploy --dry --json` before each manual deployment.
+.git/
+.vercel/
+.playwright-mcp/
+.test-data/
+.env
+.env.*
+.DS_Store
+.gitattributes
+.gitignore
+.vercelignore
+README.md
+THIRD_PARTY_NOTICES.md
+architecture.md
+design.md
+design-preview.html
+implementation-plan.md
+package.json
+package-lock.json
+tsconfig.json
+apps/
+containers/
+dist/
+docs/
+extensions/
+labs/
+licenses/
+node_modules/
+output/
+packages/
+scripts/
+spikes/
+tests/
+tmp/
+workers/
+guide-site/.vercel/
+guide-site/.env*
+guide-site/.gitignore
+guide-site/.vercelignore
+guide-site/template.html

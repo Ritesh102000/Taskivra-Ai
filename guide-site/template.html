@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#174e46">
+    <meta name="description" content="The beginner's guide to Taskivra AI: understand the basics, set up the local Mac desktop app, and follow clear, practical walkthroughs.">
+    <title>Taskivra AI — The beginner's guide</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='4' width='10' height='10' rx='3' fill='%23174e46'/%3E%3Crect x='19' y='4' width='10' height='10' rx='3' fill='%23739083'/%3E%3Crect x='11' y='19' width='10' height='10' rx='3' fill='%23174e46'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/guide.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#guide-content">Skip to the guide</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="Taskivra AI guide home">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-name">Taskivra <span>AI</span></span>
+          <span class="brand-divider" aria-hidden="true"></span>
+          <span class="brand-detail">The beginner's guide</span>
+        </a>
+        <a class="repository-link" href="https://github.com/Ritesh102000/Taskivra-Ai">View the project <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main id="top">
+      <div class="intro-wrap">
+        <div class="intro">
+          <div class="intro-copy">
+            <p class="eyebrow"><span aria-hidden="true"></span> One objective. Your agents, working together.</p>
+            <h1>Get to know<br> <span>Taskivra AI.</span></h1>
+            <p class="intro-description">New to the project? Start here. Learn what an AI agent does, get the desktop app ready, and follow practical examples one step at a time.</p>
+            <a class="button button-primary read-online" href="#guide-content">Read online <span aria-hidden="true">↓</span></a>
+            <p class="intro-meta">Guide for version {{GUIDE_VERSION}} <span aria-hidden="true">·</span> Updated {{GUIDE_DATE}}</p>
+          </div>
+          <aside class="pdf-card" aria-labelledby="pdf-card-heading">
+            <div class="paper-icon" aria-hidden="true"><span></span><span></span><span></span></div>
+            <p class="eyebrow">A guide to keep</p>
+            <h2 id="pdf-card-heading">Read at your own pace.</h2>
+            <p>The PDF includes linked contents so you can move between chapters and return to a useful step.</p>
+            <div class="pdf-actions">
+              <a class="button button-primary" href="/Taskivra-AI-Guide.pdf" target="_blank" rel="noopener">Open PDF <span aria-hidden="true">↗</span><span class="sr-only"> in a new tab</span></a>
+              <a class="button button-secondary" href="/Taskivra-AI-Guide.pdf" download="Taskivra-AI-Guide.pdf">Download PDF <span aria-hidden="true">↓</span></a>
+            </div>
+          </aside>
+        </div>
+        <p class="local-app-note"><span class="note-dot" aria-hidden="true"></span><span>You're reading the guide for a <strong>local Mac desktop app</strong>. The app currently opens as <strong>Agent Workspaces</strong>. This website hosts its documentation.</span></p>
+      </div>
+
+      <div class="docs-shell">
+        <aside class="guide-sidebar" aria-label="Guide navigation">
+          <div class="sidebar-heading">
+            <span class="sidebar-title">In this guide</span>
+            <button id="contents-toggle" class="contents-toggle" aria-controls="guide-nav" aria-expanded="true" hidden>Chapters <span aria-hidden="true">⌄</span></button>
+          </div>
+          <form id="guide-search" class="guide-search" role="search" hidden>
+            <label for="guide-query">Search the guide</label>
+            <div class="search-field">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m15.5 15.5 5 5"></path></svg>
+              <input id="guide-query" type="search" placeholder="Find a topic or a step…" autocomplete="off" aria-controls="guide-content" aria-describedby="search-help">
+            </div>
+            <p id="search-help" class="search-help">Type to find chapters. Press Enter to read the first match.</p>
+            <p id="search-status" class="search-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          </form>
+          <nav id="guide-nav" aria-label="Chapters">
+            {{GUIDE_NAV}}
+          </nav>
+          <div class="sidebar-footer"><span aria-hidden="true">↗</span><a href="https://github.com/Ritesh102000/Taskivra-Ai">Source and project notes</a></div>
+        </aside>
+        <div class="reading-column">
+          <div class="reading-header"><span>THE COMPLETE GUIDE</span><a href="#top">Back to the beginning <span aria-hidden="true">↑</span></a></div>
+          <div id="search-empty" class="search-empty" hidden>
+            <h2>No chapters found</h2>
+            <p>Try a shorter phrase, such as “model”, “files”, or “fleet”.</p>
+            <button type="button" class="button button-secondary" id="search-reset">Show all chapters</button>
+          </div>
+          <article id="guide-content" class="guide-content" aria-label="Taskivra AI beginner's guide">
+            {{GUIDE_CONTENT}}
+          </article>
+          <div class="guide-end">
+            <div><p class="eyebrow">Make it your own</p><p>Return to any chapter when you're ready for the next step.</p></div>
+            <a href="/Taskivra-AI-Guide.pdf" class="button button-secondary" download="Taskivra-AI-Guide.pdf">Keep a PDF copy <span aria-hidden="true">↓</span></a>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="site-footer"><div><a href="#top">Taskivra AI</a><p>A guide to the local desktop workspace.</p></div><a href="https://github.com/Ritesh102000/Taskivra-Ai">Explore the project <span aria-hidden="true">↗</span></a></footer>
+  </body>
+</html>

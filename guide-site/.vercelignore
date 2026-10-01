@@ -1,0 +1,17 @@
+# The guide deploys as a standalone static folder.
+# Exclude local project metadata, previews, and authoring sources.
+.git/
+.vercel/
+.env
+.env.*
+.DS_Store
+template.html
+*.py
+*.mjs
+*.log
+*.jsonl
+__pycache__/
+node_modules/
+package.json
+package-lock.json
+qa/

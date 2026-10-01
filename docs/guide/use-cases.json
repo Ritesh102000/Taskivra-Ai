@@ -1,0 +1,532 @@
+[
+  {
+    "id": "case-competitor-research",
+    "title": "Example 1 — Set up a competitor research agent",
+    "summary": "Use this when you want a clear comparison of products from public pages you choose. The example compares project-management products for a small agency; it does not contain a completed comparison.",
+    "needs": [
+      "The desktop app installed and opened, plus a model connection configured in Settings → Model connections.",
+      "Public HTTPS pages for the products you want to compare. A workflow accepts at most twenty page links, one per line.",
+      "Chrome and the app’s browser helper installed, with the extension connected in this agent’s dedicated profile."
+    ],
+    "agentName": "Competitor research assistant",
+    "agentInstructions": "Write clear comparisons for small businesses. Separate facts you observed from your interpretation. Cite the exact pages you read, record missing information, and ask for clarification when the approved sources cannot support a conclusion. Keep your working files and reports private.",
+    "objective": "Compare Trello and Asana for a five-person agency. Focus on published pricing, limits of the entry-level plans, client collaboration, and how easy the visible onboarding information is to understand. Explain important differences and list questions I should verify before choosing. Use only the approved pages, and do not create accounts or submit forms.",
+    "doneLooksLike": "One private report.md with a comparison table, practical differences for a five-person agency, exact sources and pages actually inspected, missing information, and limits of the review.",
+    "promptLabel": "Illustrative prompts to copy and adapt — this example has not been run",
+    "workflowId": "competitor-brief",
+    "values": {
+      "focus": "Compare Trello and Asana for a five-person agency. Focus on published pricing, entry-level plan limits, client collaboration, and clarity of the visible onboarding information. Separate observed facts from your interpretation. List questions to verify before choosing. Do not create accounts or submit forms.",
+      "websites": "https://trello.com/pricing\nhttps://asana.com/pricing"
+    },
+    "steps": [
+      {
+        "title": "Create the agent and give it lasting guidance",
+        "text": "Choose the + beside YOUR AGENTS. In Create an agent, enter Competitor research assistant in Agent name and copy the example agent instructions into Instructions. Choose Create agent. This gives the assistant its own task history, private files and browser profile. Instructions describe how it should work across tasks; they do not start work or grant website access."
+      },
+      {
+        "title": "Choose the guided workflow",
+        "text": "Open Workflows, find Compare competitors, and choose Use workflow. The workflow is a prepared task form that supplies a sensible report structure and read-only website access. In Agent, select the agent you just created. The alternative Create a new agent… creates an agent with a name but no custom instructions, so the earlier creation step is useful here."
+      },
+      {
+        "title": "Enter the question and the sources",
+        "text": "Copy the example focus value into What are you comparing? Copy the example websites value into Pages the agent may visit, with one complete HTTPS URL per line. Replace the example products or links if your decision is different. The listed website addresses establish the allowed websites; mentioning another website in the question does not grant access to it."
+      },
+      {
+        "title": "Choose the model and bound the run",
+        "text": "In Model, choose a connection you have already configured. Set Maximum model spend (USD) to an amount you are willing to allow, such as 1 for a first attempt. Open Advanced run limits and review Model calls, Tool steps, Active seconds and Total model tokens. You can keep their starting values for a small trial. A limit can end the attempt before the report is complete; these numbers are ceilings, not a promise about cost or completion."
+      },
+      {
+        "title": "Review, then save the task",
+        "text": "Choose Review task. Read Your task brief, What done looks like and Access for this task. Confirm the websites and read-only behavior match your intention, then choose Save task. This saves a separate task without starting model calls. The workflow supplies its own objective and completion criteria; the example objective above explains the intended outcome, rather than being another field you must find."
+      },
+      {
+        "title": "Finish browser setup for this agent",
+        "text": "Open the saved task’s Browser panel and expand Browser setup. Use Desktop Chrome · dedicated profile. Choose Open Chrome setup when one-time setup is needed. In that Chrome profile, enable Developer mode at chrome://extensions, choose Load unpacked, and select the extension folder shown by the app. Return and use Check extension. Each agent profile needs its own setup. You can then open Activity and check Ready for this job?."
+      },
+      {
+        "title": "Start and respond when necessary",
+        "text": "Choose Run agent on the saved task when setup is ready. The selected model now begins live work within the saved scope and limits. Watch the task conversation and Activity. If a page is unavailable or cannot answer the question, answer the request in its card. For a required sign-in, use Take control in Chrome and then Return to agent; enter credentials only on the website. This example normally uses public pages."
+      },
+      {
+        "title": "Review the report before relying on it",
+        "text": "When the task completes, open Results or choose Review result in Activity. Read the comparison and its sources. Use Accept this version when it meets your needs, or Request changes to prepare a separate revision task. A revision remains paused until you start it. PDF report and Word document can export supported complete text reports; Export exact file preserves the original saved file."
+      }
+    ],
+    "review": [
+      "Do the plan prices, currencies, billing periods and team-size assumptions match the actual source pages?",
+      "Does the report cite pages that were inspected and disclose any pages it could not reach?",
+      "Are judgments about usability presented as judgments, rather than as completed user tests?",
+      "Are missing facts and questions to verify visible before you make a purchasing decision?"
+    ],
+    "limitsNote": "The task reads approved websites and writes private outputs. It does not sign up for products or prove that every marketing claim is correct. Read-only browsing cannot perform a full interactive onboarding test. A redirect to an unapproved website may be blocked; if you want that source included, review its address and prepare a task with the correct approved links. Result checks do not certify factual accuracy."
+  },
+  {
+    "id": "case-csv-analysis",
+    "title": "Example 2 — Set up an agent to compare two CSV files",
+    "summary": "Use this when you have two exported tables and want a reproducible report about what changed. A CSV is a plain-text table commonly exported from a spreadsheet. You supply the files; the app does not collect sales data for you.",
+    "needs": [
+      "A configured model connection.",
+      "Two CSV files: one for the current period and one for the comparison period. For this example, each should contain product, orders and revenue columns, with the same currency and compatible meanings.",
+      "Each assigned CSV must contain at least one data row, no more than 10,000 rows and no more than 1 MiB.",
+      "Docker Desktop running and the app’s isolated code runtime prepared. The code job reads approved file copies and runs offline."
+    ],
+    "agentName": "Sales comparison assistant",
+    "agentInstructions": "Explain numerical findings in plain language. Check file roles, column meanings, currencies and missing values before calculating. Use reproducible calculations and show the checks you actually ran. Never invent missing data. Keep supplied data and outputs private.",
+    "objective": "Compare product sales between the two assigned periods. Calculate total orders and revenue in each period, absolute changes by product, and percentage changes where the comparison value is nonzero. Identify the products contributing most to the revenue change. Explain missing products, blank values, duplicate rows and any assumptions.",
+    "doneLooksLike": "One private report.md with Findings, Coverage, Calculation checks and Limitations, identifying the exact two inputs and rows analyzed, plus a reproducible calculation appendix.",
+    "promptLabel": "Illustrative prompts to copy and adapt — no example CSVs are imported automatically",
+    "workflowId": "data-report",
+    "values": {
+      "question": "How did product sales change between these periods? Compare total orders and revenue, absolute and percentage changes by product, and products contributing most to the revenue change. Use the product, orders and revenue columns. The revenue values use the same currency. Flag duplicate products, missing values and zero comparison values before drawing conclusions.",
+      "files": "Current-period sales and comparison-period sales CSVs. Both use product, orders and revenue columns, the same currency, and one row per product."
+    },
+    "steps": [
+      {
+        "title": "Create a private analysis agent",
+        "text": "Choose the + beside YOUR AGENTS. Enter Sales comparison assistant in Agent name and copy the example agent instructions into Instructions, then choose Create agent. This agent will keep the imported data private. Its general instructions describe careful analysis; this particular comparison is defined in the next task."
+      },
+      {
+        "title": "Choose the two-file workflow",
+        "text": "Open Workflows → Compare two CSV files → Use workflow. Select Sales comparison assistant in Agent. Copy the example question value into What should the analysis answer? and the example files value into What do the two periods represent? Adjust those descriptions to match your real files. The workflow expects two CSVs; it does not accept a spreadsheet workbook in place of these named slots."
+      },
+      {
+        "title": "Select a model and review limits",
+        "text": "Choose your configured connection in Model. Review Maximum model spend (USD) and Advanced run limits. For a first small dataset, you can begin with the starting values and a spend ceiling of 1 USD if that fits your budget. Code-runtime resource limits are separate from model-call limits. Keeping a small spend ceiling may produce a partial attempt rather than a finished analysis."
+      },
+      {
+        "title": "Review and save without running",
+        "text": "Choose Review task. Confirm there are no website addresses granted and that the task is intended to keep inputs and results private. Read the required result and choose Save task. Saving creates the task; it does not import files or start model work. Files to assign after saving lists Current-period CSV and Comparison-period CSV."
+      },
+      {
+        "title": "Import both files into this saved task",
+        "text": "Open the task’s Files panel and choose Import files. Select the two CSV files. Importing makes managed copies and attaches the exact saved versions to this task; it does not give the agent general access to folders on your Mac. Check that both appear under Inputs. If an import fails validation, correct the file and import its replacement."
+      },
+      {
+        "title": "Assign the roles explicitly",
+        "text": "Open Activity. In Ready for this job?, find Assign the files for this run. For Current-period CSV, choose the file containing the current period. For Comparison-period CSV, choose the earlier or other period. Wait for each slot to say Checked. A slot is a named place for a required input. This assignment prevents the agent from guessing roles from similar filenames; importing alone is not enough."
+      },
+      {
+        "title": "Check the calculation runtime",
+        "text": "In Activity, resolve any isolated-code setup item and use Check again. Docker and the prepared runtime must be available before this workflow can run its calculations. If setup is missing, use the guide’s code-runtime setup instructions. Passing CSV shape checks means the files are structurally valid; it does not establish that their business meanings are comparable."
+      },
+      {
+        "title": "Run, then answer data questions",
+        "text": "Choose Run agent. If the agent finds different currencies, missing columns or ambiguous duplicates, answer the clarification request in the task card. A proposed smaller analysis needs your acceptance; do not treat a missing required file as successfully supplied. Pause or Stop remains available if you need to halt the work."
+      },
+      {
+        "title": "Inspect the calculation record and decide",
+        "text": "Open Results after completion. Read Findings, Coverage, Calculation checks and Limitations, including the calculation appendix. Verify that the correct periods were used and that the checks were executed. Choose Accept this version or Request changes. Export the report with PDF report or Word document when supported, or Export exact file for its original form."
+      }
+    ],
+    "review": [
+      "Are the current and comparison periods assigned correctly, with their exact input versions named?",
+      "Do the analyzed row counts and columns match the supplied tables?",
+      "Were totals, duplicate handling, missing values, currencies and zero denominators checked?",
+      "Does the report include executed calculation checks and reproducible code, rather than merely suggesting checks?",
+      "Are business explanations separated from changes that the data alone can establish?"
+    ],
+    "limitsNote": "This is a bounded offline calculation over two supplied CSV snapshots. The workflow cannot read a live shop or spreadsheet service automatically. The starting code image supplies standard libraries; unavailable packages require a reviewed dependency request. Structural result checks do not independently confirm every calculation or the meaning of your source data."
+  },
+  {
+    "id": "case-gmail-review",
+    "title": "Example 3 — Set up a read-only Gmail brief agent",
+    "summary": "Use this when you want a short list of unread messages worth your attention. This example deliberately uses headers and snippets only: a snippet is the short preview supplied by Gmail, not the full message.",
+    "needs": [
+      "A configured model connection and the exact Gmail account you intend to review.",
+      "A Google Desktop OAuth client JSON with Gmail API enabled and the intended account permitted to consent. OAuth is Google’s sign-in and permission process.",
+      "The app’s Gmail helper prepared, plus permission to connect and approve that account for the agent’s project.",
+      "An understanding that the chosen model provider receives the authorized mail information used for the task."
+    ],
+    "agentName": "Unread mail assistant",
+    "agentInstructions": "Prepare concise mail briefs. Prioritize observed deadlines and direct questions. Separate explicit message content from guesses about urgency. Recommend actions for me to take without sending or changing mail. State the number of messages reviewed and every coverage or truncation limit.",
+    "objective": "Prepare a brief from the unread headers and snippets returned for my approved Gmail account. Prioritize deadlines in the next seven days, direct questions that need my reply, and payment-related messages requiring my attention. For each important item, show the sender, subject, observed deadline if present, and a suggested next action. Use headers and snippets only; do not read full threads or attachments.",
+    "doneLooksLike": "A private unread-mail brief with important observed items and suggested next actions, plus returned message count, read limit, excluded unread messages and any shortened summaries.",
+    "promptLabel": "Illustrative prompts to copy and adapt — replace you@gmail.com with your exact account",
+    "workflowId": "gmail-triage",
+    "values": {
+      "account": "you@gmail.com",
+      "focus": "Prioritize deadlines in the next seven days, direct questions that need my reply, and payment-related messages requiring attention. Show sender, subject, any observed deadline and a suggested next action. Use headers and snippets only. Do not read full threads or attachments. State the number reviewed, excluded unread messages and any shortened summaries."
+    },
+    "steps": [
+      {
+        "title": "Create the mail agent",
+        "text": "Choose the + beside YOUR AGENTS. Enter Unread mail assistant in Agent name, copy the example agent instructions into Instructions, and choose Create agent. A new agent starts without your mail connection. Its instructions guide its behavior, but account access is separately approved for the task and project."
+      },
+      {
+        "title": "Prepare the Gmail workflow",
+        "text": "Open Workflows → Review unread Gmail → Use workflow. In Agent, select Unread mail assistant. In Gmail account, type your exact email address, replacing the illustrative you@gmail.com. Copy the example focus value into What matters to you?. The address saved on this task must match the account returned by Google consent."
+      },
+      {
+        "title": "Keep this task at snippet-level access",
+        "text": "Choose a configured Model, review Maximum model spend (USD) and Advanced run limits, then choose Review task. In the reviewed form, leave Allow this task to search mail, read selected full threads, and import selected safe attachments (read only). unchecked. This optional checkbox expands detailed read access; leaving it clear keeps this example limited to the unread listing’s headers and snippets."
+      },
+      {
+        "title": "Save the task before connecting",
+        "text": "Read the task brief, read-only mail account and desired result, then choose Save task. The Gmail connection requires a saved live task naming the account, so this step comes before Connect Gmail. Saving makes no model calls and does not read the inbox."
+      },
+      {
+        "title": "Prepare the Google consent application",
+        "text": "If you have not already done so, enable Gmail API for your Google Cloud project. Create a Desktop app OAuth client and download its JSON. The app’s Setup instructions explain the testing setup, intended test user, branding and Gmail read-only scope. This Google configuration is an owner setup task; the agent does not create your Google Cloud project or credentials."
+      },
+      {
+        "title": "Connect the exact account",
+        "text": "Open Settings → Gmail connection. If several saved mail tasks exist, choose the correct Saved Gmail task. Choose Import OAuth client JSON, select the downloaded client file, and choose Connect Gmail. Complete Google sign-in and consent in the system browser that opens. Return to the app and check Connected account. Use Refresh if needed. Enter passwords and verification codes in Google’s page, never in the task conversation."
+      },
+      {
+        "title": "Approve the connection for the project",
+        "text": "Choose Verify account for project use. Open Projects, select the project containing Unread mail assistant, and find Approved accounts → Gmail. Choose Approve followed by the verified account. Connection and project approval are separate steps: consent saves the local connection, while project approval allows this project to use that exact account. Recheck the address before approving."
+      },
+      {
+        "title": "Start the brief and handle waiting",
+        "text": "Return to the saved task, open Activity and use Check again in Ready for this job?. Choose Run agent when account and model setup are ready. If Google consent expires or a different account is connected, resolve the connection request for this exact account. Answer clarification in the request card. A connection action does not override a task that you have paused."
+      },
+      {
+        "title": "Review the coverage with the brief",
+        "text": "Open Results when the brief is ready. Review the actual items and suggested actions along with the returned count, per-read limit, excluded unread messages and shortening disclosures. Choose Accept this version or Request changes. Reply to messages yourself in Gmail if appropriate; the saved brief is a report, not a sent reply."
+      }
+    ],
+    "review": [
+      "Does the result identify the same Gmail account you approved?",
+      "Does every urgency statement come from observed headers or snippets, with guesses identified?",
+      "Does the report disclose the up-to-50 unread-message read limit and whether more messages were excluded?",
+      "Does it avoid claiming to have read full bodies, attachments or the complete inbox?",
+      "Are suggested replies or actions clearly suggestions for you to carry out?"
+    ],
+    "limitsNote": "This example does not send, archive, delete or mark mail read. The baseline unread read returns up to 50 messages and can shorten summaries; unread status is preserved. Detailed thread and safe-attachment access is a separate opt-in and remains bounded. No browser-extension setup is required for Gmail API reads: Google consent uses your system browser, and the agent reads through the supported read-only connection."
+  },
+  {
+    "id": "case-code-review",
+    "title": "Example 4 — Set up an agent to review supplied code",
+    "summary": "Use this when you want concrete findings about source files you explicitly provide. The example reviews a small JavaScript price calculator. The agent has no automatic access to your repository or other Mac folders.",
+    "needs": [
+      "A configured model connection.",
+      "The source files and relevant context. For this example: price-calculator.js, price-calculator.test.js, README.md and test-fixtures.json.",
+      "Small synthetic test inputs and instructions for any test command. Remove secrets or unrelated private data before supplying files.",
+      "Docker and the prepared isolated code runtime if you want tests executed. Text review can still be useful when execution is unavailable, provided that limitation is disclosed."
+    ],
+    "agentName": "Code review assistant",
+    "agentInstructions": "Report concrete bugs tied to supplied filenames and line references when available. Explain a reproduction or failing input for each finding. Separate observed issues, proposed fixes and tests actually executed. Ask for missing context instead of assuming access to an entire repository. Keep reports and proposed fixes private.",
+    "objective": "Review the supplied JavaScript price calculator for incorrect totals, input validation, rounding and failure handling. Use the supplied fixtures and tests when possible. Prioritize findings by impact, explain a triggering input, propose a fix, and list checks actually run. Do not claim full-repository coverage.",
+    "doneLooksLike": "One private report.md containing prioritized source-grounded findings, suggested fixes, file coverage, test evidence and limits, with unexecuted tests clearly marked.",
+    "promptLabel": "Illustrative prompts to copy and adapt — substitute your real source filenames",
+    "workflowId": "code-review",
+    "values": {
+      "focus": "Review the supplied JavaScript price calculator for incorrect totals, input validation, rounding and failure handling. For each concrete finding, name the file, explain a triggering input and impact, and propose a fix. Use the supplied tests and fixtures if the offline runtime supports them. Distinguish tests actually executed from proposed tests. Do not claim full-repository coverage.",
+      "files": "price-calculator.js, price-calculator.test.js, README.md with intended behavior and test instructions, and test-fixtures.json. Request clarification if any required context is missing."
+    },
+    "steps": [
+      {
+        "title": "Create the reviewer",
+        "text": "Choose the + beside YOUR AGENTS. Enter Code review assistant in Agent name and copy the example agent instructions into Instructions. Choose Create agent. This establishes the reviewer’s general habits. The individual task names the code and concerns for this review."
+      },
+      {
+        "title": "Choose the source-review workflow",
+        "text": "Open Workflows → Review code files → Use workflow. Select Code review assistant in Agent. Copy the example focus value into What should the review focus on? and the example files value into Files or test fixtures to request. Replace the sample filenames and concerns with your real ones. For example, a Python review should describe the Python runtime and intended behavior instead."
+      },
+      {
+        "title": "Select the model and review access",
+        "text": "Select your configured Model and review Maximum model spend (USD) plus Advanced run limits. Choose Review task. Confirm that no websites are granted for this file-only example and the task uses its private workspace. The workflow permits supplied file review and optional isolated offline testing; it does not grant repository checkout or arbitrary host-file access."
+      },
+      {
+        "title": "Save, then attach the source",
+        "text": "Choose Save task. Open the saved task’s Files panel → Import files and select the source, context and fixtures. Source-text extensions such as .js, .ts and .py are handled as text; .md and .json are also supported. Check the Inputs list. This workflow does not have the two named CSV assignment controls; the attached exact input versions provide its file context."
+      },
+      {
+        "title": "Decide what testing is possible",
+        "text": "Open Activity → Ready for this job? and check the optional code-runtime status. A plain JavaScript test using Node’s standard library can fit the prepared offline image. Tests needing a web server, network service or absent package may not. Explain expected behavior and runnable commands in the supplied README. Do not assume that attaching a lockfile makes all dependencies available."
+      },
+      {
+        "title": "Start the review",
+        "text": "Choose Run agent when model setup is ready and you are satisfied with the supplied inputs. Watch the conversation and Activity. The agent may request missing source or fixtures by name. Respond through the request card, selecting the requested exact versions or importing replacements. If it requests a package, inspect the explicit dependency request rather than expecting automatic installation."
+      },
+      {
+        "title": "Keep unsupported testing visible",
+        "text": "If the required runtime cannot run a test, decide whether a text-only review is acceptable. Answer a clarification or a proposed revised outcome explicitly. A proposed test is useful evidence for a next step, but it is not an executed test. Pause or Stop the task if you need to change the scope before more work."
+      },
+      {
+        "title": "Review findings and proposed fixes",
+        "text": "Open Results and compare the findings with the supplied code. Check that line references, triggering inputs and executed checks support the priority given to each issue. Use Accept this version or Request changes. This example produces a private report and may include proposed fix files; applying a change to your real repository is a separate action you carry out or explicitly arrange."
+      }
+    ],
+    "review": [
+      "Is each finding tied to code that was actually supplied, with a concrete triggering condition?",
+      "Are intended behavior and missing context reflected in the conclusion?",
+      "Does the report name files reviewed and files not provided?",
+      "Are test commands, outcomes and execution limits recorded accurately?",
+      "Does it distinguish a suggested fix from a fix applied to your actual project?"
+    ],
+    "limitsNote": "The agent reviews selected file snapshots. It cannot establish the behavior of the entire application from a few files. Offline tests cannot call production services or download arbitrary packages. A file review is not a complete security, accessibility or performance certification."
+  },
+  {
+    "id": "case-website-review",
+    "title": "Example 5 — Set up a website usability review agent",
+    "summary": "Use this when you want a review of visible page content, clarity and consistency. This example looks at beginner information on Python’s public website; it does not perform a full customer journey or modify the site.",
+    "needs": [
+      "A configured model connection.",
+      "A short list of public HTTPS pages and a clear audience or review goal.",
+      "The agent’s dedicated Chrome profile and extension connected, or another supported browser backend already prepared."
+    ],
+    "agentName": "Website clarity reviewer",
+    "agentInstructions": "Review visible pages from the stated audience’s perspective. Explain each observed problem with its page and evidence. Separate observed issues from suggestions and untested questions. Do not claim interaction, accessibility or performance testing unless those checks were actually executed. Keep the report private.",
+    "objective": "Review the Python homepage and Getting Started page for a person who has never programmed. Focus on the clarity of the first next step, explanation of unfamiliar terms, consistency between the pages and information a beginner may need before downloading or studying. Do not submit forms, create accounts or change website data.",
+    "doneLooksLike": "One private report.md with page-specific observations, a prioritized improvement list, exact pages inspected, suggestions clearly labeled and unexecuted checks disclosed.",
+    "promptLabel": "Illustrative prompts to copy and adapt — no site review is already completed",
+    "workflowId": "website-review",
+    "values": {
+      "focus": "The audience is a person who has never programmed. Review the clarity of the first next step, explanation of unfamiliar terms, consistency between the pages, and information needed before downloading or studying Python. Give page-specific evidence and practical improvements. Separate observed issues from suggestions. Do not claim full interactive, accessibility or performance testing.",
+      "websites": "https://www.python.org/\nhttps://www.python.org/about/gettingstarted/"
+    },
+    "steps": [
+      {
+        "title": "Create the reviewer agent",
+        "text": "Choose the + beside YOUR AGENTS. Enter Website clarity reviewer in Agent name and copy the example agent instructions into Instructions. Choose Create agent. These instructions define a careful review style; the task will define which audience and pages to inspect."
+      },
+      {
+        "title": "Choose the website workflow",
+        "text": "Open Workflows → Review a website → Use workflow. In Agent, select Website clarity reviewer. Copy the example focus value into Audience and review goals and the example websites value into Pages to inspect. Replace them with your own website and audience if desired. Use one complete public HTTPS link per line."
+      },
+      {
+        "title": "Make the goal small enough to review",
+        "text": "Name a particular audience and a few pages, as the example does. “Review everything” is hard to verify and may exceed the budget. If you want a purchase journey, specify the public pages you can authorize and recognize that this read-only workflow does not complete checkout or submit forms. Start with visible information you can assess in a report."
+      },
+      {
+        "title": "Choose a model, review and save",
+        "text": "Choose your configured Model. Review Maximum model spend (USD) and Advanced run limits. Choose Review task and confirm the brief, outcome and read-only allowed websites. Choose Save task. No model work begins yet. The saved task retains this reviewed scope."
+      },
+      {
+        "title": "Prepare the browser",
+        "text": "Open the saved task’s Browser panel → Browser setup. For Desktop Chrome · dedicated profile, follow Open Chrome setup, Developer mode and Load unpacked if needed, selecting the app-shown extension folder. Use Check extension afterward. Open Activity and Check again in Ready for this job? to resolve setup issues before the run."
+      },
+      {
+        "title": "Run the visible-page review",
+        "text": "Choose Run agent. Follow the conversation and Activity as it inspects the approved pages. If a page cannot be read, answer the clarification request with an allowed substitute or accept an explicitly reduced scope. If owner sign-in is needed, choose Take control in Chrome, complete it on the website, then Return to agent. Credentials do not belong in the task message."
+      },
+      {
+        "title": "Distinguish evidence from interpretation",
+        "text": "A report may identify confusing language or an unclear link using an observation of a page. It should label inferred user difficulties as interpretation. If no screen-reader audit, load-time measurement or completed form interaction was executed, those checks must remain untested. Use Pause if you want to redirect the agent before it continues."
+      },
+      {
+        "title": "Review and choose a next step",
+        "text": "Open Results when complete. Check its page list and prioritize the observed issues you can reproduce. Choose Accept this version or Request changes for a more focused second pass. PDF report and Word document are available for supported complete text reports. A report’s acceptance does not change the website."
+      }
+    ],
+    "review": [
+      "Does each observed issue identify its page and the visible evidence?",
+      "Does the review use the audience you specified rather than an assumed expert audience?",
+      "Are suggestions distinguished from problems actually observed?",
+      "Are inaccessible pages and unexecuted interaction, accessibility and performance checks listed?",
+      "Can you reproduce the higher-priority findings before making changes?"
+    ],
+    "limitsNote": "The built-in workflow uses read-only approved browsing. It is useful for visible content and usability observations, with partial coverage disclosed. It does not replace a complete accessibility audit, instrumented performance test, real user study or authorized interactive workflow."
+  },
+  {
+    "id": "case-decision-research",
+    "title": "Example 6 — Set up a research agent for a decision",
+    "summary": "Use this when you want options compared against your own constraints. This example chooses a starting path for learning Python using sources you approve. The report remains a recommendation for your review.",
+    "needs": [
+      "A configured model connection.",
+      "Your decision, preferences and constraints written down.",
+      "Public HTTPS sources for the options, plus the agent’s browser setup completed."
+    ],
+    "agentName": "Decision research assistant",
+    "agentInstructions": "Compare options against the owner’s stated criteria. Cite inspected sources and source dates where available. Make missing information and assumptions visible. Explain trade-offs and the reason for a recommendation. Ask a focused question when a missing preference would materially change the answer.",
+    "objective": "Help me choose a first learning path for Python. I am a complete beginner, can study five hours per week, and prefer an option I can start without paying. Compare Harvard CS50’s Introduction to Programming with Python and the official Python tutorial using the approved pages. Consider prerequisites, structure, practice exercises and the likely first steps. Distinguish published facts from your estimate of beginner difficulty.",
+    "doneLooksLike": "One private report.md with a criteria-based comparison, a reasoned recommendation, first steps, exact sources and dates where available, missing information and uncertainty.",
+    "promptLabel": "Illustrative prompts to copy and adapt — the example does not claim a recommendation has been verified",
+    "workflowId": "decision-research",
+    "values": {
+      "question": "Help me choose a first learning path for Python. I am a complete beginner, can study five hours per week, and prefer an option I can start without paying. Compare Harvard CS50’s Introduction to Programming with Python and the official Python tutorial. Consider prerequisites, structure, practice exercises and first steps. Separate published facts from estimated beginner difficulty. State unknowns before recommending a path.",
+      "websites": "https://cs50.harvard.edu/python/\nhttps://docs.python.org/3/tutorial/index.html"
+    },
+    "steps": [
+      {
+        "title": "Create an agent with a decision-making style",
+        "text": "Choose the + beside YOUR AGENTS. Enter Decision research assistant in Agent name and copy the example agent instructions into Instructions. Choose Create agent. Its ongoing role is to compare against your criteria; a task will supply the particular decision and source access."
+      },
+      {
+        "title": "Choose the decision workflow",
+        "text": "Open Workflows → Research a decision → Use workflow. Select Decision research assistant in Agent. Copy the example question value into Decision, preferences and constraints and the example websites value into Sources the agent may use. Replace those values with your actual decision. Include budget, available time and must-have requirements so the recommendation can be judged."
+      },
+      {
+        "title": "Choose sources deliberately",
+        "text": "The two example links provide starting information for the two learning paths. A task can inspect approved websites, but it does not automatically search the entire web. Add other relevant public HTTPS sources before saving if your question needs them. Where facts may change, such as pricing or prerequisites, ask the report to show source dates and information it could not confirm."
+      },
+      {
+        "title": "Choose the model and set limits",
+        "text": "Choose a configured connection in Model and review Maximum model spend (USD). Open Advanced run limits and review model calls, tool steps, active seconds and token allowance. Use a small reviewed trial for a narrow question. A connection being configured does not prove its server is currently available or its model is compatible."
+      },
+      {
+        "title": "Review and save the brief",
+        "text": "Choose Review task. Confirm the decision, constraints, expected result and allowed websites. Choose Save task. This creates a saved task without starting it. The workflow’s generated brief and completion criteria become the task; there is no separate purchase or enrollment action."
+      },
+      {
+        "title": "Finish browser setup and run",
+        "text": "Open Browser → Browser setup for this agent and connect its dedicated Chrome extension if needed. In Activity, use Check again in Ready for this job?. Choose Run agent once setup is ready. If the approved pages cannot support the requested comparison, the agent should request clarification or show the missing facts."
+      },
+      {
+        "title": "Answer questions that affect the choice",
+        "text": "If the agent asks whether you prefer videos, reading or formal assignments, answer in the request card. New direction in the task conversation is included at the next agent decision. If you want to stop the attempt, use Pause or Stop. A missing preference is not permission to invent one."
+      },
+      {
+        "title": "Assess the recommendation against your constraints",
+        "text": "Open Results and read the comparison, sources, uncertainties and proposed first steps. Check that the recommendation follows the criteria you typed. Use Accept this version or Request changes to prepare a narrower revision. Verify material unknowns yourself before paying for, enrolling in or otherwise committing to an option."
+      }
+    ],
+    "review": [
+      "Are the compared options assessed against your stated budget, time and preferences?",
+      "Are costs, prerequisites and availability tied to inspected sources rather than assumed?",
+      "Are source dates, unknowns and conflicting information disclosed?",
+      "Does the explanation show why the recommended option fits, including trade-offs?",
+      "Are predicted difficulty or completion time identified as estimates?"
+    ],
+    "limitsNote": "A recommendation can only be as well supported as the sources and preferences supplied. The agent does not enroll, purchase or commit on your behalf. Pages and product details can change; the report must disclose dated information and unconfirmed claims."
+  },
+  {
+    "id": "case-file-fleet",
+    "title": "Example 7 — Establish a fleet to review published files",
+    "summary": "Use this when one objective benefits from several agents reviewing the same evidence. A fleet is a bounded team: its lead proposes roles and work, specialists claim tasks, and the lead combines their reports. You choose the objective, models, source versions and limits.",
+    "needs": [
+      "Configured model connections for Lead model and Worker model. They may use the same configured connection.",
+      "A project to keep the evidence and team together.",
+      "Supported published text evidence. This example uses launch-brief.md, pricing-policy.md and support-notes.md with fictional or shareable content.",
+      "No more than eight selected evidence files, up to 64 KiB each and 256 KiB in total. KiB is a file-size unit; 64 KiB is about 65,000 bytes."
+    ],
+    "agentName": "Launch evidence organizer",
+    "agentInstructions": "Keep imported launch evidence private until the owner publishes an exact version. Do not claim the documents establish live website behavior. Describe missing evidence and keep source versions identifiable.",
+    "agentSetupNote": "This manually created agent holds the private evidence before publication. Its instructions do not become fleet instructions. The fleet creates its own lead and specialists from the objective; there is no manual Agent instructions field in the Fleets form.",
+    "objective": "Review the selected launch documents for contradictions and missing information that could confuse a first customer. Organize distinct reviews of offer clarity, pricing consistency and support expectations; compare findings against the selected evidence, exchange findings and combine the reports. Prioritize issues with exact document evidence, recommended wording changes and questions still requiring verification. State that this is a file-only review and no live website, payment flow or customer interaction was tested.",
+    "doneLooksLike": "One combined report that traces prioritized findings to selected evidence and specialist reports, resolves or discloses disagreements, proposes changes and names the live checks that remain untested.",
+    "promptLabel": "Illustrative prompts to copy and adapt — this describes a possible fleet, not a completed live assessment",
+    "values": {
+      "projectName": "Launch review",
+      "projectDescription": "A document-only review of fictional or approved launch evidence.",
+      "preparationObjective": "Hold the supplied launch documents for my review and explicit publication. Do not begin analysis until I choose to run a task.",
+      "preparationDoneLooksLike": "The supplied documents are imported privately and identifiable by exact version.",
+      "mode": "Review published files",
+      "evidenceFilenames": [
+        "launch-brief.md",
+        "pricing-policy.md",
+        "support-notes.md"
+      ]
+    },
+    "steps": [
+      {
+        "title": "Create a project for the review",
+        "text": "Open Projects. Under New project, enter Launch review in Name and the example description in Description, then choose Create project. A project groups its agents, approved shared references and collaboration. Existing agents cannot be moved between projects, so create the evidence organizer inside this project."
+      },
+      {
+        "title": "Create the private evidence organizer",
+        "text": "In the selected project’s Add an agent form, enter Launch evidence organizer in Agent name and copy the example agent instructions into Agent instructions. Choose Create agent in Launch review. The files will initially stay private to this agent. This is a convenient way to inspect what you intend to share with the future team."
+      },
+      {
+        "title": "Save an input-holding task",
+        "text": "Beside this project agent, choose New task. Select Live agent. Copy preparationObjective into What should the agent accomplish? and preparationDoneLooksLike into What does done look like?. Choose a configured Model, review the limits, keep Task access at Private workspace and approved browser tools and Allowed websites empty, then choose Save live task. Leave this preparation task paused; you do not need model calls merely to import and publish owner-selected files."
+      },
+      {
+        "title": "Import and inspect the evidence",
+        "text": "Open the saved preparation task’s Files panel → Import files and select the three example documents or your own equivalents. Inspect each saved file before sharing it. Supply compact text, Markdown, JSON or CSV evidence; images, PDFs and spreadsheet workbooks are not eligible inputs for this fleet mode. Make sure the content fits the file and total-size limits."
+      },
+      {
+        "title": "Publish the exact versions inside the project",
+        "text": "Open each private file’s details, choose Publish, read the sharing explanation, and choose Publish within project. Publishing creates an immutable shared version: other agents in this project can discover and use it. It does not publish a webpage on the internet. A later version will not replace the one the fleet selects."
+      },
+      {
+        "title": "Prepare the fleet objective and sources",
+        "text": "Open Fleets and expand Start a fleet if necessary. In How should the fleet work?, choose Review published files. Select Launch review in Project. Copy the example objective into What should the team accomplish?. Under Evidence for this fleet, select the exact three published versions. Use Open shared library if the sources are missing and check that they belong to the same project."
+      },
+      {
+        "title": "Choose lead, worker and team ceilings",
+        "text": "Select configured connections in Lead model and Worker model. The lead plans and combines results; the worker connection is used for specialists the lead creates. Review Total model spend limit (USD), then expand Team size and limits. Review Agents, including the lead; Tasks working at once; Work items; Plan revisions; call, token and combined-time ceilings; and Limits for each task. A workspace concurrency setting may reduce simultaneous work."
+      },
+      {
+        "title": "Save a draft, then deliberately start",
+        "text": "Choose Save draft to preserve the reviewed objective, evidence and limits without model calls. In Your fleets, inspect the draft and choose Start fleet when ready. Alternatively, Start fleet on the creation form saves and starts in one action. One start includes planning, specialist tasks and automatic handoffs within your chosen limits; the lead does not ask for approval at every handoff."
+      },
+      {
+        "title": "Follow the team and resolve blockers",
+        "text": "Read Team, Shared work board, Plan revisions and Findings and messages. Open task shows an individual agent’s conversation and Activity; Read result opens a completed specialist report. Answer clarification requests in their task cards. Use Pause fleet to retain progress or Stop fleet to end execution. Resume fleet continues saved work under its existing models and budgets; it does not reset the allowance."
+      },
+      {
+        "title": "Review the combined evidence",
+        "text": "If the fleet completes, choose Open combined result. Review the final report against selected evidence, exact specialist reports and successful tool receipts. Use Accept this version when satisfied. The fleet result does not use the ordinary Request changes revision flow; for another pass, start a new fleet selecting the evidence and reports you want reviewed."
+      }
+    ],
+    "review": [
+      "Are the selected project and exact file versions correct?",
+      "Did the team divide work meaningfully and support findings with document evidence?",
+      "Are specialist reports and disagreements reflected in the combined report?",
+      "Does every claimed live test remain explicitly untested in this file-only mode?",
+      "Are budget-limited or incomplete work items visible before accepting the result?"
+    ],
+    "limitsNote": "Review published files has no live browser, network target or code execution. It reviews bounded selected text evidence and fleet reports. Publicly documented integration checks demonstrate coordination mechanics with scripted models; they do not establish the quality of a hosted model’s planning or every real fleet run. The team may stop or need attention before producing a combined result."
+  },
+  {
+    "id": "case-local-lab",
+    "title": "Example 8 — Establish a fleet in the local website lab",
+    "summary": "Use this as a practice environment for agents exploring a website together. Harbor Desk is a fictional website owned by the app. The fleet starts as logged-out visitors with the site address and discovers pages through its browser.",
+    "needs": [
+      "The desktop app opened and configured Lead model and Worker model connections.",
+      "A project for the practice run.",
+      "The app’s training website able to start at http://127.0.0.1:4318/. Another process using that port blocks setup.",
+      "Docker and the prepared code runtime only if the fleet needs optional offline calculations over permitted reports. The lab browser itself needs no Chrome extension or Docker.",
+      "A reviewed budget: live cloud-model calls can cost money. The repository’s paid live lab assessment is paused and incomplete."
+    ],
+    "agentName": "Fleet-generated lead and specialists",
+    "agentInstructions": "Work only on the app’s fictional Harbor Desk website. Use synthetic accounts and invented data. Report only behavior you actually observe, include steps and evidence for each finding, and disclose any journey you could not complete.",
+    "agentSetupNote": "Do not look for a manual agent-name or Agent instructions field in this mode. The fleet creates its team. The guidance above is already included in the copyable fleet objective below.",
+    "objective": "Explore the app’s fictional Harbor Desk website as a new visitor. Organize a bounded team to review public information, self-registration if offered, and the user journeys available to ordinary synthetic accounts. Work only on this local training website and use invented account data. Exchange findings, reproduce unexpected behavior when possible, and deliver one prioritized report with steps, observed evidence, impact and suggested remediation. Do not claim a check passed or a flaw was found without observing it. Disclose incomplete journeys and all coverage limits.",
+    "doneLooksLike": "If the run completes, one combined report grounded in real lab observations and specialist reports, with reproducible steps for observed findings and an honest list of unfinished checks.",
+    "promptLabel": "Illustrative objective to copy — the live demo remains incomplete and this is not a promised successful run",
+    "values": {
+      "projectName": "Harbor Desk practice",
+      "projectDescription": "A bounded practice run on the app’s fictional local website.",
+      "mode": "Test the local website"
+    },
+    "steps": [
+      {
+        "title": "Understand the practice boundary",
+        "text": "Harbor Desk is a synthetic site, so this example concerns invented data and ordinary visitor or self-created synthetic accounts. It is separate from a public-site review. As of the documented 1 October 2026 status, the paid live fleet assessment is paused and incomplete: it has no final report, verified model-discovered flaw or demonstrated simultaneous live specialist work. Use this tutorial as a practice setup, not proof that such a run has already succeeded."
+      },
+      {
+        "title": "Create a practice project",
+        "text": "Open Projects → New project. Enter Harbor Desk practice in Name and the example project description in Description, then choose Create project. You do not need to manually create the fleet’s agents: the team lead and specialists are created by the fleet within the saved agent limit."
+      },
+      {
+        "title": "Choose the lab mode and write the objective",
+        "text": "Open Fleets and expand Start a fleet. In How should the fleet work?, choose Test the local website. Select Harbor Desk practice in Project. Copy the example objective into What should the team accomplish?. The objective includes the working rules; there is no separate Agent instructions field on this form."
+      },
+      {
+        "title": "Start the app-owned training site",
+        "text": "Under Local training website, choose Start training website. Check that the app reports Website ready and shows http://127.0.0.1:4318/. The app verifies that this is its own site. If another service owns the port or startup fails, resolve the setup issue; the app does not adopt an unrelated website as the lab."
+      },
+      {
+        "title": "Choose models and bound the exercise",
+        "text": "Choose configured connections in Lead model and Worker model. Review Total model spend limit (USD), expand Team size and limits, and inspect both team and per-task ceilings. For a first exercise, keep the objective narrow and the team small. Setting Tasks working at once to 1 is a valid way to make the activity easier to follow; choose up to 2 only if you want and have capacity for overlapping work."
+      },
+      {
+        "title": "Save the draft before running",
+        "text": "Choose Save draft to save without model calls. Read the saved objective, models and limits. Choose Start fleet when the training site and connections are ready. A start authorizes planning and automatic handoffs within those limits. Saving a draft can succeed before site or connection readiness; it does not verify a complete live run."
+      },
+      {
+        "title": "Observe the separate agent sessions",
+        "text": "Use Team or Shared work board → Open task to inspect each agent. Its Browser panel shows Local lab Electron · Temporary session. Agents begin logged out, without privileged credentials or source files. Each has separate cookies and can register an invented account if the site offers registration. Browser observations and bounded local requests become evidence; ordinary Mac browsing stays separate."
+      },
+      {
+        "title": "Use owner controls when needed",
+        "text": "Answer clarification in the relevant task’s request card. In the lab browser, Take control in local window gives you exclusive control; Return to agent gives it back. Use Pause fleet to retain task progress and close lab browsers, or Stop fleet to end execution. Closing a lab browser clears its cookies and storage, so a paused or resumed task may need to sign in again with its synthetic account."
+      },
+      {
+        "title": "Review only demonstrated outcomes",
+        "text": "If a final result is produced, choose Open combined result. Compare the claimed findings with observations, receipt records and reproduction steps. Review which journeys remained unfinished or could not be checked within the limits. Choose Accept this version only after assessing those limits. If the fleet needs attention or ends early, keep that outcome visible instead of treating it as a completed assessment."
+      }
+    ],
+    "review": [
+      "Did the agents stay within the app-owned fictional site and use synthetic data?",
+      "Does each reported issue have observed evidence and clear reproduction steps?",
+      "Are specialist claims, report versions and successful receipts traceable?",
+      "Are incomplete journeys, closed-session login loss and budget limits disclosed?",
+      "Does the report avoid turning untested possibilities into verified flaws or passing checks?"
+    ],
+    "limitsNote": "The lab has a fixed local target, a separate temporary browser per agent, bounded local HTTP checks and optional offline code over allowed fleet reports. It is not an unrestricted terminal, general PC controller or arbitrary public-site testing system. The real live assessment remains incomplete, and the final navigation-readiness change still requires its dedicated real-browser verification described in the repository status."
+  }
+]
