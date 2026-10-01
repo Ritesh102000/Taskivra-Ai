@@ -1,0 +1,388 @@
+{
+  "audit_date": "2026-09-30",
+  "owner_product_version": "0.6.2",
+  "scope": "Product lifecycle and fit opportunities from DeerFlow and Agent Canvas; representative source paths plus current primary documentation and selected issues. Not an every-line or security audit.",
+  "runtime_validation_this_audit": false,
+  "application_changes_made": false,
+  "paid_calls": 0,
+  "pinned_sources": [
+    {
+      "product": "DeerFlow",
+      "directory": "~/Desktop/Agent Workspaces Research 2026-09-30/repos/deer-flow",
+      "commit": "f75d89f39dd152873bf2b6486052644a77e830fb"
+    },
+    {
+      "product": "OpenHands Agent Canvas",
+      "directory": "~/Desktop/Agent Workspaces Research 2026-09-30/repos/openhands",
+      "commit": "1ec86616bc0511b1e56269fd6ba5872438f4fb7f",
+      "external_runtime_boundary": "Agent Server/SDK and Automation Server are separately versioned; current full runtime not tested."
+    }
+  ],
+  "dimensions_reviewed": [
+    "positioning",
+    "onboarding",
+    "delegation",
+    "workflows",
+    "schedules",
+    "knowledge",
+    "files",
+    "artifacts",
+    "approval_and_review",
+    "isolation",
+    "observability",
+    "recovery",
+    "connectors",
+    "extensibility",
+    "packaging",
+    "monetization"
+  ],
+  "critical_distinctions": [
+    "DeerFlow scheduler and durable batches default disabled.",
+    "DeerFlow project documents do not imply project-isolated memory.",
+    "Canvas source UI and advertised cloud/enterprise are not one capability set.",
+    "Canvas hosted critic is experimental, optional and not universal to ACP agents.",
+    "Agent Workspaces single-file export and saved workflows already exist; full restore and recurrence do not.",
+    "Artifact integrity and successful tool receipts are not semantic task correctness.",
+    "Issue sample and feature presence do not prove market fit."
+  ],
+  "own_source_evidence": [
+    {
+      "path": "packages/contracts/workflows.ts",
+      "lines": [
+        3,
+        40
+      ],
+      "finding": "Current workflow input types and owner commands contain no scheduling or portability contract."
+    },
+    {
+      "path": "packages/workflows/index.ts",
+      "lines": [
+        25,
+        49
+      ],
+      "finding": "Saved workflows reuse objective, criteria and policy with generic editable fields."
+    },
+    {
+      "path": "packages/agent-loop/tools.ts",
+      "lines": [
+        6,
+        26
+      ],
+      "finding": "Narrow browser/code/Gmail/collaboration tools and explicit output authority."
+    },
+    {
+      "path": "apps/desktop/renderer/Files.tsx",
+      "lines": [
+        128,
+        140
+      ],
+      "finding": "Current result preview is bounded plain text or metadata, and file export exists."
+    },
+    {
+      "path": "apps/desktop/renderer/AgentRun.tsx",
+      "lines": [
+        34,
+        44
+      ],
+      "finding": "Current verified-result wording and usage counters."
+    },
+    {
+      "path": "implementation-plan.md",
+      "lines": [
+        167,
+        188
+      ],
+      "finding": "Outstanding Phase 7 packaging, restore, sleep/wake and integrated release gates."
+    }
+  ],
+  "recommendations": [
+    {
+      "rank": 1,
+      "proposal_and_current_gap": "**Guided first useful result.** Job-specific readiness checklist for model, required account, browser and container; preserve the draft; one clearly labeled synthetic sample; install/reconnect actions plus diagnostic export. Current starter forms and scattered settings remain foundations.",
+      "value_differentiation_effort": "All audiences; high activation value, moderate differentiation; M plus existing Phase 7 release work.",
+      "dependencies_and_boundaries": "Mac package/restore proof; credential setup UI; checks report not-tested separately from failed. Paid connection probe only explicit.",
+      "validation_experiment": "Observe 12 fresh users, 4 business/agency, 4 developer, 4 personal. Candidate gate: at least 9 reach a correctly scoped real deliverable without developer intervention; median <=10 minutes after required external account consent. Record every failure, not only completers.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 2,
+      "proposal_and_current_gap": "**Result review desk.** Render safe Markdown, bounded tables and citations; show each criterion as checked / needs review / unmet with evidence; compare output versions and export a shareable result pack. Current immutable files and plain-text preview are reused.",
+      "value_differentiation_effort": "All; high value and strong trust differentiation; M.",
+      "dependencies_and_boundaries": "Safe renderers, output MIME limits, evidence-to-criterion contract, human acceptance separate from automatic artifact integrity. No active HTML on app origin.",
+      "validation_experiment": "Blind-review 20 outputs against source fixtures. Target zero unsupported checked labels; reviewers find planted omissions and approve/reject in under 2 minutes median. Then test real reports for usefulness.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 3,
+      "proposal_and_current_gap": "**Client/project knowledge collections.** Explicitly selected briefs, brand rules and reference documents plus saved workflows, with source/expiry/version shown. Add \"use these versions\" rather than implicit cross-client memory.",
+      "value_differentiation_effort": "Agencies/business high; developer/personal useful; strong privacy differentiation; M-L.",
+      "dependencies_and_boundaries": "Durable project membership, scoped search, deletion/restore, per-task version grants. Do not move private agent files into shared visibility automatically.",
+      "validation_experiment": "Three-client fixture with conflicting instructions; zero cross-client retrieval. Five agency users run second jobs; compare setup time and corrections against current workflow cloning.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 4,
+      "proposal_and_current_gap": "**Scheduled briefs with change-only notifications.** Turn an existing saved workflow into a daily/weekly bounded read-only run. Show next run/timezone, run history, missed-run policy, maximum spend and expiration.",
+      "value_differentiation_effort": "Business/personal high, developer medium; moderate differentiation, L.",
+      "dependencies_and_boundaries": "Complete sleep/wake gates; durable leases/idempotency; shared daily cap; non-overlap; explicit stop; Mac awake/app running statement. Missing inputs create Needs-you item, never guessed answers.",
+      "validation_experiment": "Fourteen-day pilot across 8 users. Measure useful runs, duplicate/missed occurrences, intervention time, weekly return and spend per accepted result. Ship gate: zero duplicate dispatch in restart/sleep/DST fixture suite.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 5,
+      "proposal_and_current_gap": "**Scoped connections for specific jobs.** After current Gmail, add selected Drive documents/Sheets or GitHub read-only review, based on observed target jobs. A connection card shows account, permitted resource and health.",
+      "value_differentiation_effort": "Business/agency/developer; high integration value, moderate differentiation; L per provider.",
+      "dependencies_and_boundaries": "OAuth app/scopes/verification, pagination, expiry, rate limits, consent and deletion; connector tool dispatcher enforces scope. MCP alone is not a permission model.",
+      "validation_experiment": "Concierge 10 real recurring jobs first. Build only the connector removing the most manual file/browser steps; compare task completion and reconnect burden. No forecasted usage from GitHub stars.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 6,
+      "proposal_and_current_gap": "**Workflow contracts beyond saved prompts.** Named typed input slots, output format, stable deterministic preprocessing/validation steps, sample inputs and versioned definition. Current saved workflow copies brief, criterion and policy but not a reusable input schema.",
+      "value_differentiation_effort": "All; business/agency high reuse; moderate differentiation; M-L.",
+      "dependencies_and_boundaries": "Existing request validators/artifact broker; signed or owner-reviewed imports later; no arbitrary plugin installation. LLM reserved for judgment, not CSV counting.",
+      "validation_experiment": "Run one weekly spreadsheet report over 10 variant fixture inputs. All invalid inputs explain missing fields before paid generation; valid schema remains consistent across reruns. Measure repeat-user editing time.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 7,
+      "proposal_and_current_gap": "**Run receipts and useful recovery.** Timeline of last successful step, reason stopped, retry eligibility, files created and actual cost; compare attempts and export a redacted support bundle. Current activity and cost counts exist; upgrade explanation and cross-run analysis.",
+      "value_differentiation_effort": "All; high trust and support value; moderate differentiation; M.",
+      "dependencies_and_boundaries": "Redaction, stable event IDs, bounded pagination, schema version. Distinguish read retry from uncertain external write; never replay submission blindly.",
+      "validation_experiment": "Seed 8 faults: expired auth, missing file, Docker stopped, no network, budget exhausted, browser owner control, crash, repeated invalid action. At least 7 recover without developer help; zero leaked secrets in export fixture scan.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 8,
+      "proposal_and_current_gap": "**Visible team plan and scoped delegation.** Owner sees proposed independent assignments, input versions, expected outputs, shared budget and review responsibility; supervisor can launch only authorized tasks/agents. Existing peer messages and waits remain mechanisms.",
+      "value_differentiation_effort": "Agency/research/developer; strong product identity, L; postpone behind simpler successful jobs.",
+      "dependencies_and_boundaries": "Parent/child durable accounting, explicit publishing, cancellation propagation, dependency graph, per-agent cap; do not inherit another agent's browser or private context.",
+      "validation_experiment": "Compare single agent vs two specialists on 12 matching tasks. Continue only with measurable quality or elapsed-time benefit at acceptable cost, zero permission bleed and inspectable failures. No assumption that more agents perform better.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    },
+    {
+      "rank": 9,
+      "proposal_and_current_gap": "**Portable workflow packs and selected-task export.** Export reviewed workflow definition, selected references/outputs and provenance; import as disabled draft with fresh account/permission review. Existing single-file export is not workspace backup.",
+      "value_differentiation_effort": "Agencies/developers strongest; moderate differentiation, M-L.",
+      "dependencies_and_boundaries": "Phase 7 portable backup/restore, manifests/hashes/version compatibility, no cookies/tokens/private history by default. Workflow transfer and full recovery backup must remain distinct.",
+      "validation_experiment": "Move three workflows and one selected-task pack to a clean test data root; rebind accounts, run fixtures, prove no hidden credentials/grants carried over. Ask pilot users whether this supports real handover.",
+      "status": "proposed_not_implemented",
+      "ranking_basis": "product_judgment_not_measured_market_demand"
+    }
+  ],
+  "sources": [
+    {
+      "label": "Official concepts",
+      "url": "https://deerflow.tech/en/docs/introduction/core-concepts",
+      "kind": "official_live_documentation",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Pinned README",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/README.md#L33-L61",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Doctor source",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/scripts/doctor.py#L1-L10",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "support bundle",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/scripts/support_bundle.py#L1-L80",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Onboarding source",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/src/components/features/onboarding/onboarding-modal.tsx#L115-L129",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Config",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/backend/packages/harness/deerflow/config/scheduler_config.py#L4-L21",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "lifecycle",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/backend/app/scheduler/service.py#L118-L215",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Current automation guide",
+      "url": "https://docs.openhands.dev/openhands/usage/agent-canvas/prebuilt-automations",
+      "kind": "official_live_documentation",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Project context",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/backend/packages/harness/deerflow/projects/context.py#L1-L11",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "UI notice",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/frontend/src/core/i18n/locales/en-US.ts#L629",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Delegation behavior",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/README.md#L1628-L1680",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "batch config",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/backend/packages/harness/deerflow/config/subagent_batches_config.py#L8-L19",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Checks",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/backend/packages/harness/deerflow/subagents/acceptance_checks.py#L1-L53",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Diff source",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/src/components/features/diff-viewer/file-diff-viewer.tsx#L28-L43",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Critic guide",
+      "url": "https://docs.openhands.dev/openhands/usage/agent-canvas/critic",
+      "kind": "official_live_documentation",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Preview source",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/frontend/src/components/workspace/artifacts/artifact-file-preview.tsx#L32-L152",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "table limits",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/frontend/src/components/workspace/artifacts/artifact-table-preview.tsx#L19-L30",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Log export source",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/src/utils/automation-activity-log-export.ts#L10-L28",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Source",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/src/components/features/home/featured-automations/automation-run-health.ts#L11-L58",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Lark status contract",
+      "url": "https://github.com/bytedance/deer-flow/blob/f75d89f39dd152873bf2b6486052644a77e830fb/backend/app/gateway/routers/integrations.py#L54-L87",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Setup checks",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/src/manifests/automation-setup.ts#L58-L114",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "permissions",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/src/hooks/use-automation-permissions.ts#L30-L79",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Deployment options",
+      "url": "https://github.com/OpenHands/OpenHands/blob/1ec86616bc0511b1e56269fd6ba5872438f4fb7f/README.md#L63-L122",
+      "kind": "pinned_source",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Official pricing, checked 30 September 2026",
+      "url": "https://www.openhands.dev/pricing",
+      "kind": "official_live_documentation",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "DeerFlow #5320",
+      "url": "https://github.com/bytedance/deer-flow/issues/5320",
+      "kind": "primary_issue_signal",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "DeerFlow #5438",
+      "url": "https://github.com/bytedance/deer-flow/issues/5438",
+      "kind": "primary_issue_signal",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Canvas #17386",
+      "url": "https://github.com/OpenHands/OpenHands/issues/17386",
+      "kind": "primary_issue_signal",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Canvas #17424",
+      "url": "https://github.com/OpenHands/OpenHands/issues/17424",
+      "kind": "primary_issue_signal",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Canvas #17546",
+      "url": "https://github.com/OpenHands/OpenHands/issues/17546",
+      "kind": "primary_issue_signal",
+      "accessed": "2026-09-30"
+    },
+    {
+      "label": "Canvas #16430",
+      "url": "https://github.com/OpenHands/OpenHands/issues/16430",
+      "kind": "primary_issue_signal",
+      "accessed": "2026-09-30"
+    }
+  ],
+  "report": "orchestration-products.md",
+  "limitations": [
+    "No accounts or runtime setup performed.",
+    "No paid or live model quality evaluation.",
+    "Official docs may be newer than pinned checkout.",
+    "Issue states are rendered-page observations and were not reproduced.",
+    "Effort ratings and experiment thresholds are proposed product judgments."
+  ],
+  "challenge_review": {
+    "completed": "2026-09-30",
+    "application_changes_made": false,
+    "live_failures_reproduced": false,
+    "report_section": "Current product dependencies found in challenge review",
+    "material_dependencies": [
+      "Shared means all agents; client grouping requires a new access boundary.",
+      "Read-only browser and Gmail policies cannot read arbitrary attached project files.",
+      "Accepted PDF/XLSX/source-file formats do not establish ready parsing or rich preview.",
+      "Browser observations are bounded text, not visual QA.",
+      "Advertised report/script limits exceed adapter argument and model-output ceilings.",
+      "Bounded context and recent evidence require retrieval/continuity for longer jobs.",
+      "Verified-result UI conflates artifact integrity with semantic acceptance.",
+      "Native-browser transfers and developer-created Gmail OAuth setup remain adoption constraints."
+    ],
+    "minimum_experiment": "Three users per audience, one constrained job per audience, two separate sessions with changed inputs; source-grounded human acceptance and comparison to existing method. Directional study only."
+  }
+}

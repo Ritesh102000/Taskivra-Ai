@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "types": [
+      "node",
+      "vite/client"
+    ]
+  },
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "packages/**/*.ts",
+    "tests/phase1/**/*.ts",
+    "tests/phase2/**/*.ts",
+    "tests/phase3/**/*.ts",
+    "tests/phase4/**/*.ts",
+    "tests/phase5/**/*.ts",
+    "tests/phase6/**/*.ts",
+    "tests/improvements/**/*.ts",
+    "tests/phase7/**/*.ts",
+    "tests/phase8/**/*.ts",
+    "tests/fleet/**/*.ts"
+  ]
+}

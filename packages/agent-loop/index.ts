@@ -1,0 +1,346 @@
+import {labInteractionURL,parseLabCommand} from '../local-lab';
+import {SecurityReviewError} from '../security-review';
+import {FleetError} from '../fleet';
+import type {ProviderModelOption} from '../contracts/model-providers';
+import {DocumentError} from '../documents';
+import {importSelectedBytes} from '../imports';
+import {cleanBrowserObservation,cleanBrowserTabs} from './browser-results';
+import {BrowserActionError} from '../browser-actions';
+import {ProjectError} from '../projects';
+import {WorkflowError} from '../workflows';
+import {ResultError} from '../results';
+import {randomUUID} from 'node:crypto';
+import {writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import type {SQLInputValue} from 'node:sqlite';
+import type {Persistence} from '../persistence';
+import type {Coordinator,RunClaim} from '../coordinator';
+import type {RequestService} from '../requests';
+import type {CapabilitySpec} from '../contracts/requests';
+import type {LiveState,LiveTaskState,LivePolicy,LiveLimits} from '../contracts/live';
+import {parseLiveCommand,LiveError,liveFail,record,string,identity,number} from '../contracts/live-validation';
+import {parseUserRequest} from '../contracts/request-validation';
+import type {ModelAdapter,ModelTurn,ModelMessage,FunctionTool} from '../model-adapters/types';
+import {ModelAdapterError} from '../model-adapters/types';
+import {MODEL_CHOICES,DEFAULT_MODEL,modelChoice,DEFAULT_MAX_OUTPUT_TOKENS} from '../model-adapters/pricing';
+import {GmailRequests} from './gmail-requests';
+import {ArtifactError} from '../artifacts';
+import {CodeError} from '../code';
+import {BrowserError} from '../browser';
+import {GmailError} from '../gmail';
+import {CollaborationError} from '../collaboration';
+import {bounded} from './bounded';
+import {googleBrowserRejected,recoverableReadError,type TroubleshootingNote} from './troubleshooting';
+import {COLLABORATION_TOOLS,FLEET_TOOLS,LAB_TOOLS,REPLAN_TOOL,toolsForPolicy} from './tools';
+import {buildAgentPrompt,type PromptMode} from './prompts';
+import {serializeAgentContext,serializeRequiredContext,fitModelInput} from './context';
+import {failureFingerprint,REPEATED_FAILURE_LIMIT} from './failure-policy';
+import {EvidenceArchive, REPORT_CONTENT_BYTES, CODE_SOURCE_BYTES} from './evidence';
+
+type Row=Record<string,string|number|null>;
+const terminal=new Set(['succeeded','failed','cancelled']);
+const safeError=(error:unknown)=>error instanceof FleetError||error instanceof SecurityReviewError||error instanceof LiveError||error instanceof ModelAdapterError||error instanceof GmailError||error instanceof ArtifactError||error instanceof CodeError||error instanceof BrowserError||error instanceof CollaborationError||error instanceof WorkflowError||error instanceof ResultError||error instanceof ProjectError||error instanceof BrowserActionError||error instanceof DocumentError?error.message:'The live step could not finish. Progress is saved; inspect the task before resuming.';
+const noModel:ModelAdapter={async status(){return{configured:false,message:'Configure OpenAI before running.',provider:'openai',model:DEFAULT_MODEL};},prepare(){return liveFail('model_credentials','Configure OpenAI before running this task.');},async quote(){return liveFail('model_credentials','Configure OpenAI before running this task.');},async complete(){return liveFail('model_credentials','Configure OpenAI before running this task.');},discard(){}};
+export class AgentLoop {
+ readonly ready:Promise<void>;
+ private gmailRequests:GmailRequests;private reconcilingGmail:Promise<void>|null=null;
+ private work:Promise<void>|null=null; private workers=new Map<string,{agentId:string;promise:Promise<void>}>(); private active=new Map<string,AbortController>(); private stopping=false; private suspended=false; private tickRequested=false;
+ constructor(private options:{persistence:Persistence;coordinator:Coordinator;requests:RequestService;adapter?:ModelAdapter;modelResolver?:(selection:string)=>ModelAdapter;modelCatalog?:()=>ProviderModelOption[];now?:()=>number;onChanged?:()=>void}){this.gmailRequests=new GmailRequests(options.persistence,()=>this.now(),claim=>this.c.authorizeRun(claim));this.ready=this.recover();}
+ get hasInFlightWork():boolean{return !!this.work||this.workers.size>0||this.active.size>0||!!this.reconcilingGmail||!!this.row("SELECT 1 FROM request_replan_jobs WHERE state='running' AND lease_until>? LIMIT 1",this.now());}
+ private get c(){return this.options.coordinator;} private get adapter(){return this.options.adapter||noModel;} private now(){return(this.options.now||Date.now)();}
+ private model(selection:string):ModelAdapter{if(this.options.modelResolver)return this.options.modelResolver(selection);modelChoice(selection);return this.adapter;}
+ validateModel(selection:string):void{if(this.options.modelCatalog&&!this.options.modelCatalog().some(m=>m.id===selection))liveFail('model_unavailable','Choose a current model connection for this new task. Existing tasks retain their saved revision.');this.model(selection);}
+ async modelReadiness(selection:string){let configured=false;try{configured=(await this.model(selection).status()).configured;}catch{}return{credentialConfigured:configured,models:configured?[{id:selection}]:[...(this.options.modelCatalog?.()||MODEL_CHOICES)]};}
+ private row(sql:string,...args:SQLInputValue[]){return this.options.persistence.db.prepare(sql).get(...args) as Row|undefined;}
+ private rows(sql:string,...args:SQLInputValue[]){return this.options.persistence.db.prepare(sql).all(...args) as Row[];}
+ private write(sql:string,...args:SQLInputValue[]){this.options.persistence.db.prepare(sql).run(...args);}
+ private txn<T>(fn:()=>T):T{return this.options.persistence.transaction(fn);}
+ private changed(){this.options.onChanged?.();}
+ private config(taskId:string){const r=this.row('SELECT * FROM live_task_config WHERE task_id=?',taskId);if(!r)liveFail('not_found','Select a live task.');return r!;}
+ private task(taskId:string){const r=this.row('SELECT * FROM tasks WHERE id=?',taskId);if(!r)liveFail('not_found','Select an existing task.');return r!;}
+ private event(type:string,taskId:string,payload:object){this.write('INSERT INTO events(type,aggregate_id,aggregate_revision,payload,created_at) VALUES (?,?,?,?,?)',type,taskId,this.task(taskId).revision,JSON.stringify({...payload,simulation:false}),this.now());}
+ private message(taskId:string,content:string){this.write("INSERT INTO task_messages(id,task_id,role,content,created_at) VALUES (?,?,'agent',?,?)",randomUUID(),taskId,content.slice(0,16000),this.now());this.event('message.created',taskId,{role:'agent'});}
+ private history(taskId:string,kind:'observation'|'result'|'note',value:unknown){this.write('INSERT INTO live_history(task_id,kind,content,created_at) VALUES (?,?,?,?)',taskId,kind,bounded(value),this.now());this.write('DELETE FROM live_history WHERE task_id=? AND id NOT IN (SELECT id FROM live_history WHERE task_id=? ORDER BY id DESC LIMIT 24)',taskId,taskId);}
+ private async recover(){await this.c.artifacts.ready;await this.c.browser.ready;await this.c.code.ready;await this.c.collaboration.ready;if(this.stopping)return;
+  this.txn(()=>{for(const row of this.rows("SELECT * FROM live_model_calls WHERE state='reserved'")){let alive=true;try{process.kill(Number(row.owner_pid),0);}catch{alive=false;}if(alive&&row.owner_instance!==this.c.instanceId)continue;this.write("UPDATE live_model_calls SET state='uncertain',finished_at=? WHERE id=?",this.now(),row.id);this.pauseSaved(String(row.task_id),'A previous model request was interrupted. Its full reservation is retained because usage is unknown. Resume explicitly after review.');}
+   for(const r of this.rows("SELECT t.id FROM tasks t JOIN live_task_config l ON l.task_id=t.id WHERE t.state IN ('running','recovering','pausing') AND NOT EXISTS(SELECT 1 FROM runs r WHERE r.task_id=t.id AND r.state='running' AND r.lease_until>?)",this.now()))this.pauseSaved(String(r.id),'The previous live run was interrupted. Saved observations and outputs are available; resume explicitly.');
+   this.write("UPDATE live_tool_receipts SET state='outcome_unknown',finished_at=? WHERE state='dispatched' AND run_id IN (SELECT id FROM runs WHERE state<>'running')",this.now());
+  });
+  for(const row of this.rows("SELECT l.task_id,l.policy_json FROM live_task_config l JOIN tasks t ON t.id=l.task_id WHERE t.state IN ('waiting','paused')")){
+   const policy=JSON.parse(String(row.policy_json)) as LivePolicy;if(!policy.mailAccount)continue;
+   const rejected=this.rows('SELECT b.permitted_url FROM browser_tabs b JOIN browser_sessions s ON s.id=b.session_id WHERE s.task_id=?',row.task_id).some(b=>googleBrowserRejected(b.permitted_url));
+   this.gmailRequests.diagnoseSavedHandoff(String(row.task_id),policy.mailAccount.toLowerCase(),rejected?this.googleBlockedMessage():'The Gmail sign-in was still waiting when the app restarted. Use the supported Gmail read-only connection to continue from saved progress.',()=>this.diagnostic(String(row.task_id),{code:rejected?'google_browser_rejected':'gmail_login_pending',message:rejected?'Google rejected this browser sign-in.':'Gmail sign-in is still waiting.',action:'Use the supported Gmail read-only connection; the exact account will be verified.',attempts:1,recovered:false}));
+  }
+
+ }
+ private display(r:Row):LiveTaskState{return{taskId:String(r.task_id),model:String(r.model),policy:JSON.parse(String(r.policy_json)),limits:JSON.parse(String(r.limits_json)),enabled:!!r.enabled,calls:Number(r.calls),steps:Number(r.steps),inputTokens:Number(r.input_tokens),outputTokens:Number(r.output_tokens),costUsd:Number(r.cost_microusd)/1e6,reservedUsd:Number(r.reserved_microusd)/1e6,activeSeconds:Number(r.active_ms)/1000,lastError:r.last_error?String(r.last_error):null,resultVersionId:r.result_version_id?String(r.result_version_id):null,troubleshooting:this.rows("SELECT content FROM live_history WHERE task_id=? AND kind='note' ORDER BY id DESC LIMIT 24",r.task_id).map(row=>JSON.parse(String(row.content)).troubleshooting).filter(Boolean).slice(0,8)};}
+ async state():Promise<LiveState>{
+  await this.ready;
+  const models=(this.options.modelCatalog?.()||MODEL_CHOICES).map(x=>({...x})), tasks=this.rows('SELECT * FROM live_task_config ORDER BY created_at,task_id').map(r=>this.display(r));
+  const statuses=new Map<string,boolean>();
+  await Promise.all([...new Set([...models.map(m=>m.id),...tasks.map(t=>t.model)])].map(async id=>{try{statuses.set(id,(await this.model(id).status()).configured);}catch{statuses.set(id,false);}}));
+  return{legacyCredentialConfigured:statuses.get(DEFAULT_MODEL)||false,credentialConfigured:[...statuses.values()].some(Boolean),models:models.map(m=>({...m,configured:statuses.get(m.id)||false})),defaultModel:models.find(m=>statuses.get(m.id))?.id||DEFAULT_MODEL,tasks:tasks.map(task=>({...task,reviewOnly:this.c.securityReviews.isReviewTask(task.taskId)||(this.c.fleets.isFleetTask(task.taskId)&&!this.c.fleets.labOrigin(task.taskId)),modelConfigured:statuses.get(task.model)||false,modelLabel:models.find(m=>m.id===task.model)?.label||task.model})),busy:!!this.work||this.workers.size>0};
+ }
+ async handle(raw:unknown):Promise<LiveState>{const command=parseLiveCommand(raw);await this.ready;if(this.stopping)liveFail('closed','The live service is closing.');
+  if(command.type==='live.state')return this.state();
+  if(this.c.maintenanceActive)liveFail('maintenance_busy','Wait for the workspace checkpoint to finish.');
+  if(command.type==='live.createTask'){this.validateModel(command.model);this.c.createLiveTask(command);}
+  else if(command.type==='live.start'){this.config(command.taskId);await this.c.workflows.assertInputsReady(command.taskId);const blocker=this.c.fleets.blockingReason(command.taskId)||this.c.securityReviews.blockingReason(command.taskId)||this.c.results.blockingReason(command.taskId)||this.c.routines.blockingReason(command.taskId);if(blocker)liveFail('missing_input',blocker);if(!(await this.model(String(this.config(command.taskId).model)).status()).configured)liveFail('model_credentials','Configure this task’s selected model connection before starting.');if(terminal.has(String(this.task(command.taskId).state)))liveFail('invalid_state','This task has finished.');this.c.handle({type:'tasks.resume',taskId:command.taskId});this.onOwnerCommand('tasks.resume',command.taskId);}
+  else if(command.type==='live.pause'||command.type==='live.stop'){this.config(command.taskId);this.c.handle({type:command.type==='live.pause'?'tasks.pause':'tasks.cancel',taskId:command.taskId});}
+  this.changed();this.tick();return this.state();
+ }
+ onOwnerCommand(type:string,taskId:string){if(!this.row('SELECT 1 FROM live_task_config WHERE task_id=?',taskId))return;
+  if(type==='tasks.resume')this.write('UPDATE live_task_config SET enabled=1,last_error=NULL,updated_at=? WHERE task_id=?',this.now(),taskId);
+  else if(type==='tasks.pause'||type==='tasks.cancel'){this.write('UPDATE live_task_config SET enabled=0,updated_at=? WHERE task_id=?',this.now(),taskId);this.active.get(taskId)?.abort();if(this.task(taskId).state==='pausing')this.pauseSaved(taskId,null);}
+ }
+ tick(){
+  if(this.stopping||this.suspended)return;
+  if(this.work){this.tickRequested=true;return;}
+  const work=this.iterate();this.work=work;
+  void work.catch(()=>{}).finally(()=>{if(this.work===work)this.work=null;this.changed();if(this.tickRequested&&!this.stopping){this.tickRequested=false;this.tick();}});
+ }
+ private track(taskId:string,agentId:string,run:()=>Promise<void>){
+  // The scheduler reserves capacity synchronously before another claim can run.
+  const entry={agentId,promise:Promise.resolve()};this.workers.set(taskId,entry);
+  entry.promise=run().catch(()=>{}).finally(()=>{this.workers.delete(taskId);this.changed();this.tick();});
+ }
+ private async iterate(){
+  await this.ready;if(this.stopping||this.suspended)return;
+  this.c.fleets.tick();
+  await this.options.requests.drainValidations();if(this.stopping||this.suspended)return;
+  const capacity=Math.min(2,Number(this.row('SELECT max_active_agents FROM settings WHERE id=1')?.max_active_agents||1));
+  while(!this.stopping&&!this.suspended&&this.workers.size<capacity){
+   const busyAgents=new Set([...this.workers.values()].map(x=>x.agentId));
+   const eligible=this.rows("SELECT l.task_id,t.agent_id FROM live_task_config l JOIN tasks t ON t.id=l.task_id WHERE l.enabled=1 AND t.state='waiting'").filter(x=>!busyAgents.has(String(x.agent_id))).map(x=>String(x.task_id));
+   const replan=this.options.requests.claimReplan({taskIds:eligible});
+   if(replan){this.track(replan.taskId,String(this.task(replan.taskId).agent_id),()=>this.replan(replan));continue;}
+   const claim=this.c.claimNext(`live-${this.c.instanceId}`,'live',[...busyAgents]);if(!claim)break;
+   this.track(claim.taskId,claim.agentId,()=>this.execute(claim));
+  }
+ }
+ private async execute(claim:RunClaim){
+  const abort=new AbortController();this.active.set(claim.taskId,abort);const started=this.now();let countedAt=started;
+  const limits=JSON.parse(String(this.config(claim.taskId).limits_json)) as LiveLimits;
+  let stoppingWorkers:Promise<unknown>|null=null;
+  const stopAtLimit=(reason='The task reached its active-time limit. Browser and code execution were stopped.')=>{if(abort.signal.aborted)return;abort.abort();if(!this.pauseClaim(claim,reason))return;this.changed();stoppingWorkers=Promise.allSettled([this.c.code.stopForTask(claim.taskId),this.c.browser.stopForTask(claim.taskId)]);};
+  const timer=setInterval(()=>{try{if(abort.signal.aborted)return;this.c.authorizeRun(claim);const now=this.now();this.write('UPDATE live_task_config SET active_ms=active_ms+?,updated_at=? WHERE task_id=?',Math.max(0,now-countedAt),now,claim.taskId);countedAt=now;this.c.fleets.assertActiveTime(claim.taskId);if(Number(this.config(claim.taskId).active_ms)>=limits.maxActiveSeconds*1000){stopAtLimit();return;}this.c.renewLease(claim);}catch(error){stopAtLimit(error instanceof FleetError?error.message:'The execution lease expired. Browser and code execution were stopped; resume from saved progress.');}},1000);timer.unref();
+  try{await this.c.workflows.assertInputsReady(claim.taskId);const blocker=this.c.fleets.blockingReason(claim.taskId)||this.c.securityReviews.blockingReason(claim.taskId)||this.c.results.blockingReason(claim.taskId)||this.c.routines.blockingReason(claim.taskId);if(blocker)liveFail('missing_input',blocker);while(!abort.signal.aborted&&!this.stopping&&!this.suspended){this.c.authorizeRun(claim);const config=this.display(this.config(claim.taskId));this.checkBudget(config);
+    const trace=await this.c.artifacts.reserveExternal('live-step-trace',256*1024);try{
+    const updates=this.ownerUpdates(claim.taskId),projectRevision=this.projectRevision(claim.agentId);
+    const turn=await this.modelTurn(claim.taskId,claim.runId,[...this.context(claim),...this.ownerUpdateContext(updates)],this.toolset(config.policy,claim.taskId),abort.signal,()=>this.c.authorizeRun(claim));
+    this.c.authorizeRun(claim);if(abort.signal.aborted)break;
+    // A correction while the model was thinking invalidates that decision, including finish.
+    if(!this.sameOwnerUpdates(claim.taskId,updates)||this.projectRevision(claim.agentId)!==projectRevision){this.event('live.owner_update_replan',claim.taskId,{callId:turn.localCallId});continue;}
+    if(turn.toolCalls.length!==1)liveFail('output_required','The model returned no executable step. A readable output is required; resume to continue.');
+    const call=turn.toolCalls[0];const receipt=randomUUID();this.txn(()=>{this.c.authorizeRun(claim);this.incorporateOwnerUpdates(claim.taskId,updates,turn.localCallId);const latest=this.display(this.config(claim.taskId));if(latest.steps>=latest.limits.maxToolSteps)liveFail('step_limit','The task reached its tool-step limit.');this.write('UPDATE live_task_config SET steps=steps+1,checkpoint=?,updated_at=? WHERE task_id=?',JSON.stringify({tool:call.name,receipt,state:'dispatched'}),this.now(),claim.taskId);this.write("INSERT INTO live_tool_receipts(id,task_id,run_id,model_call_id,tool_name,state,created_at) VALUES (?,?,?,?,?,'dispatched',?)",receipt,claim.taskId,claim.runId,turn.localCallId,call.name,this.now());this.event('live.tool_started',claim.taskId,{tool:call.name,receipt});});this.changed();
+    try{const result=await this.dispatch(claim,call.name,call.arguments,receipt,abort.signal,updates,projectRevision);this.txn(()=>{const previous=this.row('SELECT state FROM live_tool_receipts WHERE id=?',receipt);this.write("UPDATE live_tool_receipts SET state='succeeded',result_json=?,finished_at=? WHERE id=?",bounded(result),this.now(),receipt);if(previous?.state!=='succeeded')this.history(claim.taskId,'observation',{tool:call.name,evidenceId:receipt,result});this.event('live.tool_finished',claim.taskId,{tool:call.name,receipt});});this.changed();}
+    catch(error){
+     const code=error instanceof FleetError||error instanceof LiveError||error instanceof CollaborationError||error instanceof WorkflowError||error instanceof ResultError||error instanceof ProjectError||error instanceof BrowserActionError||error instanceof DocumentError?error.code:'tool_failed';
+     const fingerprint=failureFingerprint(call.name,call.arguments,code,updates.map(update=>update.id));
+     this.txn(()=>{this.write("UPDATE live_tool_receipts SET state='failed',result_json=?,finished_at=? WHERE id=?",bounded({error:safeError(error),code,fingerprint}),this.now(),receipt);this.history(claim.taskId,'note',{tool:call.name,error:safeError(error),code});});
+     if((error instanceof LiveError||error instanceof CollaborationError||error instanceof FleetError)&&['fleet_plan_conflict','stale_revision','work_claimed','permission_denied','invalid_command','missing_evidence','output_required','owner_update_pending','dependency_cycle','version_pinned','idempotency_conflict'].includes(error.code)){
+      const recent=this.rows('SELECT state,result_json FROM live_tool_receipts WHERE task_id=? ORDER BY rowid DESC LIMIT ?',claim.taskId,REPEATED_FAILURE_LIMIT);
+      if(code!=='owner_update_pending'&&recent.length===REPEATED_FAILURE_LIMIT&&recent.every(row=>row.state==='failed'&&JSON.parse(String(row.result_json)).fingerprint===fingerprint)){
+       this.event('live.repeated_failure',claim.taskId,{tool:call.name,code,attempts:REPEATED_FAILURE_LIMIT});
+       liveFail('repeated_tool_failure',`The same ${call.name} action failed ${REPEATED_FAILURE_LIMIT} times without progress: ${safeError(error)} Progress is saved. Resolve the blocker or update the task before resuming.`);
+      }
+      continue;
+     }
+     throw error;
+    }
+    if(this.task(claim.taskId).state!=='running')break;
+    }finally{await trace();}
+   }
+   this.pauseClaim(claim,'Execution stopped at its active-time limit or owner interruption.');
+  }catch(error){this.pauseClaim(claim,safeError(error));}
+  finally{clearInterval(timer);if(stoppingWorkers)await stoppingWorkers;this.write('UPDATE live_task_config SET active_ms=active_ms+?,updated_at=? WHERE task_id=?',Math.max(0,this.now()-countedAt),this.now(),claim.taskId);this.active.delete(claim.taskId);this.changed();}
+ }
+ private checkBudget(s:LiveTaskState){if(s.calls>=s.limits.maxModelCalls)liveFail('call_limit','The task reached its model-call limit.');if(s.steps>=s.limits.maxToolSteps)liveFail('step_limit','The task reached its tool-step limit.');if(s.activeSeconds>=s.limits.maxActiveSeconds)liveFail('time_limit','The task reached its active-time limit.');if(s.inputTokens+s.outputTokens>=s.limits.maxTokens)liveFail('token_limit','The task reached its token limit.');}
+ private ownerUpdates(taskId:string){return this.rows("SELECT rowid AS sequence,id,content FROM task_messages WHERE task_id=? AND delivery_state IS NOT NULL ORDER BY rowid",taskId).map(row=>({id:String(row.id),content:String(row.content),sequence:Number(row.sequence)}));}
+ private projectRevision(agentId:string){const row=this.row('SELECT p.project_id,COALESCE((SELECT MAX(revision) FROM project_briefs b WHERE b.project_id=p.project_id),0) AS revision FROM project_agents p WHERE p.agent_id=?',agentId);return JSON.stringify(row);}
+ private sameOwnerUpdates(taskId:string,updates:{id:string;content:string}[]){const current=this.ownerUpdates(taskId);return current.length===updates.length&&current.every((entry,index)=>entry.id===updates[index].id);}
+ private ownerUpdateContext(updates:{id:string;content:string;sequence:number}[]):ModelMessage[]{return updates.length?[{role:'user',content:JSON.stringify({ownerUpdates:updates.map(entry=>entry.content),ownerUpdateOrder:updates.map(entry=>({messageId:entry.id,sequence:entry.sequence})),instruction:'These are saved owner updates. Compare their aligned ownerUpdateOrder sequence with ownerReplyOrder and currentOwnerReplyOrder: a larger sequence means a later owner instruction. This message appearing later in model input does not make every update newer than every clarification. Owner text does not grant new tool permissions or increase budgets.'})}]:[];}
+ private replanOwnerReplyOrder(claim:Parameters<RequestService['completeReplan']>[0]){
+  // Reply and message IDs are separate in the existing schema. Resolve only a
+  // unique message inside this reply transaction's recorded time boundaries.
+  const matches=this.rows("SELECT DISTINCT m.id,m.rowid AS sequence FROM request_replan_jobs j JOIN request_owner_replies r ON r.id=j.reply_id JOIN input_requests i ON i.id=r.request_id JOIN events e ON e.type='input.owner_replied' AND e.aggregate_id=r.request_id AND e.aggregate_revision=r.request_revision+1 JOIN task_messages m ON m.task_id=i.task_id AND m.role='owner' AND m.delivery_state IS NULL AND m.content=r.response AND m.created_at>=r.created_at AND m.created_at<=e.created_at WHERE j.id=? AND r.request_id=? AND i.task_id=? AND r.response=?",claim.id,claim.requestId,claim.taskId,claim.response);
+  return matches.length===1?{status:'known',messageId:String(matches[0].id),sequence:Number(matches[0].sequence)}:{status:'unknown',messageId:null,sequence:null,reason:'The current response could not be uniquely matched to its owner-message sequence. Do not guess its order relative to other owner instructions.'};
+ }
+ private incorporateOwnerUpdates(taskId:string,updates:{id:string;content:string}[],callId:string){
+  if(!this.sameOwnerUpdates(taskId,updates))liveFail('invalid_command','A new owner update needs a fresh model turn.');
+  const ids:string[]=[];
+  for(const update of updates){const row=this.row("SELECT delivery_state FROM task_messages WHERE id=? AND task_id=?",update.id,taskId);if(row?.delivery_state!=='pending')continue;this.write("UPDATE task_messages SET delivery_state='incorporated',incorporated_at=? WHERE id=? AND delivery_state='pending'",this.now(),update.id);ids.push(update.id);}
+  if(ids.length)this.event('live.owner_updates_incorporated',taskId,{messageIds:ids,callId});
+ }
+ private async modelTurn(taskId:string,runId:string|null,input:ModelMessage[],tools:FunctionTool[],signal:AbortSignal,guard:()=>void,mode:PromptMode='execute'):Promise<ModelTurn&{localCallId:string}>{
+  guard();const s=this.display(this.config(taskId));this.checkBudget(s);const prompt=buildAgentPrompt(mode,tools,this.c.fleets.labOrigin(taskId)?'fleet_lab':this.c.fleets.isFleetTask(taskId)?'fleet':this.c.securityReviews.isReviewTask(taskId)?'security_review':undefined);const adapter=this.model(s.model);const prepared=adapter.prepare({instructions:prompt.instructions,input:fitModelInput(input,prompt.instructions,tools,adapter.limits?.requestInputBytes),tools,maxOutputTokens:Math.min(DEFAULT_MAX_OUTPUT_TOKENS,adapter.limits?.maxOutputTokens||DEFAULT_MAX_OUTPUT_TOKENS,Math.floor(s.limits.maxTokens*0.75))});let callId:string|null=null;
+  try{const quote=await adapter.quote(prepared,{signal});guard();if(signal.aborted)liveFail('cancelled','The task stopped.');this.txn(()=>{guard();const latest=this.display(this.config(taskId));this.checkBudget(latest);this.c.fleets.assertBudget(taskId,quote);if(Math.ceil((latest.costUsd+latest.reservedUsd)*1e6)+quote.maxCostMicrousd>Math.floor(latest.limits.maxCostUsd*1e6))liveFail('spend_limit','The next request would exceed the task budget.');if(latest.inputTokens+latest.outputTokens+Number(this.config(taskId).reserved_input_tokens)+Number(this.config(taskId).reserved_output_tokens)+quote.inputTokens+quote.outputTokens>latest.limits.maxTokens)liveFail('token_limit','The next request would exceed the task token limit.');callId=randomUUID();this.write("INSERT INTO live_model_calls(id,task_id,run_id,state,reserved_microusd,quoted_input_tokens,quoted_output_tokens,request_hash,owner_pid,owner_instance,created_at) VALUES (?,?,?,'reserved',?,?,?,?,?,?,?)",callId,taskId,runId,quote.maxCostMicrousd,quote.inputTokens,quote.outputTokens,prepared.requestHash,process.pid,this.c.instanceId,this.now());this.write('UPDATE live_task_config SET calls=calls+1,reserved_microusd=reserved_microusd+?,reserved_input_tokens=reserved_input_tokens+?,reserved_output_tokens=reserved_output_tokens+?,updated_at=? WHERE task_id=?',quote.maxCostMicrousd,quote.inputTokens,quote.outputTokens,this.now(),taskId);this.event('live.model_started',taskId,{model:s.model,callId,promptVersion:prompt.version,promptMode:prompt.mode,promptSections:prompt.sections,promptSha256:prompt.sha256});});this.changed();
+   try{const turn=await adapter.complete(prepared,{signal});this.settle(callId!,taskId,turn.usage,turn.costMicrousd);return{...turn,localCallId:callId!};}
+   catch(error){if(error instanceof ModelAdapterError&&error.usage&&error.costMicrousd!==null)this.settle(callId!,taskId,error.usage,error.costMicrousd);else this.write("UPDATE live_model_calls SET state='uncertain',finished_at=? WHERE id=?",this.now(),callId);throw error;}
+  }finally{adapter.discard(prepared);}
+ }
+ private settle(callId:string,taskId:string,usage:{inputTokens:number;outputTokens:number},cost:number){this.txn(()=>{const row=this.row('SELECT * FROM live_model_calls WHERE id=?',callId)!;if(row.state!=='reserved')return;this.write("UPDATE live_model_calls SET state='completed',input_tokens=?,output_tokens=?,cost_microusd=?,finished_at=? WHERE id=?",usage.inputTokens,usage.outputTokens,cost,this.now(),callId);this.write('UPDATE live_task_config SET input_tokens=input_tokens+?,output_tokens=output_tokens+?,cost_microusd=cost_microusd+?,reserved_microusd=reserved_microusd-?,reserved_input_tokens=reserved_input_tokens-?,reserved_output_tokens=reserved_output_tokens-?,updated_at=? WHERE task_id=?',usage.inputTokens,usage.outputTokens,cost,row.reserved_microusd,row.quoted_input_tokens,row.quoted_output_tokens,this.now(),taskId);this.event('live.model_usage',taskId,{callId,inputTokens:usage.inputTokens,outputTokens:usage.outputTokens,costUsd:cost/1e6});});}
+ private context(claim:RunClaim):ModelMessage[]{
+  const taskId=claim.taskId,task=this.task(taskId),agent=this.row('SELECT * FROM agents WHERE id=?',task.agent_id)!;
+  const config=this.display(this.config(taskId)),fleet=this.c.fleets.context(taskId),review=this.c.securityReviews.context(taskId),scoped=!!fleet||!!review;
+  const ids=this.rows('SELECT version_id FROM run_artifact_bindings WHERE run_id=?',claim.runId).map(r=>String(r.version_id));
+  const scopedInputs=this.c.fleets.allowedInputVersionIds(taskId)||this.c.securityReviews.allowedInputVersionIds(taskId);
+  const inputs=ids.filter(id=>!scopedInputs||scopedInputs.includes(id)).map(id=>this.c.artifacts.getForAgent(String(task.agent_id),id)).map(({id,displayName,format,bytes})=>({versionId:id,displayName,format,bytes,...((!scoped||!!this.c.fleets.labOrigin(taskId))&&config.policy.mode==='workspace'?{containerPath:this.c.artifacts.codeInputManifest(taskId,[id])[0].containerPath}:{})}));
+  const requests=this.options.requests.list(taskId);
+  const history=this.rows('SELECT kind,content FROM (SELECT * FROM live_history WHERE task_id=? ORDER BY id DESC LIMIT 8) ORDER BY id',taskId).map(r=>JSON.parse(String(r.content))).map(item=>item?.truncated?{truncated:true,refreshRequired:true}:[...COLLABORATION_TOOLS,...FLEET_TOOLS].some(t=>t.name===item?.tool)?{tool:item.tool,refreshRequired:true}:item);
+  const replyRows=this.rows("SELECT rowid AS sequence,id,content FROM task_messages WHERE task_id=? AND role='owner' AND delivery_state IS NULL ORDER BY rowid DESC LIMIT 4",taskId).reverse();
+  const replies=replyRows.map(r=>r.content),ownerReplyOrder=replyRows.map(r=>({messageId:String(r.id),sequence:Number(r.sequence)}));
+  const producedOutputs=this.rows("SELECT v.id,a.display_name,v.format FROM task_artifacts b JOIN artifact_versions v ON v.id=b.version_id JOIN artifacts a ON a.id=v.artifact_id WHERE b.task_id=? AND b.role='output' AND a.producer_task_id=? ORDER BY v.created_at DESC LIMIT 16",taskId,taskId).map(r=>({outputVersionId:r.id,name:r.display_name,format:r.format}));
+  const evidence=this.rows("SELECT id,tool_name FROM live_tool_receipts WHERE task_id=? AND state='succeeded' AND tool_name IN ('gmail_unread','gmail_search','gmail_thread','browser_open','browser_navigate','browser_observe','browser_tab_open','browser_tab_observe','read_file','extract_file','code_execute','lab_open','lab_observe','lab_action','lab_command') ORDER BY created_at DESC LIMIT 16",taskId).map(r=>({evidenceId:r.id,tool:r.tool_name}));
+  const collaboration=scoped?{policies:[],board:[],inbox:[],publications:[],dependencies:[],sharedArtifacts:[],limits:{board:0,inbox:0,publications:0,artifacts:0}}:this.c.collaboration.context(claim);
+  const context={fleet,securityReview:review,browserActions:scoped?null:this.c.browserActions.context(taskId),project:scoped?null:this.c.projects.context(claim.agentId),workflowInputs:fleet?null:this.c.workflows.inputContext(taskId),outputRequirements:this.outputRequirements(taskId),currentTime:new Date(this.now()).toISOString(),collaboration,producedOutputs,evidence,ownerTask:{objective:task.objective,completionCriteria:task.completion_criteria,instructions:agent.instructions},ownerReplies:replies,ownerReplyOrder,policy:config.policy,inputs,requests,savedObservations:history,usage:config};
+  return[{role:'user',content:serializeAgentContext(context)}];
+ }
+ private outputRequirements(taskId:string){
+  if(this.row("SELECT 1 FROM input_requests r JOIN request_details d ON d.request_id=r.id WHERE r.task_id=? AND d.kind='reduced_scope' AND r.state='fulfilled'",taskId))return null;
+  const output=this.c.workflows.requirementsForTask(taskId)?.output;
+  return output?{...output,instruction:'Use actual Markdown headings for the required sections. Structure checks do not verify factual correctness; cite exact recorded evidence and disclose missing coverage.'}:null;
+ }
+ private toolset(policy:LivePolicy,taskId:string){const fleetAllowed=this.c.fleets.allowedToolNames(taskId),allowed=fleetAllowed||this.c.securityReviews.allowedToolNames(taskId);return [...toolsForPolicy(policy),...(fleetAllowed?FLEET_TOOLS:[]),...(this.c.fleets.labOrigin(taskId)?LAB_TOOLS:[])].filter(tool=>!allowed||allowed.includes(tool.name));}
+ private async dispatch(claim:RunClaim,name:string,args:Record<string,unknown>,receipt:string,signal:AbortSignal,updates:{id:string;content:string}[],projectRevision:string):Promise<unknown>{this.c.authorizeRun(claim);this.c.securityReviews.assertToolAllowed(claim.taskId,name,args);this.c.fleets.assertToolAllowed(claim.taskId,name,args);const config=this.display(this.config(claim.taskId));if(!this.toolset(config.policy,claim.taskId).some(t=>t.name===name))liveFail('permission_denied','This tool is not allowed for the owner policy.');const checkRun=()=>{if(signal.aborted)liveFail('cancelled','The task stopped.');this.c.authorizeRun(claim);};const check=()=>{checkRun();if(!this.sameOwnerUpdates(claim.taskId,updates)||this.projectRevision(claim.agentId)!==projectRevision)liveFail('owner_update_pending','A new owner update or project brief stopped the next part of this step. Read it before deciding what to do next. Earlier completed actions and saved outputs are not undone.');};check();
+  if(name.startsWith('fleet_'))return this.c.fleets.dispatch(claim,name,args,receipt,check);
+  if(name.startsWith('lab_')){
+   const origin=this.c.fleets.labOrigin(claim.taskId);if(!origin||!this.c.localLab?.status().ready)liveFail('permission_denied','Start the app-owned training website before using lab tools.');
+   if(name==='lab_close'){record(args,[]);await this.c.browser.stopForTask(claim.taskId);check();return{closed:true,sourceEvidence:false};}
+   if(name==='lab_command'){record(args,['argvJson']);const argvJson=string(args.argvJson,12000);try{parseLabCommand(argvJson);}catch(error){return liveFail('invalid_command',error instanceof Error?error.message:'Use a supported local HTTP check.');}const result=await this.c.localLab!.command(claim.agentId,argvJson,signal);check();return result;}
+   record(args,name==='lab_open'?['url']:name==='lab_action'?['actionJson']:[]);
+   const state=await this.c.browser.agentOpen(claim,check);check();let method='page.observe',params:Record<string,unknown>=state.activeTabId?{tab:state.activeTabId}:{};
+   if(name==='lab_open'){try{params={...params,url:labInteractionURL(string(args.url,4096))};}catch{return liveFail('permission_denied','Only the fixed local training website is available.');}method='page.navigate';}
+   if(name==='lab_action'){
+    let action:Record<string,unknown>;try{action=JSON.parse(string(args.actionJson,12000));}catch{return liveFail('invalid_command','Use a valid lab action JSON object.');}
+    if(!action||typeof action!=='object'||Array.isArray(action)||Object.keys(action).some(k=>!['kind','tabId','revision','ref','value','x','y'].includes(k))||!['click','fill','select','scroll'].includes(String(action.kind)))liveFail('invalid_command','Use one supported lab page action.');
+    const tab=state.tabs.find(t=>t.id===action.tabId);if(!tab||state.activeTabId!==tab.id||tab.revision!==action.revision)liveFail('invalid_command','Refresh the lab page before using its controls.');
+    params={tab:tab!.id,revision:number(action.revision,1,Number.MAX_SAFE_INTEGER)};method='page.'+action.kind;
+    if(action.kind==='scroll'){params.x=number(action.x||0,-4096,4096);params.y=number(action.y||0,-4096,4096);}
+    else{params.ref=identity(action.ref);if(!state.targets.some(t=>t.ref===params.ref))liveFail('invalid_command','Use an exact current page control.');if(action.kind!=='click')params.value=string(action.value,8192);}
+   }
+   let raw:unknown;try{raw=await this.c.browser.agentAction(claim,state.sessionId,state.generation,method,params,check);}catch(error){if(error instanceof BrowserError&&['stale_observation','fresh_observation_required','invalid_target'].includes(error.code))return liveFail('invalid_command','The lab page changed; call lab_observe for fresh controls before choosing another action.');throw error;}check();return cleanBrowserObservation(raw,config.policy,origin!);
+  }
+
+  if(name==='evidence_list'){record(args,['cursor']);return new EvidenceArchive(this.options.persistence).list(claim.taskId,args.cursor);}
+  if(name==='evidence_read'){record(args,['evidenceId']);return new EvidenceArchive(this.options.persistence).read(claim.taskId,args.evidenceId);}
+  if(name==='collaboration_context'){record(args,[]);return this.c.collaboration.context(claim);}
+  if(name==='discover_shared'){record(args,[]);return this.c.collaboration.discover(claim);}
+  if(name==='consume_shared'){record(args,['versionId']);return this.c.collaboration.consume(claim,{versionId:identity(args.versionId)});}
+  if(name==='send_agent_message'){record(args,['recipientAgentId','kind','taskIds','versionIds','idempotencyKey']);return this.c.collaboration.send(claim,args as never);}
+  if(name==='acknowledge_messages'){record(args,['messageIds','publicationIds']);this.c.collaboration.ack(claim,args.messageIds as string[],args.publicationIds as string[]);return{acknowledged:true};}
+  if(name==='wait_for_task'){record(args,['dependsOnTaskId','requiredVersionId']);const dependsOnTaskId=identity(args.dependsOnTaskId),requiredVersionId=args.requiredVersionId===null?undefined:identity(args.requiredVersionId);return this.c.collaboration.waitFor(claim,{dependsOnTaskId,requiredVersionId},result=>{this.write("UPDATE live_tool_receipts SET state='succeeded',result_json=?,finished_at=? WHERE id=?",bounded(result),this.now(),receipt);this.write('UPDATE live_task_config SET checkpoint=? WHERE task_id=?',JSON.stringify({waitingForTaskId:dependsOnTaskId,requiredVersionId,receipt}),claim.taskId);this.history(claim.taskId,'observation',{tool:name,evidenceId:receipt,result});});}
+  if(name==='browser_request_action'){record(args,['actionJson','reason','expectedEffect','idempotencyKey']);let action:unknown;try{action=JSON.parse(string(args.actionJson,12000));}catch{return liveFail('invalid_command','Use a valid exact browser action.');}
+   const proposal=await this.c.browserActions.request(claim,{action,reason:args.reason,expectedEffect:args.expectedEffect,idempotencyKey:args.idempotencyKey},{beforeDispatch:check,onPending:proposal=>{const result={waiting:true,actionId:proposal.id,state:'pending',message:'The owner must review the exact browser action.'};this.write("UPDATE live_tool_receipts SET state='succeeded',result_json=?,finished_at=? WHERE id=?",bounded(result),this.now(),receipt);this.write('UPDATE live_task_config SET checkpoint=? WHERE task_id=?',JSON.stringify({browserActionId:proposal.id,receipt}),claim.taskId);this.history(claim.taskId,'observation',{tool:name,evidenceId:receipt,result});this.write("UPDATE tasks SET state='waiting',waiting_reason='browser_action',revision=revision+1,updated_at=? WHERE id=?",this.now(),claim.taskId);this.write("UPDATE runs SET state='waiting',finished_at=?,lease_until=? WHERE id=?",this.now(),this.now(),claim.runId);}});return{waiting:proposal.state==='pending',actionId:proposal.id,state:proposal.state,message:'The exact action is saved for owner review; inspect browserActions context before applying.'};
+  }
+  if(name==='browser_apply_action'){record(args,['actionId']);const result=await this.c.browserActions.apply(claim,identity(args.actionId),check);if(result.action.state==='outcome_unknown')this.pauseClaim(claim,'The website action may have happened. Review it in Browser actions before continuing; it will not be sent again.');return{action:{id:result.action.id,state:result.action.state,revision:result.action.revision,kind:result.action.action.kind,error:result.action.error,resolution:result.action.resolution?{...result.action.resolution,note:result.action.resolution.note.slice(0,400)}:null},replayed:result.replayed,...(result.observation?{observation:this.cleanObservation(result.observation,config.policy)}:{})};}
+  if(['gmail_search','gmail_thread','gmail_attachment'].includes(name)){
+   const account=config.policy.mailAccount||'';if(config.policy.mailDetail!=='threads_and_attachments'||!this.c.gmail)liveFail('permission_denied','Enable detailed read-only Gmail review on a new task before using these tools.');this.c.projects.assertGmailAccount(claim.taskId,account);
+   if(name==='gmail_search'){record(args,['query','cursor']);const result=await this.c.gmail!.searchReadonly(account,{query:string(args.query,500),...(args.cursor===null?{}:{cursor:identity(args.cursor)})},{signal});check();this.c.projects.assertGmailAccount(claim.taskId,account);return result;}
+   if(name==='gmail_thread'){record(args,['threadId']);const result=await this.c.gmail!.readThreadReadonly(account,{threadId:identity(args.threadId)},{signal});check();this.c.projects.assertGmailAccount(claim.taskId,account);return result;}
+   record(args,['messageId','attachmentId']);const result=await this.c.gmail!.readAttachmentReadonly(account,{messageId:identity(args.messageId),attachmentId:string(args.attachmentId,1024)},{signal});try{check();this.c.projects.assertGmailAccount(claim.taskId,account);const imported=await importSelectedBytes(this.c.artifacts,{agentId:claim.agentId,taskId:claim.taskId,...result},()=>{check();this.c.projects.assertGmailAccount(claim.taskId,account);});check();this.c.projects.assertGmailAccount(claim.taskId,account);this.txn(()=>{check();for(const versionId of imported.versionIds){if(this.row("SELECT 1 FROM task_artifacts WHERE task_id=? AND version_id=? AND role='input'",claim.taskId,versionId))this.write('INSERT OR IGNORE INTO run_artifact_bindings(run_id,version_id) VALUES (?,?)',claim.runId,versionId);}});return{versionIds:imported.versionIds,source:result.source};}finally{result.bytes.fill(0);}
+  }
+  if(name==='gmail_unread'){record(args,[]);return this.gmail(claim,config.policy,check,signal);}
+  if(['browser_tabs','browser_tab_open','browser_tab_observe','browser_tab_close'].includes(name)){
+   record(args,name==='browser_tabs'?[]:name==='browser_tab_open'?['url']:['tabId']);const url=name==='browser_tab_open'?this.allowedURL(string(args.url),config.policy):null,tabId=['browser_tab_observe','browser_tab_close'].includes(name)?identity(args.tabId):null;
+   const state=await this.recoverRead(claim,check,()=>this.c.browser.agentOpen(claim,check));check();
+   if(name==='browser_tabs')return cleanBrowserTabs(await this.recoverRead(claim,check,()=>this.c.browser.agentAction(claim,state.sessionId,state.generation,'tabs.list',{},check)),config.policy);
+   if(tabId&&!state.tabs.some(t=>t.id===tabId))liveFail('permission_denied','This tab does not belong to the current task browser.');
+   if(name==='browser_tab_observe'){
+    const inventory=cleanBrowserTabs(state.tabs,config.policy),tab=state.tabs.find(t=>t.id===tabId)!;
+    if(!inventory.tabs.find(t=>t.tabId===tabId)?.readable)return this.cleanObservation({url:tab.url},config.policy);
+    return this.cleanObservation(await this.recoverRead(claim,check,()=>this.c.browser.agentAction(claim,state.sessionId,state.generation,'page.observe',{tab:tabId},check)),config.policy);
+   }
+   if(name==='browser_tab_close'){const result=await this.c.browser.agentAction(claim,state.sessionId,state.generation,'tabs.close',{tab:tabId},check) as {tabs?:unknown};return{closedTabId:tabId,...cleanBrowserTabs(result.tabs,config.policy)};}
+   if(state.tabs.length>=6)liveFail('tab_limit','This private browser already has six tabs. Close an unneeded tab before opening another.');
+   return this.cleanObservation(await this.c.browser.agentAction(claim,state.sessionId,state.generation,'tabs.open',{url},check),config.policy);
+  }
+  if(name==='browser_downloads'){record(args,[]);const list=await this.c.browser.agentDownloads(claim,check),downloads=[...list];while(Buffer.byteLength(JSON.stringify(downloads))>12000)downloads.pop();return{downloads,returnedCount:downloads.length,truncated:downloads.length<list.length,sourceEvidence:false,note:'Managed download metadata only. Save an exact completed ID, then read its pinned file. Save listed files and refresh to reveal any omitted downloads.'};}
+  if(name==='browser_save_download'){record(args,['downloadId']);return this.c.browser.agentSaveDownload(claim,identity(args.downloadId),check);}
+  if(name==='browser_open'||name==='browser_navigate'||name==='browser_observe'){record(args,name==='browser_observe'?[]:['url']);const url=name==='browser_observe'?null:this.allowedURL(string(args.url),config.policy);let state=await this.recoverRead(claim,check,()=>this.c.browser.agentOpen(claim,check));check();let observation=await this.recoverRead(claim,check,()=>this.c.browser.agentAction(claim,state.sessionId,state.generation,'page.observe',{},check));check();if(url)observation=await this.c.browser.agentAction(claim,state.sessionId,state.generation,'page.navigate',{tab:state.activeTabId,url},check);return this.cleanObservation(observation,config.policy);}
+  if(name==='publish_output'){record(args,['versionId']);const id=identity(args.versionId);this.allowedFile(claim,id);if(!this.hasGrant(claim.taskId,'artifact_publish',id))liveFail('permission_denied','Ask the owner to approve publication of this exact version first.');let fenceError:unknown;const result=await this.c.artifacts.publish({principal:{kind:'owner'},versionId:id,beforeCommit:()=>{try{check();if(!this.hasGrant(claim.taskId,'artifact_publish',id))liveFail('permission_denied','The publication grant changed.');}catch(error){fenceError=error;throw error;}}}).catch(error=>{throw fenceError??error;});checkRun();return result;}
+  if(name==='browser_upload'){record(args,['versionId','origin','ref','revision']);const versionId=identity(args.versionId),origin=string(args.origin,256),ref=identity(args.ref),revision=number(args.revision,1,Number.MAX_SAFE_INTEGER);this.allowedFile(claim,versionId);this.allowedURL(origin,config.policy);if(!this.hasGrant(claim.taskId,'browser_upload',versionId,origin))liveFail('permission_denied','This exact input and destination require owner approval.');return this.c.browser.agentUpload(claim,{versionId,destinationOrigin:origin,ref,revision},check);}
+  if(name==='extract_file'){record(args,['versionId','optionsJson']);const versionId=identity(args.versionId);this.allowedFile(claim,versionId);let options:Record<string,unknown>;try{options=record(JSON.parse(string(args.optionsJson,2048)),['pageStart','pageCount','sheet','startRow','rowCount','startColumn','columnCount']);}catch{return liveFail('invalid_command','Use bounded page or sheet options.');}const result=await this.c.documents.extractForAgent(claim,{...options,versionId},check);const encoded=JSON.stringify(result.data);if(Buffer.byteLength(encoded)>16000){const{data,...metadata}=result;return{...metadata,dataPreview:encoded.slice(0,10000),dataTruncated:true,coverage:'Partial extraction preview. Read the exact output version or request smaller page/cell ranges. No omitted content was verified.'};}return result;}
+  if(name==='read_file'){record(args,['versionId']);const versionId=identity(args.versionId);this.allowedFile(claim,versionId);const result=await this.c.artifacts.preview({principal:{kind:'agent',agentId:claim.agentId},versionId});check();if(result.version.visibility==='shared'){const {id,artifactId,version,displayName,visibility,bytes,sha256,mime,format,createdAt,status}=result.version;return{...result,version:{id,artifactId,version,displayName,visibility,bytes,sha256,mime,format,createdAt,status}};}return result;}
+  if(name==='code_execute'){record(args,['runtime','source','inputVersionIds','timeoutSeconds']);string(args.source,CODE_SOURCE_BYTES);const result=await this.c.code.executeForAgent(claim,args as never,check);if(this.task(claim.taskId).state==='running'){checkRun();this.txn(()=>{for(const id of result.outputVersionIds)this.write('INSERT OR IGNORE INTO run_artifact_bindings(run_id,version_id) VALUES (?,?)',claim.runId,id);});}return result;}
+  if(name==='user_request'){record(args,['requestJson']);let spec:unknown;try{spec=JSON.parse(string(args.requestJson,12000));}catch{liveFail('invalid_command','The input request must be valid JSON.');}const request=parseUserRequest(spec);if(request.kind==='browser_handoff'){const b=await this.c.browser.agentOpen(claim,check);check();await this.c.browser.agentRequestLogin(claim,b.sessionId,b.generation,check);return{waiting:true,kind:'browser_handoff'};}return this.options.requests.createForAgent(claim,request,{onCreate:created=>{this.write("UPDATE live_tool_receipts SET state='succeeded',result_json=?,finished_at=? WHERE id=?",bounded(created),this.now(),receipt);this.write('UPDATE live_task_config SET checkpoint=? WHERE task_id=?',JSON.stringify({waitingRequestId:created.id,revision:created.revision,receipt}),claim.taskId);this.history(claim.taskId,'observation',{tool:name,evidenceId:receipt,result:created});}});}
+  if(name==='save_report'){record(args,['name','content','evidenceIds']);const filename=string(args.name,120),content=string(args.content,REPORT_CONTENT_BYTES);if(!/^[A-Za-z0-9][A-Za-z0-9 _.-]*\.(md|txt)$/.test(filename)||filename.includes('..'))liveFail('invalid_command','Use a plain Markdown or text filename.');if(!Array.isArray(args.evidenceIds)||args.evidenceIds.length<1||args.evidenceIds.length>24)liveFail('missing_evidence','A report requires a successful observation or output.');for(const id of args.evidenceIds as unknown[]){const r=this.row("SELECT * FROM live_tool_receipts WHERE id=? AND task_id=? AND state='succeeded'",identity(id),claim.taskId);if(!r||!['gmail_unread','gmail_search','gmail_thread','browser_open','browser_navigate','browser_observe','browser_tab_open','browser_tab_observe','read_file','extract_file','code_execute','lab_open','lab_observe','lab_action','lab_command'].includes(String(r.tool_name)))liveFail('missing_evidence','The report evidence must belong to this task.');const result=JSON.parse(String(r!.result_json));if(result.waiting||result.accountVerified===false||result.loginOrRedirect===true||result.humanLoginRequired===true||result.nativeHumanControl===true)liveFail('missing_evidence','A login, redirect or owner-control request is not factual source evidence.');}
+   const release=await this.c.artifacts.reserveExternal('agent-report',Buffer.byteLength(content)*3);try{check();const path=join(release.directory,filename);await writeFile(path,content,{mode:0o600,flag:'wx'});check();const imported=await this.c.artifacts.importFiles({principal:{kind:'owner'},target:{scope:'private',agentId:claim.agentId,taskId:claim.taskId},paths:[path]});check();const versionId=imported.versionIds[0];this.txn(()=>{check();this.write("UPDATE task_artifacts SET role='output' WHERE task_id=? AND version_id=?",claim.taskId,versionId);this.write('INSERT OR IGNORE INTO run_artifact_bindings(run_id,version_id) VALUES (?,?)',claim.runId,versionId);this.write('UPDATE live_task_config SET result_version_id=? WHERE task_id=?',versionId,claim.taskId);this.write('UPDATE artifact_versions SET provenance=? WHERE id=?',JSON.stringify({agentReport:{taskId:claim.taskId,evidenceIds:args.evidenceIds}}),versionId);});const preview=await this.c.artifacts.preview({principal:{kind:'agent',agentId:claim.agentId},versionId});return{versionId,sha256:preview.version.sha256,bytes:preview.version.bytes,verified:true};}finally{await release();}}
+  if(name==='finish'){record(args,['outputVersionId','summary']);const versionId=identity(args.outputVersionId),summary=string(args.summary,8000);const output=this.row("SELECT 1 FROM task_artifacts b JOIN artifact_versions v ON v.id=b.version_id JOIN artifacts a ON a.id=v.artifact_id WHERE b.task_id=? AND b.version_id=? AND b.role='output' AND a.producer_task_id=? AND a.owner_agent_id=?",claim.taskId,versionId,claim.taskId,claim.agentId);if(!output)liveFail('output_required','Completion requires a readable output produced by this task.');await this.c.artifacts.preview({principal:{kind:'agent',agentId:claim.agentId},versionId});check();const quality=await this.c.results.checkQuality(claim.taskId,versionId);check();if(!quality.canFinish)liveFail('output_required','Fix the saved output before finishing: '+quality.checks.filter(v=>v.status==='fail').map(v=>v.message).join(' '));this.txn(()=>{check();this.c.fleets.assertFinish(claim.taskId,versionId);if(this.row("SELECT 1 FROM input_requests WHERE task_id=? AND blocking=1 AND state NOT IN ('fulfilled','cancelled','superseded')",claim.taskId))liveFail('output_required','Resolve required inputs before completion.');this.write("UPDATE tasks SET state='succeeded',waiting_reason=NULL,generation=generation+1,revision=revision+1,updated_at=? WHERE id=?",this.now(),claim.taskId);this.write("UPDATE runs SET state='succeeded',finished_at=?,lease_until=? WHERE id=?",this.now(),this.now(),claim.runId);this.write('UPDATE live_task_config SET enabled=0,result_version_id=?,last_error=NULL WHERE task_id=?',versionId,claim.taskId);this.message(claim.taskId,summary);this.event('live.completed',claim.taskId,{versionId,receipt});});return{completed:true,versionId,quality};}
+  return liveFail('permission_denied','Unknown model tool.');
+ }
+ public grantCapability(taskId:string,capability:CapabilitySpec){
+  this.c.securityReviews.assertToolAllowed(taskId,'grant_capability',{});this.c.fleets.assertToolAllowed(taskId,'grant_capability',{});
+  const s=this.display(this.config(taskId)),task=this.task(taskId);if(s.policy.mode!=='workspace'||s.policy.mailAccount)liveFail('permission_denied','This task is configured for read-only browsing. Create a workspace task for file transfers.');
+  if(capability.name==='browser_upload')this.allowedURL(String(capability.origin),s.policy);
+  for(const versionId of capability.versionIds){this.c.artifacts.getForAgent(String(task.agent_id),versionId);if(!this.row('SELECT 1 FROM task_artifacts WHERE task_id=? AND version_id=?',taskId,versionId))liveFail('permission_denied','Only exact files attached to this task can be granted.');}
+ }
+ private hasGrant(taskId:string,name:CapabilitySpec['name'],versionId:string,origin?:string){return this.rows('SELECT capability_json FROM request_capability_grants WHERE task_id=? AND revoked_at IS NULL',taskId).some(row=>{const grant=JSON.parse(String(row.capability_json)) as CapabilitySpec;return grant.name===name&&grant.versionIds.includes(versionId)&&(name!=='browser_upload'||grant.origin===origin);});}
+ private allowedFile(claim:RunClaim,id:string){this.c.securityReviews.assertToolAllowed(claim.taskId,'read_file',{versionId:id});this.c.fleets.assertToolAllowed(claim.taskId,'read_file',{versionId:id});if(!this.row('SELECT 1 FROM run_artifact_bindings WHERE run_id=? AND version_id=?',claim.runId,id))liveFail('permission_denied','The file was not pinned to this run.');this.c.artifacts.getForAgent(claim.agentId,id);}
+ private allowedURL(raw:string,policy:LivePolicy){let url:URL;try{url=new URL(raw);}catch{return liveFail('invalid_command','Use an HTTPS URL.');}if(url!.protocol!=='https:'||url!.username||url!.password||!policy.allowedOrigins.includes(url!.origin))liveFail('permission_denied','This website is outside the origins explicitly approved by the owner.');return url!.href;}
+ private cleanObservation(raw:unknown,policy:LivePolicy){return cleanBrowserObservation(raw,policy);}
+ private diagnostic(taskId:string,note:Omit<TroubleshootingNote,'at'>){this.history(taskId,'note',{troubleshooting:{...note,at:this.now()}});this.changed();}
+ private googleBlockedMessage(){return 'Google rejected sign-in from this browser. Repeating the login cannot repair that restriction. Connect Gmail through the supported read-only authorization flow; the task will resume after the exact account is verified.';}
+ /** Only retry a fresh read/open, never a navigation, upload, click or uncertain action. */
+ private async recoverRead<T>(claim:RunClaim,check:()=>void,read:()=>Promise<T>):Promise<T>{return this.c.taskRecovery.runRead({taskId:claim.taskId,runId:claim.runId,operation:'browser_read',check,signal:this.active.get(claim.taskId)?.signal,read});}
+
+ private async connectionRequired(claim:RunClaim,account:string,reason:string){
+  const requestId=this.gmailRequests.create(claim,account,reason,id=>this.write('UPDATE live_task_config SET checkpoint=? WHERE task_id=?',JSON.stringify({waitingRequestId:id,kind:'gmail_connection'}),claim.taskId));
+  await this.c.browser.stopForTask(claim.taskId);return{waiting:true,accountVerified:false,kind:'gmail_connection',requestId,reason};
+ }
+ private async gmail(claim:RunClaim,policy:LivePolicy,check:()=>void,signal:AbortSignal):Promise<unknown>{
+  if(!policy.mailAccount)liveFail('permission_denied','No owner-approved mail account.');const account=policy.mailAccount!.toLowerCase();
+  if(this.c.gmail){const connection=await this.c.gmail.status();check();if(connection.connectedAccount===account){
+   try{this.c.projects.assertGmailAccount(claim.taskId,account);const result=await this.c.gmail.readUnread(account,{signal});check();this.c.projects.assertGmailAccount(claim.taskId,account);return result;}catch(error){check();if(error instanceof GmailError&&['connection_missing','connection_expired','scope_denied','account_mismatch'].includes(error.code)){this.diagnostic(claim.taskId,{code:error.code,message:error.message,action:'Reconnect the exact requested account with read-only permission.',attempts:1,recovered:false});return this.connectionRequired(claim,account,error.message);}throw error;}
+  }}
+  const b=await this.recoverRead(claim,check,()=>this.c.browser.agentOpen(claim,check));check();
+  let obs=await this.recoverRead(claim,check,()=>this.c.browser.agentAction(claim,b.sessionId,b.generation,'page.observe',{},check)) as Record<string,unknown>;check();
+  if(googleBrowserRejected(obs.url)){this.diagnostic(claim.taskId,{code:'google_browser_rejected',message:'Google rejected this browser sign-in.',action:'Switch to supported Gmail read-only authorization.',attempts:1,recovered:false});return this.connectionRequired(claim,account,this.googleBlockedMessage());}
+  const url=`https://mail.google.com/mail/?authuser=${encodeURIComponent(account)}#search/is%3Aunread`;
+  try{obs=await this.c.browser.agentAction(claim,b.sessionId,b.generation,'page.navigate',{tab:b.activeTabId,url},check) as Record<string,unknown>;}
+  catch(error){if(!recoverableReadError(error))throw error;check();obs=await this.recoverRead(claim,check,()=>this.c.browser.agentAction(claim,b.sessionId,b.generation,'page.observe',{},check)) as Record<string,unknown>;}
+  check();if(googleBrowserRejected(obs.url)){this.diagnostic(claim.taskId,{code:'google_browser_rejected',message:'Google rejected this browser sign-in.',action:'Switch to supported Gmail read-only authorization.',attempts:1,recovered:false});return this.connectionRequired(claim,account,this.googleBlockedMessage());}
+  let origin='';try{origin=new URL(String(obs.url)).origin;}catch{}
+  if(origin!=='https://mail.google.com'){await this.c.browser.agentRequestLogin(claim,b.sessionId,b.generation,check);return{waiting:true,accountVerified:false,reason:'Sign in to the requested Gmail account, then return browser control.'};}
+  this.c.projects.assertGmailAccount(claim.taskId,account);const result=await this.recoverRead(claim,check,()=>this.c.browser.agentAction(claim,b.sessionId,b.generation,'page.gmailUnread',{tab:b.activeTabId,account},check)) as Record<string,unknown>;check();
+  if(result.accountVerified!==true||result.listingVerified!==true){this.diagnostic(claim.taskId,{code:'gmail_listing_unverified',message:'The requested account or unread listing could not be verified.',action:'Use the read-only Gmail connection to verify the account and retrieve unread listings.',attempts:1,recovered:false});return this.connectionRequired(claim,account,'The browser could not verify the requested account and unread listing. Connect Gmail read-only to continue.');}return result;
+ }
+ public browserChanged(){if(this.stopping)return;for(const diagnosis of this.c.browser.diagnostics()){
+  const config=this.row('SELECT policy_json FROM live_task_config WHERE task_id=?',diagnosis.taskId);if(!config)continue;const policy=JSON.parse(String(config.policy_json)) as LivePolicy;if(!policy.mailAccount)continue;
+  this.gmailRequests.diagnoseSavedHandoff(diagnosis.taskId,policy.mailAccount.toLowerCase(),this.googleBlockedMessage(),()=>this.diagnostic(diagnosis.taskId,{code:'google_browser_rejected',message:'Google rejected this browser sign-in.',action:'Use supported Gmail read-only authorization; do not retry the blocked login.',attempts:1,recovered:false}));
+ }}
+ public async gmailChanged(){
+  if(this.reconcilingGmail)return this.reconcilingGmail;
+  const work=(async()=>{await this.ready;if(this.stopping||!this.c.gmail)return;const state=await this.c.gmail.status();if(!state.connectedAccount||state.connecting||state.error||this.stopping)return;
+   for(const taskId of this.gmailRequests.pending(state.connectedAccount)){const policy=this.display(this.config(taskId)).policy;if(policy.mailAccount?.toLowerCase()!==state.connectedAccount)continue;
+    await this.c.browser.stopForTask(taskId);if(this.stopping)return;
+    if(this.gmailRequests.fulfill(taskId,state.connectedAccount))this.diagnostic(taskId,{code:'gmail_connected',message:'The exact requested Gmail account is connected.',action:'Resume once from saved progress using read-only access.',attempts:1,recovered:true});
+   }this.changed();this.tick();})();this.reconcilingGmail=work;try{await work;}finally{if(this.reconcilingGmail===work)this.reconcilingGmail=null;}
+ }
+ private async replan(claim:Parameters<RequestService['completeReplan']>[0]){
+  const abort=new AbortController();this.active.set(claim.taskId,abort);const start=this.now(),state=this.display(this.config(claim.taskId));
+  const deadline=setTimeout(()=>{abort.abort();try{this.txn(()=>{this.options.requests.authorizeReplan(claim);this.pauseSaved(claim.taskId,'The task reached its active-time limit while replanning.');});}catch{/* A superseded replan cannot pause newer work. */}},Math.max(1,state.limits.maxActiveSeconds*1000-Number(this.config(claim.taskId).active_ms)));deadline.unref();
+  let trace:Awaited<ReturnType<typeof this.c.artifacts.reserveExternal>>|undefined;
+  const guard=()=>{if(abort.signal.aborted||this.stopping||!this.config(claim.taskId).enabled)liveFail('cancelled','Replanning is stopped.');this.options.requests.authorizeReplan(claim);};
+  const heartbeat=setInterval(()=>{try{guard();this.options.requests.renewReplan(claim);}catch{abort.abort();}},1000);heartbeat.unref();
+    try{this.c.securityReviews.assertToolAllowed(claim.taskId,'replan_result',{});this.c.fleets.assertToolAllowed(claim.taskId,'replan_result',{});trace=await this.c.artifacts.reserveExternal('live-step-trace',256*1024);
+   while(true){guard();const updates=this.ownerUpdates(claim.taskId);const turn=await this.modelTurn(claim.taskId,null,[{role:'user',content:serializeRequiredContext({securityReview:this.c.securityReviews.context(claim.taskId),ownerTask:{objective:this.task(claim.taskId).objective,completionCriteria:this.task(claim.taskId).completion_criteria},policy:state.policy,usage:state,request:claim.request,ownerReply:claim.response,currentOwnerReplyOrder:this.replanOwnerReplyOrder(claim)})},...this.ownerUpdateContext(updates)],[REPLAN_TOOL],abort.signal,guard,'replan');guard();
+    if(!this.sameOwnerUpdates(claim.taskId,updates)){this.event('live.owner_update_replan',claim.taskId,{callId:turn.localCallId});continue;}
+    if(turn.toolCalls.length!==1||turn.toolCalls[0].name!=='replan_result')liveFail('invalid_command','The replan did not provide a structured proposal.');record(turn.toolCalls[0].arguments,['resultJson']);const result=JSON.parse(string(turn.toolCalls[0].arguments.resultJson,12000));this.options.requests.completeReplan(claim,result);this.txn(()=>this.incorporateOwnerUpdates(claim.taskId,updates,turn.localCallId));break;
+   }
+  }
+  catch{try{this.options.requests.completeReplan(claim,{kind:'keep_blocked',message:'The replan could not finish. Required files are still missing; reply again or provide them to continue.'});}catch{}}
+  finally{clearTimeout(deadline);clearInterval(heartbeat);this.options.requests.releaseReplan(claim);this.write('UPDATE live_task_config SET active_ms=active_ms+? WHERE task_id=?',Math.max(0,this.now()-start),claim.taskId);await trace?.();this.active.delete(claim.taskId);}
+ }
+ private pauseClaim(claim:RunClaim,error:string|null):boolean{return this.txn(()=>{
+  // An expired worker may stop its own generation, but never a replacement run.
+  const run=this.row('SELECT r.*,t.generation AS task_generation,t.state AS task_state,t.agent_id AS task_agent_id FROM runs r JOIN tasks t ON t.id=r.task_id WHERE r.id=?',claim.runId);
+  if(!run||run.task_id!==claim.taskId||run.agent_id!==claim.agentId||run.task_agent_id!==claim.agentId||run.worker_id!==claim.workerId||run.fencing_generation!==claim.generation||run.task_generation!==claim.generation||run.state!=='running'||run.task_state!=='running')return false;
+  this.pauseSaved(claim.taskId,error);return true;
+ });}
+ private pauseSaved(taskId:string,error:string|null){const task=this.task(taskId);if(terminal.has(String(task.state)))return;this.write("UPDATE tasks SET state='paused',generation=generation+1,revision=revision+1,updated_at=? WHERE id=?",this.now(),taskId);this.write("UPDATE runs SET state='paused',finished_at=?,lease_until=? WHERE task_id=? AND state='running'",this.now(),this.now(),taskId);this.write('UPDATE live_task_config SET enabled=0,last_error=?,updated_at=? WHERE task_id=?',error,this.now(),taskId);if(error)this.message(taskId,error);this.event('live.paused',taskId,{error});}
+ async suspend(){this.suspended=true;this.tickRequested=false;for(const abort of this.active.values())abort.abort();await this.work;await Promise.allSettled([...this.workers.values()].map(x=>x.promise));await this.reconcilingGmail;}
+ resumeScheduling(){this.suspended=false;}
+ async shutdown(){this.stopping=true;for(const abort of this.active.values())abort.abort();await this.work;await Promise.allSettled([...this.workers.values()].map(x=>x.promise));await this.reconcilingGmail;}
+ abandon(){this.stopping=true;for(const abort of this.active.values())abort.abort();}
+}

@@ -1,0 +1,3824 @@
+{
+  "date": "2026-09-30",
+  "scope": "Source prompt-resource inventory and deep review of runtime composition and task-relevant families; no model calls. Third-party provider base prompts and deployment overrides are not verified.",
+  "coverage": {
+    "browser-use-desktop": {
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "trackedFiles": 554,
+      "indexedTextSourceFiles": 408,
+      "inventoryEntries": 105
+    },
+    "skyvern": {
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "trackedFiles": 5773,
+      "indexedTextSourceFiles": 4993,
+      "inventoryEntries": 167
+    }
+  },
+  "categoryCounts": {
+    "developer contribution instructions": 6,
+    "development/reference skill copy": 10,
+    "runtime prompt composer": 4,
+    "runtime harness manual": 2,
+    "runtime domain skill": 69,
+    "runtime interaction skill": 19,
+    "tool usage/schema surface": 30,
+    "runtime inline prompt/composition": 8,
+    "external-client usage skill": 24,
+    "Jinja browser action/extraction": 52,
+    "Jinja verification": 13,
+    "Jinja workflow planner/copilot": 20,
+    "Jinja recovery/script generation": 9,
+    "runtime context instruction fragment": 1,
+    "runtime policy context and safety classifier": 1,
+    "runtime prompt configuration": 1,
+    "runtime conditional prompt variants": 1,
+    "runtime template loader": 1,
+    "runtime prompt input bounding": 1
+  },
+  "entries": [
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "AGENTS.md",
+      "category": "developer contribution instructions",
+      "lines": 33,
+      "sha256": "d02684c155029a8e18b04182d4bfa3c989786cc54b2b410e43a8481278d8c733",
+      "loadedBy": [],
+      "notes": "Repository development guidance; not assumed to be agent runtime instructions.",
+      "reviewDepth": "outline"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/domain-skills/browser-use.com/pricing.md",
+      "category": "development/reference skill copy",
+      "lines": 44,
+      "sha256": "e1388b21718e84048eb00eaab497578e757a498f7cb6a53dfde12309d71e475d",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/domain-skills/example.com/overview.md",
+      "category": "development/reference skill copy",
+      "lines": 21,
+      "sha256": "2f59bf91dbc21b45ce91c5af58e8bad49111b8b6d2549ab1133937b521757403",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/domain-skills/harness-test/self-edit.md",
+      "category": "development/reference skill copy",
+      "lines": 27,
+      "sha256": "d4617399f156fac44bd02c888d95342e7aa8acc6f920a9c673af6bf8625f8f82",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/domain-skills/linkedin/dm.md",
+      "category": "development/reference skill copy",
+      "lines": 17,
+      "sha256": "2a1abb444b4f1073cea3bc7a84e2b479388a269839f0b6cf0c90112750cc81b3",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/domain-skills/linkedin/invitation-manager.md",
+      "category": "development/reference skill copy",
+      "lines": 30,
+      "sha256": "36e075efc72707394646af9c46bdd07eae7e2df93e5ad5951590e906f0d6a04c",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/domain-skills/linkedin/invitations.md",
+      "category": "development/reference skill copy",
+      "lines": 14,
+      "sha256": "f7837def8b128562de65bc844ce694c668f0919116602bdcf3e42954a19d9c9a",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/domain-skills/linkedin/notifications.md",
+      "category": "development/reference skill copy",
+      "lines": 35,
+      "sha256": "40e73c1e515732af178040913368590a75b31d79e561e65d1fd287beeedabacc",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/interaction-skills/connection.md",
+      "category": "development/reference skill copy",
+      "lines": 19,
+      "sha256": "354f98f95c805e6c70fa207c56a42f5acdcc0929784702c0b1073d311166ca64",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/interaction-skills/dialogs.md",
+      "category": "development/reference skill copy",
+      "lines": 29,
+      "sha256": "ded0e9250fac62449a43a3a5e4b6e16410e3de01c97930aa22d92f57238140b4",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/interaction-skills/screenshots.md",
+      "category": "development/reference skill copy",
+      "lines": 25,
+      "sha256": "7b53e26d1ad0b489df4c034e1c9a03a043a073088fcbfec556bf7d33f1093ab0",
+      "loadedBy": [],
+      "notes": "Not the stock tree imported by harness.ts; do not assume this copy is active runtime.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/engines/browsercode/adapter.ts",
+      "category": "runtime prompt composer",
+      "lines": 300,
+      "sha256": "6eac7d6cda5066413ae1f7fd588b76174fd8e8d098c91b432c8b918bfaa2d75c",
+      "loadedBy": [
+        "app/src/main/hl/engines/runEngine.ts:221-235"
+      ],
+      "notes": "wrapPrompt composes target, harness/tool instructions, skill menu, renderer output contracts, attached paths, task.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/engines/claude-code/adapter.ts",
+      "category": "runtime prompt composer",
+      "lines": 289,
+      "sha256": "c3e580c153a716c7e17da1dff36929446da5e450048fe9aac10fc719777f4448",
+      "loadedBy": [
+        "app/src/main/hl/engines/runEngine.ts:221-235"
+      ],
+      "notes": "wrapPrompt composes target, harness/tool instructions, skill menu, renderer output contracts, attached paths, task.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/engines/codex/adapter.ts",
+      "category": "runtime prompt composer",
+      "lines": 311,
+      "sha256": "b5bad41a45c4dcf71439265ce934b56ed88f7a5929916525e08c0a80184bce93",
+      "loadedBy": [
+        "app/src/main/hl/engines/runEngine.ts:221-235"
+      ],
+      "notes": "wrapPrompt composes target, harness/tool instructions, skill menu, renderer output contracts, attached paths, task.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/engines/skillIndexPrompt.ts",
+      "category": "runtime prompt composer",
+      "lines": 231,
+      "sha256": "8dd533035a669ddea11d808265d0c739074117bd283927bce2d250397db18bcd",
+      "loadedBy": [
+        "app/src/main/hl/engines/runEngine.ts:221-235"
+      ],
+      "notes": "wrapPrompt composes target, harness/tool instructions, skill menu, renderer output contracts, attached paths, task.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/AGENTS.md",
+      "category": "runtime harness manual",
+      "lines": 247,
+      "sha256": "d809f83800beb8e9274e99025cbeb00f6fc4d6e60ceb945e7890395942057a69",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/browser-harness-js/SKILL.md",
+      "category": "runtime harness manual",
+      "lines": 248,
+      "sha256": "64570f439df65c9e52aed5085d06e76b64623f28e1a8ee41f2d858409feccc1a",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/amazon/product-search.md",
+      "category": "runtime domain skill",
+      "lines": 198,
+      "sha256": "c7e9163318f26a3c746db3e7ba3fefd7857b56b1fa3693a1e8a79b3e2ec406f3",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/archive-org/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 341,
+      "sha256": "ac2a171a5b58871debc6bbde90b859a83ee1514b46dcaa3ace116e6daf167dac",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/arxiv-bulk/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 333,
+      "sha256": "deefc981964b6be574ed73999df8e6db3e2d92ad9d38814cedad4f6e6d364f0c",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/arxiv/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 311,
+      "sha256": "e78c4f0f53bd76dfb77c013dfa85b34113b762311518304b61a0d9925f3954ce",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/atlas/overview.md",
+      "category": "runtime domain skill",
+      "lines": 70,
+      "sha256": "4f80df5d30815de522d21cf9de6f1473dcfc10bfe8999c70deef7ecaaa63f91b",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/booking-com/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 578,
+      "sha256": "3efff5afb37f1b5cd885f8d83d42b862da946c4ed4a8c2dbd7cf11c6e0540d39",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/capterra/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 440,
+      "sha256": "b10fa64b02a18d0e49d45311218acdb67eb9966923336cd3c1322979e7cb5bd3",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/centilebrain/generate-estimates.md",
+      "category": "runtime domain skill",
+      "lines": 110,
+      "sha256": "8aef2dd173467d8e4453148c7115c7ba2d804282726cd99e6fa6f9cb3251048d",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/coingecko/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 325,
+      "sha256": "b247462a343d726c4b733aaa5b1f2bc48c75b20e7f6ea073cac8b83b591a374f",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/coinmarketcap/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 463,
+      "sha256": "23b869cbf11e791ea510826e56315a06e9087426455d7bcc480995c0572fd19d",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/coursera/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 360,
+      "sha256": "89c1ab388c55e43f5914864469ba52628aa6deacdffa0005c8f3df4a407d1e25",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/craigslist/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 390,
+      "sha256": "eacdb4c4266d241262b1f5caf8726e8fccd11d79a4b48966c2cc3e76b0ea25bf",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/crossref/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 568,
+      "sha256": "22af995b1dc5cc092e167acb75d6a78d417188266bdb650ea4e1423560f3e8b2",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/dev-to/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 323,
+      "sha256": "ace3a1939299e15f9f3b9ed869680cd9f5f646f80a17e77215e83ebf123037c3",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/duckduckgo/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 349,
+      "sha256": "33aeacc5847640544d77868b996f851d25a30da4064099ee96e4e109b47a9b90",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/ebay/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 435,
+      "sha256": "2988b48562aea6fb47518e5a13457cb1eb8541fdecd94de7be6eb9bbb2963535",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/etsy/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 506,
+      "sha256": "3bce787896e2f3c4e7bd507cc0379b818804b5c7a2275864905017e602b3e5b2",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/eventbrite/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 363,
+      "sha256": "920df83351cc74893e80bb16e1f29215f80e372edcd72130d29633ea722a4305",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/facebook/groups.md",
+      "category": "runtime domain skill",
+      "lines": 236,
+      "sha256": "498c9fa21d4485a39d8db13878e8f9bd608a4c4fefb625f8a678bcb16a68f531",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/facebook/pages.md",
+      "category": "runtime domain skill",
+      "lines": 295,
+      "sha256": "59a80c8be4df1377d3df69de1219a4603f65709becd01adc5f6b1aee03e168f2",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/framer/editor.md",
+      "category": "runtime domain skill",
+      "lines": 108,
+      "sha256": "7ab7fa212beca24537740a38c7b867bd67ee95ab7757344ecae23609f0429f5f",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/fred/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 493,
+      "sha256": "6486241c0c9a312aeea55073fd715c99ebc1c2c0811e2404227d74a996fbb7cb",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/g2/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 580,
+      "sha256": "8c4d6fe7366b4593183332b974e89060ea8598dbe5c9723c822715f17f59539c",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/genius/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 511,
+      "sha256": "53bf155614d4b8d8b65a588e77dcbff83d0f6e99d6e3c0cc3d48a3df0f624f20",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/github/repo-actions.md",
+      "category": "runtime domain skill",
+      "lines": 65,
+      "sha256": "a1c209f49e487fa1e01bebbaa402895b70badbe5679927bcd282a3a65857cf17",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/github/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 184,
+      "sha256": "6a2c0754e09de418623ac3c23a54f6efd1c9d88bd2eec756b17fb89f8047dee2",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/glassdoor/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 543,
+      "sha256": "a5a3eb12643f9dbc0e0c1017993b93fdab1b5e45bf28813933512e5d769aea56",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/goodreads/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 461,
+      "sha256": "e4d58991be6afa49a504e63565cf820016a550c9fe550f5d528f94f546d55187",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/gutenberg/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 383,
+      "sha256": "9b0445691634f15367cf5dbf46d074658346b3efef9781d12289fbf4f429813b",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/hackernews/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 243,
+      "sha256": "014d63fb1c123d7cb4f4e1b11831dd8d3910caa05b8109be94c8621e6d81e685",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/howlongtobeat/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 473,
+      "sha256": "986d5fdf4279cb63775aeb2df6b0457dfba69de46edbc5586f51885c45bc17a4",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/itch-io/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 436,
+      "sha256": "80ea40d56e4e70db60052d1413721ec282f0d8d3e6e679a3a5c9bd17201753ba",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/job-boards/indeed-glassdoor.md",
+      "category": "runtime domain skill",
+      "lines": 1021,
+      "sha256": "55887e40ea47af968987e7b9674e434914f63f6c5a37ce0e1f10265c0a9d1ed8",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/letterboxd/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 349,
+      "sha256": "e3269acdb42caabd4bf3da9cd51dbdd390719195b194108193a94b3c2851e516",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/linkedin/invitation-manager.md",
+      "category": "runtime domain skill",
+      "lines": 109,
+      "sha256": "1031ebe28be71e3cad2bf595f4411e697dc50ce83ba88c00d04b49748e8fb883",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/macrotrends/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 537,
+      "sha256": "31a0791c3cfd893dbf6fc69201f54955a19d194af8348633d019fbf010ecaa7f",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/medium/article-hydration.md",
+      "category": "runtime domain skill",
+      "lines": 120,
+      "sha256": "c6d3889959b736306b351561681f40802f42ae4c0bd319dc1510f869a65f0e69",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/medium/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 414,
+      "sha256": "61780a17e7867dcf13487cd9f6d459e402dc82a3220b9ad97e629ebf983de6a3",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/metacritic/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 477,
+      "sha256": "d8cb03ab8ad63f979a7b4d441daf076efb6ab5f9891c402cee55970ff08886e2",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/musicbrainz/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 478,
+      "sha256": "4af39436a1c8710598919b3a37efffc16281eda814714f22026dc1c863c46607",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/nasa/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 339,
+      "sha256": "c6d46e7fd87263203f119a3f745ae6c04277bc9bfdbe27ca97e247b8e10d9a8a",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/news-aggregation/multi-source.md",
+      "category": "runtime domain skill",
+      "lines": 205,
+      "sha256": "6aedb81ec9f3999e9de74e0aa23d4ce6d41aea22a0601a575575ffd2e594ee07",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/open-library/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 472,
+      "sha256": "6335868e85dc864e56bd69074505f0b6bc52ec5536e38098bda80043dcfebef6",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/openalex/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 470,
+      "sha256": "57931594234badcdaa7910c0c1ae7cb25e8a856ec0ca316b3c1b80d46e809a8b",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/openstreetmap/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 490,
+      "sha256": "b939b275fed2aa259c53edfd473fadb0b3c4448c6f893704dc25ea887b49fe75",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/package-registries/npm-pypi.md",
+      "category": "runtime domain skill",
+      "lines": 478,
+      "sha256": "ea0745f926c9ed4978afafa5b985e550c9cf873b15e3814af91e7eab754efd29",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/producthunt/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 307,
+      "sha256": "7064649dd730e348b9ca1929617e4e60ce196f43b13ac4bfffe2afa70420676a",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/pubmed/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 421,
+      "sha256": "4997fc397cd8f1a5e3c656b3f58fd516e06d33275ecd32ba73728db3c61a1b2b",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/quora/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 364,
+      "sha256": "5c5e60c135ee2680904475bdb276d7f2d6d0eb993ad60843b34118b228741cb6",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/rawg/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 352,
+      "sha256": "f65b1a9196b4fdff01dc3561cb797d76e74e901e5e4fe22dfc33f582f20db33e",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/reddit/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 124,
+      "sha256": "3cb77618ae4e43c46bc2349dc8bf3c4b16d09d4cdd7af0c5e10b5627012daefb",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/rest-countries/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 233,
+      "sha256": "8e98f4445f1e59f48d878ea185200154e1b9e12f35f7d568597a719dc9f317b7",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/sec-edgar/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 361,
+      "sha256": "718ed866f4c73ce8ac54247d99153ec8498d3be32452160fb7aff43a650beb01",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/soundcloud/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 362,
+      "sha256": "37f3ea101f1a4a08918e39ba76311ed93d1bd7e335323e5f436e094dadbca2fe",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/spotify/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 339,
+      "sha256": "41b73619417cc81f2edc2299a7ed550c150a65278c47b1ae0208ff22de9a2eee",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/stackoverflow/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 435,
+      "sha256": "b5835dfc5567d32042314727430e5d63d3fc25ea351297ab2aa77b0773c356fc",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/steam/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 575,
+      "sha256": "08f5d3aacec5cbf5ab6b151634b614b8e74ee27f2e59d5f986f342865c554465",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/thetechgeeks/pricing.md",
+      "category": "runtime domain skill",
+      "lines": 52,
+      "sha256": "b66268155a3beb6c8448c7360d05f7ae9552aa0a6da90d2eb1bee240e4e5c994",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/tiktok/upload.md",
+      "category": "runtime domain skill",
+      "lines": 107,
+      "sha256": "2479411809a9a0805c5ea95977fa30e7db1b2dee2035a5ab8611de6d48b39a50",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/tradingview/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 309,
+      "sha256": "0f7292e7c98b5b155e8aad5fa33fc2b1899dcdf39a1fa9e9a02e4b37da98b48f",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/trello/boards-and-lists.md",
+      "category": "runtime domain skill",
+      "lines": 88,
+      "sha256": "618103054625ca1b2d75096f090737d3f13c36c0a47b9800c546c9ff030a1bbf",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/trustpilot/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 375,
+      "sha256": "a834f8bbd5942805181f9d8ac750954aeeea77613a93dbdcbb11f6d414c32e32",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/walmart/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 444,
+      "sha256": "845e8a2da8356975a498e412321be2f0c12bac8bd210aa1fbe17a6293a8f0ec9",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/wayback-machine/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 306,
+      "sha256": "787de886e7b5109f6e7500fa660abb86c0036f03cc1a36aa7081535b443fb2a7",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/weather/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 398,
+      "sha256": "58ed52a9fa545bc0cf20a4c79780da73e71108fab800e1213de197fc074bb346",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/wellfound/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 596,
+      "sha256": "f938b5649211db09b1716cc96ebc81f9a0f0dec9b3339ea91a497bee0a03939b",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/world-bank/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 356,
+      "sha256": "3666ddd5b0f7745603ac0d37824d1a83dd51acbb2975eb6ab0e725892d7b1076",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/youtube/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 404,
+      "sha256": "812ac04620fc3ee2cf9be25f87bd45bd1f172b512dbed9f7d8e0d169c29a3a70",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/domain-skills/zillow/scraping.md",
+      "category": "runtime domain skill",
+      "lines": 433,
+      "sha256": "d11c66cba3174d647b9cdb8c7c640b88ed8ff8710594386138ca4b9a0e631389",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/ask-block.md",
+      "category": "runtime interaction skill",
+      "lines": 121,
+      "sha256": "b95607421d9aaf05829388a479f8a6dc5b611ebd956596ede49faac9b8f39185",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/connection.md",
+      "category": "runtime interaction skill",
+      "lines": 98,
+      "sha256": "f9bdafc67e014e86b3c1f6672790abbd5541877ef27652af8cd25f4fd49c0eea",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/cookies.md",
+      "category": "runtime interaction skill",
+      "lines": 61,
+      "sha256": "ce2a590fd8c035c103b85eda38c945139afefab20b337592df1e71ceef5f7756",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/cross-origin-iframes.md",
+      "category": "runtime interaction skill",
+      "lines": 67,
+      "sha256": "81d860c48ab9b7fd09d35159c262b0e4cc37c093fee7a51f31e740b8ed01385a",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/dialogs.md",
+      "category": "runtime interaction skill",
+      "lines": 75,
+      "sha256": "91cf00b3d734e425ecbc1aae7a6c7a7c32b33687efadb3ffd3e6cd79381cdca1",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/downloads.md",
+      "category": "runtime interaction skill",
+      "lines": 77,
+      "sha256": "5daa766f30601f0fc37c0b62edf846695632280a7b6db50f869e5c8083bbea25",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/drag-and-drop.md",
+      "category": "runtime interaction skill",
+      "lines": 56,
+      "sha256": "92e7e36aaa18284de8172ffda5f9d27742d50722e4e74936c9f7231ecc67a373",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/dropdowns.md",
+      "category": "runtime interaction skill",
+      "lines": 79,
+      "sha256": "e347e09917dbab35153b16eb190324a510d14392903cc030e458b0a2f57340f8",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/iframes.md",
+      "category": "runtime interaction skill",
+      "lines": 69,
+      "sha256": "4f673b1bd512041842cd12cff91a5142a028767e5516085cdf75cb2ab79439b2",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/neobrutalist-html.md",
+      "category": "runtime interaction skill",
+      "lines": 116,
+      "sha256": "2e63b80e8cd4799569b6257976d69ad1b45410a0f133f28a4e5f3fa9d1cfed01",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/network-requests.md",
+      "category": "runtime interaction skill",
+      "lines": 109,
+      "sha256": "b6ea42d59b44efb79e966d41e6aad476dae86a145006f493ecd245f73c0ab688",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/options-block.md",
+      "category": "runtime interaction skill",
+      "lines": 276,
+      "sha256": "99408fcd6fab79f3e6c8fe7981b750b52a28482fd4f7b65b6e71ac16d3b35d51",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/print-as-pdf.md",
+      "category": "runtime interaction skill",
+      "lines": 69,
+      "sha256": "af65961a90589736a1c2d6d015499dc47eeaf042c386e7f14509c4ed218c61fd",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/screenshots.md",
+      "category": "runtime interaction skill",
+      "lines": 54,
+      "sha256": "77ae6bb65c033926991b4eaedcadf1673d203ca5a2851d76244107139aa64ac2",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/scrolling.md",
+      "category": "runtime interaction skill",
+      "lines": 75,
+      "sha256": "8736736cff39293c348bc696a8bb5ef8fdeea40c5d00702315d2b93dafec8e8c",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/shadow-dom.md",
+      "category": "runtime interaction skill",
+      "lines": 80,
+      "sha256": "ff976bb6fee730382e92be1839e108f1cc66283307aa273e293d19e2c316477b",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/tabs.md",
+      "category": "runtime interaction skill",
+      "lines": 75,
+      "sha256": "871406babc0c30bffa9d88d59a51d591887347fa78ae467ad6b18eb9a74e63b3",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/uploads.md",
+      "category": "runtime interaction skill",
+      "lines": 65,
+      "sha256": "71d0d76a756a7e0641a13b7d41aec1e8c4495685660352474a266e7909150c19",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "path": "app/src/main/hl/stock/interaction-skills/viewport.md",
+      "category": "runtime interaction skill",
+      "lines": 70,
+      "sha256": "6c90ec3334ba18a503fd76b28dab79aedb18890bb629b90e7b3bef81fe6cb8fc",
+      "loadedBy": [
+        "app/src/main/hl/harness.ts:25-53",
+        "app/src/main/hl/harness.ts:130-170",
+        "app/src/main/hl/engines/skillIndexPrompt.ts:197-230"
+      ],
+      "notes": "Stock materialized into userData harness; index injected by three engine adapters; body loaded on demand through agent-skill. Not all are system-role messages.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "AGENTS.md",
+      "category": "developer contribution instructions",
+      "lines": 92,
+      "sha256": "e67961179047fcf19435dafc36a957eac8e5026af5878ea76097ed410ae72699",
+      "loadedBy": [],
+      "notes": "Developer guidance separate from runtime model instructions.",
+      "reviewDepth": "outline"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "CLAUDE.md",
+      "category": "developer contribution instructions",
+      "lines": 92,
+      "sha256": "75815f71a229e890e39783d45c5325cca2ec57f03ca5b9bb44e1e3d98e0b36db",
+      "loadedBy": [],
+      "notes": "Developer guidance separate from runtime model instructions.",
+      "reviewDepth": "outline"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/__init__.py",
+      "category": "tool usage/schema surface",
+      "lines": 688,
+      "sha256": "6649a6f015c2b122e62da6ec41dc81a191cb41034d8ee189f0f55d87044c9831",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/blocks.py",
+      "category": "tool usage/schema surface",
+      "lines": 817,
+      "sha256": "58ca794e246ced6890cb944e0afadc68780fcdf96e8e8e02f42301d0d6d382c6",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/browser.py",
+      "category": "tool usage/schema surface",
+      "lines": 5342,
+      "sha256": "f539e7ff159f066b361bf5513ed36d50ae9b082a8fc1807f2943379f9fa43a20",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/browser_profiles.py",
+      "category": "tool usage/schema surface",
+      "lines": 224,
+      "sha256": "9fc4a509a1d8461bdbd80d699d55b824db4bb362830ad6684e731d6c6cd52792",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/cdp_input.py",
+      "category": "tool usage/schema surface",
+      "lines": 185,
+      "sha256": "6a5cd12097a3f51f639ff66de20c5077de0756e60b5c931cdbb08ceb7a7631d5",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/code_block.py",
+      "category": "tool usage/schema surface",
+      "lines": 237,
+      "sha256": "40896ac9ef393126c1ccb51d8344362a12c0b97f974b03cb18658546e3efb770",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/credential.py",
+      "category": "tool usage/schema surface",
+      "lines": 659,
+      "sha256": "9f3ab0dc38328d52c806ff669adb16f0fdb19a1ed6f841bfdc9bc9d223ad892f",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/folder.py",
+      "category": "tool usage/schema surface",
+      "lines": 212,
+      "sha256": "07128b18470591602a909891e45eb9741535916e184a35c2759168fe2aed6394",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/inspection.py",
+      "category": "tool usage/schema surface",
+      "lines": 1282,
+      "sha256": "e7981b983b2e033c2dc72f47565b0814c995a5dc68ee22b567c9cfe373975be0",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/instructions.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 174,
+      "sha256": "3a09bfd80e7386c67c2c872e0a0f599127bb3fdd87e70653753a8c3632696440",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/org.py",
+      "category": "tool usage/schema surface",
+      "lines": 115,
+      "sha256": "a9edac8b9c3ac675327a5b5d5e0adbd15a6d1beccec463b0771746fc87cbbb38",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/output_tools.py",
+      "category": "tool usage/schema surface",
+      "lines": 395,
+      "sha256": "0c64cfb261b98aef4c695e6d97afb7d54cd4b8860ba1e0c87ecad4033b545773",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/prompts.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 1181,
+      "sha256": "96db9f46a4f763e5a9342382dd0033c4e9015c6c9fb173f73d7ddb1d09173fe8",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/response.py",
+      "category": "tool usage/schema surface",
+      "lines": 1221,
+      "sha256": "a7aa84877ce689af84c674aec838eed4921abba9481f77359e3b4aa1c1608592",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/schedule.py",
+      "category": "tool usage/schema surface",
+      "lines": 700,
+      "sha256": "18c78560c596edb933400b262c5b3b6cb7a6332aa058a8395915eb2349d1ab74",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/scripts.py",
+      "category": "tool usage/schema surface",
+      "lines": 297,
+      "sha256": "517a824b1219809fa46194afc7e8789ce157e423e0425219f035857fa369e651",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/session.py",
+      "category": "tool usage/schema surface",
+      "lines": 775,
+      "sha256": "97939cae4e43f30e89ae0edfd4e83d5690fc6481a66c5fa44101a19752813772",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/state.py",
+      "category": "tool usage/schema surface",
+      "lines": 200,
+      "sha256": "dd53d0df256c2ef33e444a398551829b944073614def3144347b96bda69eaf12",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/storage.py",
+      "category": "tool usage/schema surface",
+      "lines": 173,
+      "sha256": "020ba345db2c6c4968314ea633b64d0b3863e29b4c7de719390ace3faa1100e2",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/tabs.py",
+      "category": "tool usage/schema surface",
+      "lines": 795,
+      "sha256": "c695cc7a09b96e8b26796aa73973cfc54cbe5a817dadcfc9454772c4822391e9",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/trajectory.py",
+      "category": "tool usage/schema surface",
+      "lines": 37,
+      "sha256": "49fc7358121f26c148b79e6f13674afbfe315f590fb647cecd6929b0a9eadf5e",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/mcp_tools/workflow.py",
+      "category": "tool usage/schema surface",
+      "lines": 2399,
+      "sha256": "881d7e5776b49f1c06418e2ffddc17e803828746698fba45c9d36d81ca51f168",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/README.md",
+      "category": "external-client usage skill",
+      "lines": 80,
+      "sha256": "ba393ef7d0305268a54a57f9ce59882fe3517e6569fd240a1f172845e6a8652a",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/qa/SKILL.md",
+      "category": "external-client usage skill",
+      "lines": 500,
+      "sha256": "f967bb0487c294aa66e198eea3a2f38d11ade1ee109963c55596f2491e856d6c",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/SKILL.md",
+      "category": "external-client usage skill",
+      "lines": 238,
+      "sha256": "b671f3eb46586f62f82022d0fdac42d8f2e9c16d1e6860f5d1bd58373b9beeb9",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/agent-mode.md",
+      "category": "external-client usage skill",
+      "lines": 64,
+      "sha256": "76182173f24ef19282a6892ff02b52df61a016483a27ce1c4249a4931685a948",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/ai-actions.md",
+      "category": "external-client usage skill",
+      "lines": 19,
+      "sha256": "102bbbc22097cf43efe6721d80af91e1eeec27f5f5763477858e585e8708c66f",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/block-types.md",
+      "category": "external-client usage skill",
+      "lines": 54,
+      "sha256": "780e5ace98113a305e5024515b61e151a8879f5145c341972b21aa677f214924",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/cli-parity.md",
+      "category": "external-client usage skill",
+      "lines": 25,
+      "sha256": "cd39fa5afb34257ce698ea03eb72f8eb32792cf5a73f14d8e24d1c4f8ad6a611",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/common-failures.md",
+      "category": "external-client usage skill",
+      "lines": 26,
+      "sha256": "011d7eb3c25ae6f1c396257581da7fb9eeba22b018d1644e6597cb6e2b028574",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/complex-inputs.md",
+      "category": "external-client usage skill",
+      "lines": 22,
+      "sha256": "5c53576c548769428330292877695c9f04592f8cd07ce21dfcf2baa039eff52b",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/credentials.md",
+      "category": "external-client usage skill",
+      "lines": 56,
+      "sha256": "15a33d19d956c24e98d9a31776e1943fc0b209c29f8d454a16d03c1200a8eebb",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/engines.md",
+      "category": "external-client usage skill",
+      "lines": 20,
+      "sha256": "498fc0c47abfef1553b01af127552dd91548b563caa55a661c5c94056ea2c812",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/pagination.md",
+      "category": "external-client usage skill",
+      "lines": 17,
+      "sha256": "4ee78a89c934959921b0699128af89c543ad84a1c328c3aa22b14e944ae574a7",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/parameters.md",
+      "category": "external-client usage skill",
+      "lines": 31,
+      "sha256": "b5771d79879d78e12212bca7cf5e76267319cfad54654e6d2ee8939d35d6561e",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/precision-actions.md",
+      "category": "external-client usage skill",
+      "lines": 17,
+      "sha256": "09c68800a251fd9c3ba4cba895cf7348f78cce5a77432892103ce25c17f0c16a",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/prompt-writing.md",
+      "category": "external-client usage skill",
+      "lines": 27,
+      "sha256": "90e301c6923a4af154a84bd80e9e3f24154d1c6280be7a0a7ab842f39516cd15",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/quick-start-patterns.md",
+      "category": "external-client usage skill",
+      "lines": 125,
+      "sha256": "fc8dce4dbad024917d52137f4b3df36bc6d663785430c9cbc52d6329a3e48887",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/rerun-playbook.md",
+      "category": "external-client usage skill",
+      "lines": 14,
+      "sha256": "c9b93b2ec87b6203783a8ebfd10990540ad1b8a8b72627d36d9f34a9103c2d0a",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/schemas.md",
+      "category": "external-client usage skill",
+      "lines": 30,
+      "sha256": "79cb3b8a6771dec55a05a4647194e77bc9961cc1fc770daa4670e26b5e7bb237",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/screenshots.md",
+      "category": "external-client usage skill",
+      "lines": 20,
+      "sha256": "768d40f2cf5037d2aeed90d7e9669e678efad17493b16e34f3ce89a2fb64e1aa",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/sessions.md",
+      "category": "external-client usage skill",
+      "lines": 31,
+      "sha256": "d4c25af174a45a333027566be796dc826d3c216a908c9c303037c6dda55095c8",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/status-lifecycle.md",
+      "category": "external-client usage skill",
+      "lines": 18,
+      "sha256": "5e456b909f7e9ca53df169cd8595f4384fab02783c099a0dd66616cbe354cc0b",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/skyvern/references/tool-map.md",
+      "category": "external-client usage skill",
+      "lines": 79,
+      "sha256": "110eb17365b84cc18a6da26a9d32396b0346029c3f2d54671541a0cf333f8bc1",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/smoke-test/SKILL.md",
+      "category": "external-client usage skill",
+      "lines": 469,
+      "sha256": "5fa4a77ce5a89429da8ca88e9ce7378c2343394ab5049f23ad0fcd3bb6dc64e6",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/cli/skills/testing/SKILL.md",
+      "category": "external-client usage skill",
+      "lines": 123,
+      "sha256": "23345c5aa7216ed10dcc076d6b434e1ae8ee015fa810758b65b820d9006545a8",
+      "loadedBy": [
+        "skyvern/cli/skill_commands.py"
+      ],
+      "notes": "CLI/MCP users load these usage resources; not the internal browser executor system prompt.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/constants.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 181,
+      "sha256": "b56e89dc40bc6fd67fd417e54423aeb0974e8871a079008a021954f2924c948d",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/core/script_generations/CLAUDE.md",
+      "category": "developer contribution instructions",
+      "lines": 133,
+      "sha256": "0be9922a27523391abf48782dcf7a91f6c1f6f3e0425933b472f50d26ca7c889",
+      "loadedBy": [],
+      "notes": "Developer guidance separate from runtime model instructions.",
+      "reviewDepth": "outline"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/CLAUDE.md",
+      "category": "developer contribution instructions",
+      "lines": 9,
+      "sha256": "ca0381feeb173add22f3a252f481b5ea8c66b2f8e4b1285f821b4b0b31f90faa",
+      "loadedBy": [],
+      "notes": "Developer guidance separate from runtime model instructions.",
+      "reviewDepth": "outline"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/answer-user-detail-questions.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 25,
+      "sha256": "67b274f7e02468d9e766a67716b3741661ed5266263fe3549e08eab67d94dbeb",
+      "loadedBy": [],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/auto-completion-choose-option.j2",
+      "category": "Jinja verification",
+      "lines": 64,
+      "sha256": "82a6a6c026364c1ee6af5dd6753bec42e01fcaadb4099e1a0fd09411d566c218",
+      "loadedBy": [
+        "skyvern/forge/sdk/experimentation/prompt_families.py:15",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:28",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:37",
+        "skyvern/webeye/actions/handler.py:12372",
+        "skyvern/webeye/actions/handler.py:12374",
+        "skyvern/webeye/actions/handler.py:12387",
+        "skyvern/webeye/actions/handler.py:12392",
+        "skyvern/webeye/actions/handler.py:12804",
+        "skyvern/webeye/actions/handler.py:12806",
+        "skyvern/webeye/actions/handler.py:12824"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/auto-completion-potential-answers.j2",
+      "category": "Jinja verification",
+      "lines": 44,
+      "sha256": "4866eedcc600e20fa5404d148c7d8fea0a873c10182377a58132a517e7bfe7fd",
+      "loadedBy": [
+        "skyvern/webeye/actions/handler.py:12579",
+        "skyvern/webeye/actions/handler.py:12596"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/auto-completion-tweak-value.j2",
+      "category": "Jinja verification",
+      "lines": 53,
+      "sha256": "dc5887745fb02f624fc889a4fba762136af213ed3e8f52abfabb6b51fc0db8e5",
+      "loadedBy": [
+        "skyvern/webeye/actions/handler.py:12643",
+        "skyvern/webeye/actions/handler.py:12653"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/batch-form-fill-plan.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 50,
+      "sha256": "c7afa7c0bf592baf1d4658da8d8e912685de7c5edc689852ee19acac0a09eed2",
+      "loadedBy": [
+        "skyvern/core/script_generations/skyvern_page.py:3110",
+        "skyvern/core/script_generations/skyvern_page.py:3123"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/build-workflow-from-pdf.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 101,
+      "sha256": "616413a5435249725a52779f96a2c6ec813f9f79c3a3f362eb315714a95640b3",
+      "loadedBy": [
+        "skyvern/services/pdf_import_service.py:199"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/check-date-format.j2",
+      "category": "Jinja verification",
+      "lines": 31,
+      "sha256": "fcde47fc3c9db04b56fa2141bf94ae718ccd3e2e90bdd5f73de133b8340e5566",
+      "loadedBy": [
+        "skyvern/webeye/actions/handler.py:4239",
+        "skyvern/webeye/actions/handler.py:4247"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/check-evaluation-goal.j2",
+      "category": "Jinja verification",
+      "lines": 21,
+      "sha256": "26fbc4f5151dcad4e4c81c7d4e6b11e6aa51bf695b00a2b47539c47fa4237398",
+      "loadedBy": [
+        "evaluation/script/create_webvoyager_task_v2.py:35",
+        "evaluation/script/create_webvoyager_task_v2.py:37",
+        "evaluation/script/create_webvoyager_workflow.py:37",
+        "evaluation/script/create_webvoyager_workflow.py:39"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/check-phone-number-format.j2",
+      "category": "Jinja verification",
+      "lines": 52,
+      "sha256": "5e7286e6a64836cb5d6634435dcd0608234c3a0ed285ba32ef3d1456d9862d0d",
+      "loadedBy": [
+        "skyvern/webeye/actions/handler.py:2698",
+        "skyvern/webeye/actions/handler.py:2708"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/check-user-goal-with-termination.j2",
+      "category": "Jinja verification",
+      "lines": 78,
+      "sha256": "6c265d1c0b11977784616d6ed69eb9853326435317851d554b18aa687f08dc9b",
+      "loadedBy": [
+        "skyvern/forge/agent.py:6491",
+        "skyvern/forge/agent.py:6492",
+        "skyvern/forge/sdk/api/llm/api_handler_factory.py:361",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:27",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:35"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/check-user-goal.j2",
+      "category": "Jinja verification",
+      "lines": 63,
+      "sha256": "bb01d65eb03204bc30fbd6922fe81bc5057b102b9d45297180c7fd9afdc44189",
+      "loadedBy": [
+        "skyvern/forge/agent.py:6491",
+        "skyvern/forge/agent.py:6492",
+        "skyvern/forge/sdk/api/llm/api_handler_factory.py:361",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:14",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:27",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:35",
+        "skyvern/webeye/actions/handler.py:7579",
+        "skyvern/webeye/actions/handler.py:7587"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/conditional-prompt-branch-evaluation.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 23,
+      "sha256": "8235d9f9037b60f1e952ef11de36a8dd49472dad3d329782c95ab3161e802620",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/block.py:17761"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/confirm-multi-selection-finish.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 43,
+      "sha256": "b28610a6c0e75db949449a504f1d4aebf9b40e281bb1298af78fafe7aa7ad034",
+      "loadedBy": [
+        "skyvern/webeye/actions/handler.py:13016",
+        "skyvern/webeye/actions/handler.py:13027",
+        "skyvern/webeye/actions/handler.py:13037"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/conversational_ui_goal.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 14,
+      "sha256": "aabfaaee69d42119609cf8bce67ea94671ae661e306970ce9fa0076375a31bbe",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/service.py:10577",
+        "skyvern/forge/sdk/workflow/service.py:10583"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/copilot-agent-title.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 12,
+      "sha256": "8227746560bfd944189f720497e14eef691882814e1640da3eeb6ee785f6214c",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/agent_naming.py:23"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/css-shape-convert.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 9,
+      "sha256": "c3ee1b7968b85e3cec128ef305b50e9057a038af8dcea912b1054ffde8b28ef3",
+      "loadedBy": [
+        "skyvern/forge/agent_functions.py:855",
+        "skyvern/forge/agent_functions.py:866",
+        "skyvern/forge/sdk/api/llm/api_handler_factory.py:368"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/cua-answer-question.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 19,
+      "sha256": "fbd599dc40240f388837f6f0386230873ef6f4d385353549d3adf146ed77dd8e",
+      "loadedBy": [
+        "skyvern/forge/agent.py:5831",
+        "skyvern/forge/agent.py:5838"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/cua-fallback-action.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 22,
+      "sha256": "5342c4b9cd9a9bdeeb9212805ca2895d4e72949c4f72ac5c546e9c665d136c09",
+      "loadedBy": [
+        "skyvern/webeye/actions/parse_actions.py:968",
+        "skyvern/webeye/actions/parse_actions.py:976",
+        "skyvern/webeye/actions/parse_actions.py:983"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/custom-select.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 66,
+      "sha256": "9df490ad642f5338cf65d4a37373721020eff37bb2fe2783fa0fccef8b8b4408",
+      "loadedBy": [
+        "skyvern/forge/sdk/api/llm/utils_test.py:213",
+        "skyvern/webeye/actions/handler.py:14365",
+        "skyvern/webeye/actions/handler.py:14379",
+        "skyvern/webeye/actions/handler.py:14783",
+        "skyvern/webeye/actions/handler.py:14798"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/data-extraction-summary.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 21,
+      "sha256": "54d33560d7f5a56a87068290b517fdc18e423a82ca8899f0589b39ad8e3e63b3",
+      "loadedBy": [
+        "skyvern/forge/agent.py:1061",
+        "skyvern/forge/agent.py:1066",
+        "skyvern/forge/agent.py:11317",
+        "skyvern/forge/agent.py:11321",
+        "skyvern/forge/agent.py:11452",
+        "skyvern/utils/prompt_engine.py:72"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/decisive-criterion-validate.j2",
+      "category": "Jinja verification",
+      "lines": 52,
+      "sha256": "751969acd1b5b3a93cbda9340a34a793f58afdda5b1c3a82e1c145a2b857d74d",
+      "loadedBy": [
+        "skyvern/forge/agent.py:337",
+        "skyvern/forge/sdk/api/llm/utils.py:206"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/evaluate-prompt.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 40,
+      "sha256": "9fe2ea59d091d619b2f5ef48719de6c74bd482525b2b1747aace3df2c879c972",
+      "loadedBy": [
+        "evaluation/core/__init__.py:168",
+        "evaluation/core/__init__.py:178"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extract-action-dynamic.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 81,
+      "sha256": "a0f44fa59bf0e9e21ccfb5013c6dd4fc669b0c9c764d5cc152339efbedb173a3",
+      "loadedBy": [
+        "skyvern/forge/sdk/experimentation/prompt_families.py:26",
+        "skyvern/utils/prompt_engine.py:70"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extract-action-static.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 71,
+      "sha256": "db7cec95a582832af0bcb798e848e39561327e069457d8cf5d1654a0fca25dd0",
+      "loadedBy": [
+        "skyvern/forge/sdk/experimentation/prompt_families.py:26",
+        "skyvern/utils/prompt_engine.py:71"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extract-action.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 153,
+      "sha256": "c77cd1589b4a25fc0c5b1857966f38d90f8d3f60edfe19f5837a8846e881662e",
+      "loadedBy": [
+        "skyvern/forge/agent.py:336",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:20",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:26",
+        "skyvern/utils/prompt_engine.py:69"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extract-applicant-parameters.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 33,
+      "sha256": "a4d0e667e70dc6195d91cb86ab1f173becce860c8dc64413b2271e3e74f52820",
+      "loadedBy": [
+        "skyvern/core/script_generations/run_initializer.py:95",
+        "skyvern/core/script_generations/run_initializer.py:105"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extract-information-from-file-text.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 13,
+      "sha256": "770065141c8128727eccf2177ffb15c1ee75ab14bea4b91e751fcf7fb1b03584",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/block.py:13750",
+        "skyvern/forge/sdk/workflow/models/block.py:13755",
+        "skyvern/forge/sdk/workflow/models/block.py:13768",
+        "skyvern/forge/sdk/workflow/models/block.py:14262",
+        "skyvern/forge/sdk/workflow/models/block.py:14271"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extract-information.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 47,
+      "sha256": "d1455dd71dabd1a95e74b2d35290154688cc9b44222818811c558606b5bb1d52",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1508",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1622",
+        "skyvern/utils/prompt_engine.py:63",
+        "skyvern/webeye/actions/handler.py:15583",
+        "skyvern/webeye/actions/handler.py:15599",
+        "skyvern/webeye/actions/handler.py:15681",
+        "skyvern/webeye/actions/handler.py:15947"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extract-text-from-image.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 22,
+      "sha256": "9e98283201d58035f29daf3d78458af19bcb2a2aac42e0b72a6e0982c07ad754",
+      "loadedBy": [
+        "skyvern/forge/sdk/api/llm/api_handler_factory.py:369",
+        "skyvern/forge/sdk/workflow/models/block.py:13266",
+        "skyvern/forge/sdk/workflow/models/block.py:13268",
+        "skyvern/forge/sdk/workflow/models/block.py:13284",
+        "skyvern/forge/sdk/workflow/models/block.py:13391",
+        "skyvern/forge/sdk/workflow/models/block.py:13393",
+        "skyvern/forge/sdk/workflow/models/block.py:13405"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/extraction_prompt_for_nat_language_loops.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 12,
+      "sha256": "7e30223e2c959c7b4f932843824dc0565bda7d2311eba40093076e56c5d4a754",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/block.py:3456"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/file-upload-select-files.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 17,
+      "sha256": "5812c441c0d00dc3a95906baece0198e088fcb3d0c79eb146467a6d5ce42ecbf",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/block.py:11635",
+        "skyvern/forge/sdk/workflow/models/block.py:11659"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/form-field-mapper.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 80,
+      "sha256": "bf02e0b4882f66e642baeb6e878ceee3db005d6a7a938fb476980ca856533cd6",
+      "loadedBy": [
+        "skyvern/core/script_generations/skyvern_page.py:1793",
+        "skyvern/core/script_generations/skyvern_page.py:1808"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/generate-action-reasoning.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 20,
+      "sha256": "cffb3fb1dd00a27820dc75e643a4acd7c1d028d0826866b8e3bc7a1d2f182a55",
+      "loadedBy": [
+        "skyvern/core/script_generations/script_skyvern_page.py:480",
+        "skyvern/core/script_generations/script_skyvern_page.py:493"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/generate-task.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 20,
+      "sha256": "662b80d054e34d3a29270677b7d8f22f02695e7b7aa85e0fba9c0344abf78676",
+      "loadedBy": [
+        "evaluation/core/__init__.py:186",
+        "evaluation/core/__init__.py:189",
+        "skyvern/forge/sdk/workflow/service.py:10592",
+        "skyvern/forge/sdk/workflow/service.py:10598",
+        "skyvern/services/task_v1_service.py:80",
+        "skyvern/services/task_v1_service.py:83"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/generate-workflow-parameters.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 55,
+      "sha256": "4765d4dab00b1c1ca8cd53c0899c1c6f5cce59a9da018903b5f7c847a1b0ffc0",
+      "loadedBy": [],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/generate-workflow-title.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 15,
+      "sha256": "41c72a48d65ef5ca3cd6a88b46933bbda74ede22581ab085bb1d2c309e40753e",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/service.py:1309",
+        "skyvern/forge/sdk/workflow/service.py:1315"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/generate_workflow_run_block_description.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 10,
+      "sha256": "ccaa782f5379b561b112b8590c8031cb18faded589684b0cb569b23aecca629c",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/block.py:1599"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/handle-dialog.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 30,
+      "sha256": "03f4865dab3585745dcbe6afb04999253e27d39ad2b90a3967c727976e68cd05",
+      "loadedBy": [
+        "skyvern/webeye/dialog_handler.py:296",
+        "skyvern/webeye/dialog_handler.py:309"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/improve-prompt-for-ai-browser-agent.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 80,
+      "sha256": "ec7715536b7374dad52846e6e3fa1c2a7c7875ee95cb6f351ce928980d8351fa",
+      "loadedBy": [
+        "skyvern/forge/sdk/routes/prompts.py:34"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/improve-prompt-for-data-extraction.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 75,
+      "sha256": "417bd286a6878161299c2a8a29bb2297f6263c7fc3312955a3032f96f3fec3cc",
+      "loadedBy": [
+        "skyvern/forge/sdk/routes/prompts.py:35"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/infer-action-type.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 20,
+      "sha256": "02c7902c277992b08ae909e8b6d60f3ccd2f73688991ff6d7192a1d79c6f93cf",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1777",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1782",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1786",
+        "skyvern/forge/agent.py:7810",
+        "skyvern/forge/agent.py:7816"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/match-email.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 26,
+      "sha256": "5824b5509c6b4d8dfcc646523e645cccedd7a8c7bf85517684f607690de5233d",
+      "loadedBy": [
+        "skyvern/services/email/inbox.py:61",
+        "skyvern/services/email/inbox.py:70"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/multi-field-totp-rejection-check.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 17,
+      "sha256": "5195cda0974581eb8d05cc8ffb72a1242a434f661b84274189aeeacd4fd49450",
+      "loadedBy": [
+        "skyvern/forge/agent.py:9599",
+        "skyvern/forge/agent.py:9612"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/normal-select.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 44,
+      "sha256": "2b620ecfacca798fd94be56f87acdfad82e2d6b06b39260568d8eb64c4c44f43",
+      "loadedBy": [
+        "skyvern/webeye/actions/handler.py:15402",
+        "skyvern/webeye/actions/handler.py:15412",
+        "skyvern/webeye/actions/handler.py:15417"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/opened-dropdown-confirm.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 17,
+      "sha256": "ecc961e7849fd3218922fa7c4f981271e7d8399408e940eeb434cdee32e42625",
+      "loadedBy": [
+        "skyvern/webeye/actions/handler.py:15188",
+        "skyvern/webeye/actions/handler.py:15195"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/page-classify.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 21,
+      "sha256": "242856c5acd8e421e63fd6343f20b98405b209af4ece8531bb3a5e69ce05e8bc",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:844",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:862"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/parse-input-or-select-context.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 27,
+      "sha256": "f79d9e5af070008c889a04712fed3b5cc61e4c89116a4180c861bc4b25e56662",
+      "loadedBy": [
+        "skyvern/forge/sdk/experimentation/prompt_families.py:16",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:29",
+        "skyvern/forge/sdk/experimentation/prompt_families.py:38",
+        "skyvern/webeye/actions/handler.py:16142",
+        "skyvern/webeye/actions/handler.py:16146",
+        "skyvern/webeye/actions/handler.py:16153"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/parse-otp-login.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 25,
+      "sha256": "0cf90513fdbbe37d8bff0c0170c8bd06ad362c9560430cad16827f28f2f86e61",
+      "loadedBy": [
+        "skyvern/services/otp_service.py:253",
+        "skyvern/services/otp_service.py:258"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/pdf-fill-field-mapping.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 36,
+      "sha256": "904a9f0f7d0f2b866d6b052994146f1be44ef6485138acbd7a261671f272d6cf",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/pdf_fill_block.py:417",
+        "skyvern/forge/sdk/workflow/models/pdf_fill_block.py:424"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/pdf-fill-flat-placement.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 26,
+      "sha256": "8005d826604d6b9a193e06b026f505924ca039db9558ff83ab061bdaff3b2e3b",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/pdf_fill_block.py:687",
+        "skyvern/forge/sdk/workflow/models/pdf_fill_block.py:694"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/quality-audit.j2",
+      "category": "Jinja verification",
+      "lines": 38,
+      "sha256": "73b25ae00a6795cfa176b52f946ffddcd42469f7952200af3f4cb34dfbcc337f",
+      "loadedBy": [
+        "skyvern/core/script_generations/skyvern_page.py:3425",
+        "skyvern/core/script_generations/skyvern_page.py:3534",
+        "skyvern/core/script_generations/skyvern_page.py:3544"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/recording-action-block-prompt-input-text.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 21,
+      "sha256": "b46ec21b76d9b8aafecdf640697a189e9fd97290538425cc24598a2e07817e4a",
+      "loadedBy": [
+        "skyvern/services/browser_recording/service.py:622"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/recording-action-block-prompt.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 15,
+      "sha256": "d968814dd17fcd29f372f811e789fe015a25fcc4e325b8146d074ecd668d7bf8",
+      "loadedBy": [
+        "skyvern/services/browser_recording/service.py:637"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/script-failure-triage.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 57,
+      "sha256": "6e34266b11744b2b653071f3b402ce580768700bc8fc5465afbcc42b498877c0",
+      "loadedBy": [
+        "skyvern/services/script_reviewer.py:994",
+        "skyvern/services/script_reviewer.py:1005"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/script-generation-file-url-generation.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 17,
+      "sha256": "bf91f952412c6e1e55e36ae8b1f0b3b534a761b61c59914c2e0419a3eb841403",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:595",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:601",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:605"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/script-generation-input-text-generatiion.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 17,
+      "sha256": "b18f06f73874b3c9aa3fa94a1356334e0e27ba5e7fd3025e8f0a7935eb559e5c",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:470",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:476",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:480"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/script-reviewer-conditional.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 70,
+      "sha256": "8c40eab213975ad7914580c58876071b6613e42d5853d2dfd18abc53376505f6",
+      "loadedBy": [
+        "skyvern/services/script_reviewer.py:814",
+        "skyvern/services/script_reviewer.py:832",
+        "skyvern/services/script_reviewer.py:841",
+        "skyvern/services/script_reviewer.py:848",
+        "skyvern/services/script_reviewer.py:870"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/script-reviewer-extraction.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 261,
+      "sha256": "4a464a505ef3bc973454cebd0a5de1cc9996442f86c74e5e010fea8683861b15",
+      "loadedBy": [
+        "skyvern/services/script_reviewer.py:1111"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/script-reviewer-form-filling.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 352,
+      "sha256": "e832b3e1e9f996d94ba6ac64f51c131a9c31c6ac8235c22765bef73828e01904",
+      "loadedBy": [
+        "skyvern/services/script_reviewer.py:1113"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/script-reviewer.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 641,
+      "sha256": "2b950369c1f38b995979767ceef03bee748497a9eb8b33758d7d957fad863021",
+      "loadedBy": [
+        "skyvern/services/script_reviewer.py:1115"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/select-from-group.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 29,
+      "sha256": "27e7fc56e92617910abf99deedfc219a69216d2a56991298807d671b5d6659d1",
+      "loadedBy": [
+        "skyvern/core/script_generations/skyvern_page.py:2852",
+        "skyvern/core/script_generations/skyvern_page.py:2867"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/single-click-action.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 61,
+      "sha256": "801c321a6956ad5318bac554bc2f0dd7ede0d6db83999ceefc4f4e2e1e1d2d51",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:254",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:263",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:267",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1823",
+        "skyvern/forge/agent.py:7831"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/single-hover-action.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 55,
+      "sha256": "1145a0e20f3b035f5ed7bad6f44401fe9161adfee0ef0fdf7f474f878de28cdf",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1835",
+        "skyvern/forge/agent.py:7839"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/single-input-action.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 64,
+      "sha256": "1d6d441282c847d5ee1abeca1b989c81806b4a7de5f06164f10b943b36d360f3",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:507",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:515",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:519",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1826",
+        "skyvern/forge/agent.py:7833"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/single-locate-element.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 32,
+      "sha256": "39f3d6507cb38f7f7cb3c4f39be811034492bb467a888d34a908fd2ff8512eb9",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1681",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1699"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/single-select-action.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 64,
+      "sha256": "c1f6e96d8583a22369b5aac9732f8e3cf2f9cb1f65340e7b25ecb93fb91df84d",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:704",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:712",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:716",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1832",
+        "skyvern/forge/agent.py:7837"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/single-upload-action.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 51,
+      "sha256": "dbd7d7c74701a32fb858ff416f959a177b3daad56b322d9e9dcd20efeea21f7c",
+      "loadedBy": [
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:630",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:638",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:642",
+        "skyvern/core/script_generations/real_skyvern_page_ai.py:1829",
+        "skyvern/forge/agent.py:7835"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/split-pdf.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 24,
+      "sha256": "c7971d9b180667b57b56ab2a0f1e87b50d7b136ab6770e9607121ed381602be8",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/split_pdf_block.py:202",
+        "skyvern/forge/sdk/workflow/models/split_pdf_block.py:209"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/suggest-data-schema.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 134,
+      "sha256": "2a10bd5c8f9ab36d35536b260099d82c8870325d42d6becaf8564312b6fe02cd",
+      "loadedBy": [
+        "skyvern/forge/sdk/routes/agent_protocol.py:5562",
+        "skyvern/forge/sdk/routes/agent_protocol.py:5577"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/summarize-max-retries-reason.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 45,
+      "sha256": "9f60c404cbb970ad9618818f715d497c1bad15defa415ccec01fa2f8a7cf05cf",
+      "loadedBy": [
+        "skyvern/forge/agent.py:10521",
+        "skyvern/forge/agent.py:10534"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/summarize-max-steps-reason.j2",
+      "category": "Jinja recovery/script generation",
+      "lines": 39,
+      "sha256": "b5ccc4997ca00ae352797714470ab758e3cf86321848aac9426fdc50670778a3",
+      "loadedBy": [
+        "skyvern/forge/agent.py:10368",
+        "skyvern/forge/agent.py:10380"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/summarize-workflow-run-output.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 32,
+      "sha256": "b81fc9a5de513e81772fef59da3da0e88ea8e3df4de177457084da9f85562766",
+      "loadedBy": [
+        "skyvern/forge/sdk/routes/prompts.py:197"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/surface-user-defined-errors.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 51,
+      "sha256": "58e7779af99c353d17e1f69476d4cfaa9a1dc783a5e46f5b9275b12738ca65a0",
+      "loadedBy": [
+        "skyvern/services/error_detection_service.py:205",
+        "skyvern/services/error_detection_service.py:228",
+        "skyvern/services/script_service.py:1357",
+        "skyvern/webeye/actions/handler.py:16218",
+        "skyvern/webeye/actions/handler.py:16232"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/surface-web-search-errors.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 42,
+      "sha256": "f13645f514e9a9a23ef94ccd0432538bafe4c083c33a153e692cf657e648e28a",
+      "loadedBy": [
+        "skyvern/forge/sdk/workflow/models/web_search_block.py:233"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/svg-convert.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 13,
+      "sha256": "d9dbc0aa01f93a366ead93fc930c4880465f4c405a5ecdf448fb8cd6be75bf6c",
+      "loadedBy": [
+        "skyvern/forge/agent_functions.py:693",
+        "skyvern/forge/agent_functions.py:703"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 146,
+      "sha256": "d1e55475e8d7607a1a180caa434a965d2212dc799a0865a7c161fc9ffd8f341c",
+      "loadedBy": [
+        "skyvern/cli/mcp_tools/blocks.py:659",
+        "skyvern/cli/mcp_tools/blocks.py:784",
+        "skyvern/cli/mcp_tools/instructions.py:126",
+        "skyvern/core/script_generations/generate_script.py:3059",
+        "skyvern/core/script_generations/generate_script.py:3110",
+        "skyvern/core/script_generations/generate_script.py:3180",
+        "skyvern/core/script_generations/generate_script.py:3237",
+        "skyvern/core/script_generations/generate_script.py:3486",
+        "skyvern/core/script_generations/generate_script.py:3636",
+        "skyvern/core/script_generations/script_block_extractor.py:12",
+        "skyvern/forge/agent.py:561",
+        "skyvern/forge/sdk/api/llm/api_handler_factory.py:922",
+        "skyvern/forge/sdk/artifact/models.py:132",
+        "skyvern/forge/sdk/copilot/tools/banned_blocks.py:108",
+        "skyvern/schemas/run_enums.py:6",
+        "skyvern/schemas/runs.py:180",
+        "skyvern/schemas/workflows.py:489",
+        "skyvern/services/task_v2_service.py:1008",
+        "skyvern/services/task_v2_service.py:1034"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_check_completion.j2",
+      "category": "Jinja verification",
+      "lines": 64,
+      "sha256": "8899aa1750b2357b8fe103888b2568ae77b42a15a0d3af106680d0c373444900",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:1342",
+        "skyvern/services/task_v2_service.py:1361"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_generate_compute_code.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 46,
+      "sha256": "86e5518fb81f07890f5d7bb1093efa26a094b26923dd8f6561635ff139f43052",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:2023",
+        "skyvern/services/task_v2_service.py:2034"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_generate_extraction_task.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 28,
+      "sha256": "d7168a807aaa7605b35c4c21aa067e6571cf776648282fa3e61d9ca865c8c726",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:1869",
+        "skyvern/services/task_v2_service.py:1883"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_generate_metadata.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 27,
+      "sha256": "0fa60bd385c4c6073946c2aa0e6f3605650683bb92c2c10a8f2f54cc26188d79",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:467",
+        "skyvern/services/task_v2_service.py:475"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_generate_task_block.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 28,
+      "sha256": "c19b27dab57a7edb5d99c6b3c3f3a44a93d2246f047057d57b88b875d82daadd",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:1757",
+        "skyvern/services/task_v2_service.py:1777"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_loop_task_extraction_goal.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 6,
+      "sha256": "4d3067cda2687860305f1ccc9230396d7c95b8700ed8e663609497bfb1099d1a",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:1631"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_summarize-max-steps-reason.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 26,
+      "sha256": "2900d84b8d9c5d0238252bc88822361771b80cb590d62994b48f03322eb70fcd",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:209",
+        "skyvern/services/task_v2_service.py:219"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/task_v2_summary.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 35,
+      "sha256": "9585415eb5aeab19c83dc7323bb12649688d3c0753c862bc8348c098c57bd67b",
+      "loadedBy": [
+        "skyvern/services/task_v2_service.py:2691",
+        "skyvern/services/task_v2_service.py:2702"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/taskv3-goal-check.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 39,
+      "sha256": "8443feb858280516e16ad18e8fb1ceb1ebd5c9145dcf1264aaba3bf7dd576b57",
+      "loadedBy": [
+        "skyvern/forge/taskv3/goal_check.py:24"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/taskv3-unlisted-outcome-check.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 59,
+      "sha256": "7060f2a210f1cebee0f74d205a841bfff0f6ccf630defdc3816a543c023879d1",
+      "loadedBy": [
+        "skyvern/forge/taskv3/goal_check.py:38"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/ui-tars-system-prompt.j2",
+      "category": "Jinja browser action/extraction",
+      "lines": 37,
+      "sha256": "eb89cc96d55a0d3aa89211ec7968dd5746fc3c89251fbb849e2b44a34a05a774",
+      "loadedBy": [
+        "skyvern/forge/sdk/api/llm/api_handler_factory.py:372",
+        "skyvern/forge/sdk/api/llm/ui_tars_llm_caller.py:33",
+        "skyvern/forge/sdk/api/llm/ui_tars_llm_caller.py:139"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/validation-evidence-router.j2",
+      "category": "Jinja verification",
+      "lines": 48,
+      "sha256": "9d0ca8ae3d6937c10209da0687ff288e65018626b4ce181c535f2102ba8be6e4",
+      "loadedBy": [
+        "skyvern/forge/validation_evidence_router.py:281",
+        "skyvern/forge/validation_evidence_router.py:290"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/workflow-copilot-agent.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 56,
+      "sha256": "b85154a4ed639f8c9810b846483a60cbad4f1a1cbea9513321528e060bd9d820",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/config.py:75"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/workflow-copilot-browser-ablation.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 9,
+      "sha256": "c65f00c57960813ce262375c7308bd42af784edab93d32be0d2c5ee019da2342",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/browser_ablation.py:70"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/workflow-copilot-completion-verification.j2",
+      "category": "Jinja verification",
+      "lines": 21,
+      "sha256": "9a728608fd2efcc64162a5640e596f5b6a611ec4b27f1e635df129df4d8f03fa",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/completion_verification.py:43"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/workflow-copilot-output-designation.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 21,
+      "sha256": "3d6262246e11e7c92b6a3305f7a240924c1cafdc7651a861f377bfb30952f7a5",
+      "loadedBy": [],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/workflow-copilot-raw-secret-safety.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 15,
+      "sha256": "a598139258e7b6cf7676ae6540a03609567ac8f0f5994d0b75862b7140ec4fe5",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/llm_config.py:15",
+        "skyvern/forge/sdk/copilot/request_policy.py:138"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/prompts/skyvern/workflow-copilot-user.j2",
+      "category": "Jinja workflow planner/copilot",
+      "lines": 134,
+      "sha256": "49a5e01cbe6aaa3983ec2b5d3e7aafc5dfb239fd0c15188d17bb693ca6e8440a",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/agent.py:1556"
+      ],
+      "notes": "PromptEngine.load_prompt renders named templates. Literal source references listed; empty refs do not prove unused because loading may be dynamic. Runtime role depends on caller, not extension.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/agent.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 5963,
+      "sha256": "033f03dab80860e5a0c222e9aa51a1e2bb55514cdf53c70842d017759ef76c45",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/request_slots.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 627,
+      "sha256": "ad2978bd9bbee8acae7faa487f7d544e3a0324b5fed1c557c808426b2a559f4d",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/tools/__init__.py",
+      "category": "tool usage/schema surface",
+      "lines": 2201,
+      "sha256": "981a5a0d9b58311588fb49401337095b2ecb7f315a4359a88789919150d79ebe",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/tools/browser_code.py",
+      "category": "tool usage/schema surface",
+      "lines": 796,
+      "sha256": "209a4da19dfe0532770ed04692f6beb4b424cbfcf87f18dbd94fe0bcf398336b",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/tools/discovery.py",
+      "category": "tool usage/schema surface",
+      "lines": 998,
+      "sha256": "4c64cd9b1a7d96343bfd1c5290ed81a6526054fddc956338c8e416f126425074",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/tools/mcp_hooks.py",
+      "category": "tool usage/schema surface",
+      "lines": 2583,
+      "sha256": "0c5d185dd9574572f95aebcc56220e7862868dddf3cfd5fd6639c93dc20634a1",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/tools/run_execution.py",
+      "category": "tool usage/schema surface",
+      "lines": 6989,
+      "sha256": "d4b0c934b37d91553a95e4a24168f122c40783fe8500d67e625e13d406117b96",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/tools/workflow_update.py",
+      "category": "tool usage/schema surface",
+      "lines": 4873,
+      "sha256": "07f8452c68fa611c2281ca64d2cfa3a71cd2ef0bf2e4851ca5425198fbe2c082",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/db/CLAUDE.md",
+      "category": "developer contribution instructions",
+      "lines": 11,
+      "sha256": "7038a57d8894b31e9286b44ba791e53dd7af013e394d36dc508c2cf599388941",
+      "loadedBy": [],
+      "notes": "Developer guidance separate from runtime model instructions.",
+      "reviewDepth": "outline"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/routes/credentials.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 3547,
+      "sha256": "8c3b8558726908a9c174e63493dd676fc86d5437274efa550e6863795a29c7c8",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/taskv3/auth_tools.py",
+      "category": "tool usage/schema surface",
+      "lines": 1016,
+      "sha256": "e41db309826aa85fe2f5dc7fd03534440653a7cdec06c02952c94049fa032684",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/taskv3/captcha_tools.py",
+      "category": "tool usage/schema surface",
+      "lines": 371,
+      "sha256": "21c001eb0c4a71888aadcc873f6c9b0cc31fd166c54501b26d940e688180a434",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/taskv3/engine.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 690,
+      "sha256": "cf8d6ebc225b18cdf241eb024483b7925a12092e41d19dd18e1c60cc77efc410",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/taskv3/loop.py",
+      "category": "tool usage/schema surface",
+      "lines": 5094,
+      "sha256": "7ec76fa4d63b7cb53a4a0e46e9eca9206f8c84f242e6e9da850d8e2a51a326ec",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/taskv3/tools.py",
+      "category": "tool usage/schema surface",
+      "lines": 19309,
+      "sha256": "3db93daf3f9b462c4954208665a8e423b74a461b9c33e20a313b1c1ca96ad1df",
+      "loadedBy": [],
+      "notes": "Tool descriptions/docstrings complement prompts; inventory candidate, individual tool registration not all deep-read.",
+      "reviewDepth": "inventory"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/services/script_reviewer_v3/prompts.py",
+      "category": "runtime inline prompt/composition",
+      "lines": 328,
+      "sha256": "e619523b4c2248d8942590302e562692a9dde6c9fb2d0faee47a1663cc8fe3dc",
+      "loadedBy": [
+        "See report exact symbol load paths"
+      ],
+      "notes": "Includes inline instructions, prompt fragments and/or role-specific assembly. Not every string in this file is a prompt.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/work_plan.py",
+      "category": "runtime context instruction fragment",
+      "lines": 79,
+      "sha256": "74df29669ea46c11cf83644208073546f5350c779ef99b82a015a624b78f4961",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/agent.py:1500"
+      ],
+      "notes": "Model notes only; prompt labels them as prior notes, never execution policy. Deep-reviewed.",
+      "reviewDepth": "deep"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/request_policy.py",
+      "category": "runtime policy context and safety classifier",
+      "lines": 4869,
+      "sha256": "5ac3657bd123ae2baae8f800117793e7865a7318d079be1a50e6d377e38bb74a",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/agent.py:1488-1495"
+      ],
+      "notes": "Deterministic policy summary + separately named secret-safety classifier; not all policy code is a prompt.",
+      "reviewDepth": "composition review"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/copilot/config.py",
+      "category": "runtime prompt configuration",
+      "lines": 142,
+      "sha256": "857e8970bcf66b76291699f7469f96ed58038974e0bac2472397dfe2de5f51cd",
+      "loadedBy": [
+        "skyvern/forge/sdk/copilot/agent.py:866-890"
+      ],
+      "notes": "Default template and optional injected security_rules. Deployment values are not verified.",
+      "reviewDepth": "composition review"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/experimentation/prompt_families.py",
+      "category": "runtime conditional prompt variants",
+      "lines": 86,
+      "sha256": "45c20a5d8fedbf6e2cdee0aae8e7b1cc1c09df4ddf879dd5d78c72a00e568017",
+      "loadedBy": [
+        "skyvern/forge/sdk/experimentation/llm_prompt_config.py"
+      ],
+      "notes": "Static maps gate slim variants by prompt family; verification deliberately excluded.",
+      "reviewDepth": "composition review"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/forge/sdk/prompting.py",
+      "category": "runtime template loader",
+      "lines": 145,
+      "sha256": "c844c19179f00b793e9f491b0fdcc8e94c244e742eae8ad6d4e7ec9daaa6e6f7",
+      "loadedBy": [
+        "skyvern/forge/prompts.py:4"
+      ],
+      "notes": "Jinja template loading and untrusted-data filter; role assigned by caller.",
+      "reviewDepth": "composition review"
+    },
+    {
+      "repo": "skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "path": "skyvern/utils/prompt_engine.py",
+      "category": "runtime prompt input bounding",
+      "lines": 426,
+      "sha256": "a9227e9540526e2f9848510595b9b225c20aa366926680fde734568c3906d3cb",
+      "loadedBy": [
+        "skyvern/forge/agent.py"
+      ],
+      "notes": "Element-tree economy fallback, explicit truncation/cap, matching final prompt cache inputs.",
+      "reviewDepth": "composition review"
+    }
+  ]
+}

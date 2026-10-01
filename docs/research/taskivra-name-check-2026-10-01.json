@@ -1,0 +1,68 @@
+{
+  "candidate": "Taskivra",
+  "proposedRepoName": "taskivra",
+  "checkedClientDate": "2026-10-01",
+  "observedAtUtc": "2026-10-01T04:23:48.543237+00:00",
+  "publicWebSearch": {
+    "exactQueries": [
+      "\"Taskivra\"",
+      "\"Taskivra\" app OR software OR AI OR company",
+      "\"Taskivra\" site:github.com OR site:npmjs.com OR site:pypi.org",
+      "\"Taskivra\" site:linkedin.com OR site:x.com OR site:instagram.com OR site:producthunt.com",
+      "\"Taskivra\" trademark OR brand OR business"
+    ],
+    "finding": "No exact-match indexed existing product or brand found in these searches."
+  },
+  "directRegistryChecks": [
+    {
+      "check": "GitHub repository names",
+      "url": "https://api.github.com/search/repositories?q=taskivra+in:name&per_page=30",
+      "httpStatus": 200,
+      "totalCount": 0,
+      "incompleteResults": false,
+      "matches": []
+    },
+    {
+      "check": "GitHub username",
+      "url": "https://api.github.com/users/taskivra",
+      "httpStatus": 404,
+      "interpretation": "No exact public record returned by this registry. This is not a reservation or guarantee."
+    },
+    {
+      "check": "npm package",
+      "url": "https://registry.npmjs.org/taskivra",
+      "httpStatus": 404,
+      "interpretation": "No exact public record returned by this registry. This is not a reservation or guarantee."
+    },
+    {
+      "check": "PyPI package",
+      "url": "https://pypi.org/pypi/taskivra/json",
+      "httpStatus": 404,
+      "interpretation": "No exact public record returned by this registry. This is not a reservation or guarantee."
+    },
+    {
+      "check": ".com registration",
+      "url": "https://rdap.verisign.com/com/v1/domain/taskivra.com",
+      "httpStatus": 404,
+      "interpretation": "No exact public record returned by this registry. This is not a reservation or guarantee."
+    },
+    {
+      "check": ".ai registration",
+      "url": "https://rdap.identitydigital.services/rdap/domain/taskivra.ai",
+      "httpStatus": 404,
+      "interpretation": "No exact public record returned by this registry. This is not a reservation or guarantee."
+    },
+    {
+      "check": ".app registration",
+      "url": "https://pubapi.registry.google/rdap/domain/taskivra.app",
+      "httpStatus": 404,
+      "interpretation": "No exact public record returned by this registry. This is not a reservation or guarantee."
+    }
+  ],
+  "limitations": [
+    "Public GitHub search does not include private repositories. Repo names are scoped by owner, not globally reserved.",
+    "An RDAP404 indicates no public registration record at query time, not guaranteed registrar availability or price.",
+    "Search indexing is incomplete; these checks do not prove worldwide non-use or trademark clearance.",
+    "No domain, handle, package or repository was registered or renamed."
+  ]
+}

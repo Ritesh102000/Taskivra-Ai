@@ -1,0 +1,59 @@
+{
+  "kind": "phase3-browser-worker",
+  "startedAt": "2026-09-30T08:27:02.886Z",
+  "finishedAt": "2026-09-30T08:27:16.084Z",
+  "images": {
+    "browser": "sha256:b61e56c36347a0867cba17d0fb12ff972a359ce29e74384e1cbe043ce226a2c1",
+    "egress": "sha256:e5b366e68249b7426ba3b39ddeee10ad91bfad7d7a5aa2573e41e5c58d964f34"
+  },
+  "sourceSha256": {
+    "protocol.mjs": "a8656aa536f78468dd1569492ab49b4c6c1195c2afb2dcc91565ccbd8028f7f5",
+    "files.mjs": "fb42bbd12c04ebb7f1dd6e041a339c2aace71878ffdc5bfaf2aa71a0a9126795",
+    "sandbox.mjs": "357c377eb366b06d2cc777085d61d654bde129112c3b4f911c6a9aaa220208ac",
+    "worker.mjs": "a2cbce0003589c9cad0bb10cb9479158010a7088c8d489982e2ac1e11448a825",
+    "gmail.mjs": "2099fdef503e1ba55b1f2c8dabc32584480df6d16a90802bf1506afe7e1df5ef",
+    "dom-fence.mjs": "79dd9ecad791092acec968eda33aea52cdc793c4d4a7a208e88636c87bc1c8f3"
+  },
+  "sandbox": {
+    "uid": 1000,
+    "chromium": "153.0.8010.12",
+    "proof": "proc-renderer-namespaces-and-additional-seccomp-filter",
+    "namespaceSandbox": true,
+    "seccompBpfSandbox": true,
+    "noNewPrivileges": true,
+    "unsafeFlags": false,
+    "workerSeccompFilters": 1,
+    "renderers": [
+      {
+        "namespace": true,
+        "seccomp": true,
+        "noPrivileges": true,
+        "filters": 2
+      },
+      {
+        "namespace": true,
+        "seccomp": true,
+        "noPrivileges": true,
+        "filters": 2
+      }
+    ]
+  },
+  "checks": {
+    "sandboxLaunchAndResourceBoundary": true,
+    "separateCookieIdentitiesAndThreeTabs": true,
+    "humanFencingAndForeignIds": true,
+    "popupOwnership": true,
+    "checkedUpload": true,
+    "crossOriginFormUploadBlocked": true,
+    "persistedDownloadBeforeContextClose": true,
+    "freshAgentObservationAndNoAgentFrame": true,
+    "reviewedFillSelectClickAndDOMMutationFence": true,
+    "encryptedProfileRestartAndFreshGeneration": true,
+    "oneWorkerCrashLeavesPeerWorking": true
+  },
+  "limitations": [
+    "Synthetic local fixture; real provider MFA/passkeys not exercised.",
+    "File selection grants the page access; JavaScript may forward received bytes.",
+    "No screenshots, profiles or credential input are recorded in this report."
+  ]
+}

@@ -1,0 +1,381 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-09-30",
+  "product_version": "0.6.2",
+  "scope": "Audit and recommendations only; no application implementation or new live tests",
+  "primary_report": "docs/market-fit-audit.md",
+  "reference_commits": {
+    "browser-use-desktop": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+    "skyvern": "695c05698eba52716521dd2b49800e88f314b660",
+    "deer-flow": "f75d89f39dd152873bf2b6486052644a77e830fb",
+    "openhands": "1ec86616bc0511b1e56269fd6ba5872438f4fb7f",
+    "kortix-suna": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+    "openagents": "d46d087dca2279eac25414621e6af91bc8b3338b"
+  },
+  "source_baseline": [
+    {
+      "path": "package.json",
+      "sha256": "879e31df521d58346d6102e08f6c410a03f9d1adb51faf50eae78a2a4ece7ba5"
+    },
+    {
+      "path": "README.md",
+      "sha256": "816a10f340bf9b3e9b1d6c496906518242ea6e152bf274f4fa5915277471ff99"
+    },
+    {
+      "path": "architecture.md",
+      "sha256": "3b395caf8ea16f1133fa999a71a61181df184e64e328a17004c4a658a79f75ae"
+    },
+    {
+      "path": "design.md",
+      "sha256": "1bdc5690c7fcbc665e07c2812283bb6ec60f99c7c8956d462165d98cc9b4a403"
+    },
+    {
+      "path": "implementation-plan.md",
+      "sha256": "a1f68f7a053d2bafc22331cea5aa445808619f211e128974da4a854192a472e3"
+    },
+    {
+      "path": "packages/agent-loop/tools.ts",
+      "sha256": "626945369094482664d6640e9171b57520da03166c26ba532b33ab7ed4570ba1"
+    },
+    {
+      "path": "packages/agent-loop/index.ts",
+      "sha256": "950328d0e5f8ee22d98c010f820bc9eb32ee966290aac1e28d4f7aeebd084908"
+    },
+    {
+      "path": "packages/agent-loop/context.ts",
+      "sha256": "75b58fa05bf124124364a7859575713fd053d50f0a02b3918e876a52dc615f19"
+    },
+    {
+      "path": "packages/artifacts/index.ts",
+      "sha256": "b21a5d95122f21f0e9a2009a8b940b2fb99c7be413e367bc310d1a52c2c72084"
+    },
+    {
+      "path": "packages/artifacts/safe-io.ts",
+      "sha256": "3cb7989d5c98a6bb9ee473b8ebc8757d5ff859cba66b2fbb039b718aea015eff"
+    },
+    {
+      "path": "packages/code/index.ts",
+      "sha256": "5652775a935573dfae4054a5549cb7b5d7f98b95d7d54d1db5308023e9337abc"
+    },
+    {
+      "path": "packages/code-runtime/README.md",
+      "sha256": "76376a997760a20c6b359d14a1b09c1e6513c221609a9e255a95b21d90d1344a"
+    },
+    {
+      "path": "packages/model-adapters/openai.ts",
+      "sha256": "5cae634ce13a270d5a1596d865831658f20a75f90ee1558115a714abf01c8ac4"
+    },
+    {
+      "path": "packages/model-adapters/pricing.ts",
+      "sha256": "cb3044433390172e38147e47902cdf9d352d51c19bfe96af9119eba7e3770769"
+    },
+    {
+      "path": "packages/workflows/catalog.ts",
+      "sha256": "3f698238c2199e627debb701c8bb909a390116edd25b3a60adc4e0ac977edbf7"
+    },
+    {
+      "path": "packages/workflows/index.ts",
+      "sha256": "ea570df2d2e3df3b6a51f3c9321453de43aa1143fa80c44af75af32c0f7583f8"
+    },
+    {
+      "path": "packages/contracts/live.ts",
+      "sha256": "98cd257d123d3f6b0ee863e03ac58b7b84e3c518469b3a80cf41c9472abd6af8"
+    },
+    {
+      "path": "apps/desktop/renderer/Workflows.tsx",
+      "sha256": "b859835bb2cdf534f58db491c2b75a40fce3b6b1899ca404951cff9bdabe92d3"
+    },
+    {
+      "path": "apps/desktop/renderer/Files.tsx",
+      "sha256": "287d951247eed9b8fb425a46fa4904c1990e5dd14849a1b7b15f273f874432f2"
+    },
+    {
+      "path": "docs/prompt-research/verification.json",
+      "sha256": "1fffdfc6dd6635b815ea045c7e30c1e4f2cf7c8472d67bc6b7573374792768e5"
+    }
+  ],
+  "priorities": {
+    "P0": "First useful experience; implement bounded slices",
+    "P1": "Select after repeated-use evidence; not an instruction to build all",
+    "P2": "Customer-demand gated"
+  },
+  "features": [
+    {
+      "id": "F01",
+      "priority": "P0",
+      "relative_effort": "L",
+      "title": "Installable Mac release and recovery",
+      "first_slice": "Local package, checkpoint-safe backup/restore, clean stop and sleep/wake handling",
+      "customer_value": "Makes the product usable beyond a developer machine",
+      "dependencies_and_acceptance": "Complete Phase 7 integrated scenario and restore drill on a clean data root. External distribution adds signing/notarization and an update plan",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F02",
+      "priority": "P0",
+      "relative_effort": "M",
+      "title": "Guided setup and task doctor",
+      "first_slice": "Check only the selected job's model, account, browser, runtime and input requirements",
+      "customer_value": "Reduces abandoned setup and repeated troubleshooting across all audiences",
+      "dependencies_and_acceptance": "Reuse existing health checks. Show configured, tested, expired and not tested distinctly. Preserve task drafts; native Chrome reading needs no code container, while the container-browser route requires Docker",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F03",
+      "priority": "P0",
+      "relative_effort": "M",
+      "title": "Result review desk",
+      "first_slice": "Render Markdown and tables, show sources/coverage, compare versions, Accept or Request changes, exact export",
+      "customer_value": "Turns output files into something a person can use and trust",
+      "dependencies_and_acceptance": "Reuse immutable artifacts. Separate integrity, criterion checks and owner acceptance. Untrusted result content must not run scripts in the app",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F04",
+      "priority": "P0",
+      "relative_effort": "M",
+      "title": "Task acceptance and quality evaluation",
+      "first_slice": "Simple success checklist and representative task fixtures",
+      "customer_value": "Detects plausible-looking but incomplete work",
+      "dependencies_and_acceptance": "Include planted omissions, wrong calculations and partial source coverage. Align output-size limits; no unsupported “checked” status. Evaluate live model quality separately with an explicitly chosen budget",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F05",
+      "priority": "P0",
+      "relative_effort": "L",
+      "title": "Ordinary file support and polished exports",
+      "first_slice": "Start with safe source-text formats, CSV tables/charts and a reviewed report export; then PDF/XLSX parsing and DOCX",
+      "customer_value": "Opens real business and developer work without manual conversion",
+      "dependencies_and_acceptance": "Reviewed pinned runtime dependencies, extraction coverage and bounds. Preserve spreadsheet values/types; never run macros. Test import → calculation → preview → export on the same exact versions",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F06",
+      "priority": "P1",
+      "relative_effort": "M",
+      "title": "Parameterized jobs",
+      "first_slice": "Named file/input slots, output schema, sample input/output and versioned procedure",
+      "customer_value": "Repeating a job becomes filling a form rather than rewriting prompts",
+      "dependencies_and_acceptance": "F03–F04. Reject missing/wrong inputs before paid work; three new input sets produce the promised schema; do not clone credentials or grants",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F07",
+      "priority": "P1",
+      "relative_effort": "L",
+      "title": "Client/project spaces and reviewed knowledge",
+      "first_slice": "Selected briefs, rules, sources and reusable jobs",
+      "customer_value": "Reuses context without mixing customers",
+      "dependencies_and_acceptance": "New project access rules and independent read-input capabilities. Three conflicting client fixtures must not cross retrieval, sharing, messages or account boundaries",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F08",
+      "priority": "P1",
+      "relative_effort": "M",
+      "title": "Source discovery and research receipts",
+      "first_slice": "Approved web search, selected-source fetching, citations and coverage",
+      "customer_value": "Research can discover evidence rather than require every URL from the user",
+      "dependencies_and_acceptance": "Search-provider setup, costs and destination policy. Respect access restrictions; record retrieved dates, distinguish conflicting sources and preserve source receipts",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F09",
+      "priority": "P1",
+      "relative_effort": "L",
+      "title": "Selected Drive and Sheets connection",
+      "first_slice": "Import chosen files/ranges as versioned inputs",
+      "customer_value": "Removes repetitive exports for business reports",
+      "dependencies_and_acceptance": "OAuth/account lifecycle, scopes, pagination, revocation and data snapshots. A stale/wrong account cannot silently supply inputs; no writes in this slice",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F10",
+      "priority": "P1",
+      "relative_effort": "M–L",
+      "title": "Gmail review beyond snippets",
+      "first_slice": "Paginated search, explicit full-thread access and selected safe attachments",
+      "customer_value": "Makes mail prioritization and follow-up analysis more useful",
+      "dependencies_and_acceptance": "Decompose current Gmail tool restrictions; clear account and coverage, attachment validation and new consent as needed. Keep current read-only behavior unless a separate action is approved",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F11",
+      "priority": "P1",
+      "relative_effort": "L",
+      "title": "Local recurring jobs",
+      "first_slice": "Repeat a previously accepted job daily/weekly with next run, timezone and history",
+      "customer_value": "Creates ongoing usefulness",
+      "dependencies_and_acceptance": "F01, F04, F06 and stable required sources. Durable occurrence identity, non-overlap, caps, expiry, missed-run policy and pause-all; restart/sleep cannot produce duplicate dispatch",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F12",
+      "priority": "P1",
+      "relative_effort": "M",
+      "title": "Change summaries and actionable notifications",
+      "first_slice": "What changed since the accepted result; alert only when useful",
+      "customer_value": "Reduces monitoring and notification fatigue",
+      "dependencies_and_acceptance": "F03 plus durable events; F11 for recurrence. Detect new information separately from wording changes; deep-link to the exact result/request; quiet hours and stale-action checks",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F13",
+      "priority": "P1",
+      "relative_effort": "L",
+      "title": "Useful browser actions",
+      "first_slice": "Fresh-target click/fill/select, task tabs and managed downloads; form staging only where the site supports it",
+      "customer_value": "Enables portal work and meaningful interactive checks",
+      "dependencies_and_acceptance": "Policy/broker changes and native/container capability matrix. Typing can autosave: approvals bind account, target, operation, payload and revision. Reconcile uncertain outcomes through authoritative state or idempotency; if unverifiable, stop for review without automatic replay",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F14",
+      "priority": "P1",
+      "relative_effort": "M",
+      "title": "Recovery view and resource queue",
+      "first_slice": "Last successful step, cause, safe repair, waiting resource and retry history",
+      "customer_value": "Makes troubleshooting understandable without babysitting",
+      "dependencies_and_acceptance": "Existing checkpoints, receipts and code-capacity limits. Queue two code jobs predictably; expired login, runtime loss, canceled work and unknown outcomes have distinct recovery paths",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F15",
+      "priority": "P1",
+      "relative_effort": "M",
+      "title": "Outcome and cost history",
+      "first_slice": "Accepted, revised and abandoned results; intervention time; estimated spend per accepted result",
+      "customer_value": "Helps users decide which jobs are worth keeping",
+      "dependencies_and_acceptance": "F03 acceptance state, workflow linkage and local metrics. Include failed attempts and distinguish provider estimates from invoices or self-reported time saved",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F16",
+      "priority": "P2",
+      "relative_effort": "M–L",
+      "title": "Read-only GitHub context",
+      "first_slice": "Selected repository/commit/diff import with provenance",
+      "customer_value": "Reduces developer copy/paste and stale source review",
+      "dependencies_and_acceptance": "F05 and a scoped connector. Pin commit and file limits; never imply a full repository was read from a partial diff",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F17",
+      "priority": "P2",
+      "relative_effort": "M",
+      "title": "Calendar briefing",
+      "first_slice": "Selected calendar events plus approved context",
+      "customer_value": "Makes personal and business daily briefs more actionable",
+      "dependencies_and_acceptance": "Read-only connector and optional F11. Exact calendar/account/timezone; no meeting edits in the first slice",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F18",
+      "priority": "P2",
+      "relative_effort": "L",
+      "title": "Draft and approve external actions",
+      "first_slice": "One requested email, ticket or CRM update type",
+      "customer_value": "Closes the gap between a recommendation and useful execution",
+      "dependencies_and_acceptance": "Stable read connector and explicit operation grants. Show account, recipient/object and exact before/after; revised drafts invalidate approval; reconcile uncertain sends",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F19",
+      "priority": "P2",
+      "relative_effort": "M",
+      "title": "Visible two-agent workflows",
+      "first_slice": "Researcher → reviewer, with owner-visible assignments and shared budget",
+      "customer_value": "Makes existing collaboration understandable",
+      "dependencies_and_acceptance": "F04/F06 and exact published handoffs. Compare against a single agent; keep only if quality or elapsed time improves enough to justify cost",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F20",
+      "priority": "P2",
+      "relative_effort": "M",
+      "title": "Tested playbooks",
+      "first_slice": "Reviewed procedure, permitted tools, known inputs and held-out examples",
+      "customer_value": "Improves specialist repeatability",
+      "dependencies_and_acceptance": "F04/F06 and versioning. Promote changes only after tests; retrieved instructions cannot self-install tools or expand authority",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F21",
+      "priority": "P2",
+      "relative_effort": "M",
+      "title": "Portable workflow and task packs",
+      "first_slice": "Export selected definitions, evidence and results; import as disabled drafts",
+      "customer_value": "Supports reuse, handover and support",
+      "dependencies_and_acceptance": "F01/F06, manifests and compatibility checks. Exclude tokens/cookies/private history by default; rebind accounts and grants after import",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F22",
+      "priority": "P2",
+      "relative_effort": "S–M",
+      "title": "Quick capture",
+      "first_slice": "Send a selected URL/file or explicitly pasted text into a task draft",
+      "customer_value": "Reduces friction while the user continues other work",
+      "dependencies_and_acceptance": "Local shortcut/share entry point with preview. No background clipboard monitoring; capture creates a draft rather than silently starting paid work",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F23",
+      "priority": "P1",
+      "relative_effort": "M",
+      "title": "Context and model budgets suited to the job",
+      "first_slice": "Scoped evidence retrieval, bounded artifact writing and evaluated model choices",
+      "customer_value": "Prevents long jobs from losing evidence or repeatedly paying to read it",
+      "dependencies_and_acceptance": "F04 evaluations; retain owner caps and initial OpenAI support. Model change never changes permissions; measure quality/cost before introducing other providers",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    },
+    {
+      "id": "F24",
+      "priority": "P2",
+      "relative_effort": "L",
+      "title": "Visual website QA",
+      "first_slice": "Screenshots, interactive steps and reproducible evidence",
+      "customer_value": "Broadens agency/developer audits beyond page copy",
+      "dependencies_and_acceptance": "F13 plus evaluated image-capable model flow and fixture sites. Separate visual checks from actual accessibility/performance tests; all findings need observable evidence",
+      "status": "proposed",
+      "demand_evidence": "Unvalidated; source-backed gap and product judgment, not measured customer demand"
+    }
+  ],
+  "validation": {
+    "discovery": "15 people, five per audience; proposed only",
+    "activation": "12 Mac pilots, four per audience; at least 9 independently reach a scoped result as a proposed gate",
+    "repeat_use": "At least 6 of 12 accept a repeat job with new inputs in week two and at least 4 in week four; proposed small-cohort decision gates, not market fit proof"
+  },
+  "document_verification": {
+    "feature_count": 24,
+    "local_links_exist": true,
+    "source_line_anchors_in_bounds": true,
+    "source_baseline_hashes_unchanged": true,
+    "research_json_parses": true,
+    "new_runtime_tests": false
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-09-30T05:48:05.043Z",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "chromeVersion": "154.0.8037.92",
+  "backend": "desktop_chrome",
+  "nativeHostSourceSha256": "00659b7befba0d25525239f5ca56fef656d70716b4cd65e5152121cf3b48fbb6",
+  "nativeHostBinarySha256": "23e77bf7ce62649b5ca261b654ad796a1732552879327ba74eea78282704d24d",
+  "syntheticChecks": {
+    "hostNode": {
+      "passed": 14,
+      "failed": 0
+    },
+    "electronNode": {
+      "passed": 14,
+      "failed": 0
+    },
+    "typecheck": "passed"
+  },
+  "installedExtensionCheck": {
+    "passed": 1,
+    "failed": 0,
+    "durationMilliseconds": 2470.767833,
+    "profile": "explicit disposable QA profile, separate from personal Chrome and production app data",
+    "checks": [
+      "authenticated compiled native host and fixed extension origin",
+      "public HTTPS navigation through background tabs API",
+      "bounded real JPEG preview",
+      "chrome.debugger.getTargets confirms owned targets detached before human handoff",
+      "human observations contain no text, targets, or frame",
+      "old generation and pre-observation actions rejected",
+      "fresh observation required on return",
+      "session stop completes and subsequent requests rejected"
+    ],
+    "noModelCalls": true,
+    "noMailboxReads": true,
+    "foregroundFocusMeasured": false
+  },
+  "limits": [
+    "One-time owner Load unpacked per dedicated profile.",
+    "Chrome host browser is not Docker network/filesystem isolation.",
+    "Managed artifact upload/download remains available only in the container backend.",
+    "Actual Google login acceptance has not been proved by this public-page test."
+  ],
+  "containsScreenshots": false,
+  "containsCredentials": false,
+  "containsPageText": false
+}

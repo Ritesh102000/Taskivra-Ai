@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-09-11T13:05:06.280Z",
+  "synthetic": true,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "imageDigest": "sha256:8732abc1579e14403d764735670577887db6e6545eaf741654e361870650a685",
+  "goodInputSha256": [
+    "507f36fc55dc43444f181fa7f6623349dca4be3a6a43e58b7257c92de99d70ae",
+    "b8adc22088fa0c44103fd2c2af13e55fdfeddb74b002008958e2dab7cd59c5ee"
+  ],
+  "rejectedInputSha256": "25f7612f71e950110237dca86f5ee71cec9d5057f6c110e8ed00bf4880f46a90",
+  "blockedWithWrongFile": true,
+  "restartPreservedAcceptedSlot": true,
+  "fulfillmentReceipts": 1,
+  "continuationRuns": 1,
+  "realCodeExecutions": 1,
+  "verifiedSum": 20,
+  "outputSha256": "8155bf6fc5e47f9a4fd5bd0b4fd1a9bca14a8d19293f043c697ecac07bfe4aeb",
+  "outputBytes": 13,
+  "finalState": "succeeded",
+  "modelCalls": 3,
+  "inputTokens": 7647,
+  "outputTokens": 544,
+  "costUsd": 0.00393,
+  "reservedUsd": 0,
+  "taskBudgetUsd": 0.1,
+  "credentialsOmitted": true
+}

@@ -1,0 +1,11 @@
+import {spawnSync} from 'node:child_process';
+import {mkdirSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {join,dirname} from 'node:path';
+if(process.platform!=='darwin')throw new Error('The desktop Chrome bridge currently supports macOS only.');
+const root=dirname(fileURLToPath(import.meta.url));mkdirSync(join(root,'bin'),{recursive:true,mode:0o700});
+const result=spawnSync('/usr/bin/clang',['-O2','-Wall','-Wextra','-Werror',join(root,'profile-parent.c'),'-o',join(root,'bin/profile-parent')],{stdio:'inherit'});
+if(result.status!==0)process.exit(result.status||1);
+const host=spawnSync('/usr/bin/clang',['-O2','-Wall','-Wextra','-Werror','-fobjc-arc','-framework','Foundation',join(root,'native-host.m'),'-o',join(root,'bin/native-host')],{stdio:'inherit'});
+if(host.status!==0)process.exit(host.status||1);
+console.log('Desktop Chrome native host and profile verifier built. Dedicated profiles are prepared from the app.');

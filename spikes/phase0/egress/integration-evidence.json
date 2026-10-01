@@ -1,0 +1,215 @@
+{
+  "recorded_at": "2026-09-11T06:39:00.874828+00:00",
+  "docker_server_version": "29.4.0",
+  "test_only_fixture": true,
+  "image": "sha256:88b953f640fb46d26ae690640d708d2ed56df3bd273a477491847a57af9b9b95",
+  "source_sha256": {
+    "proxy.py": "ff57e0da180b87229793ca58c03655385c018ff176de6538cd91edb722614242",
+    "fixture.py": "88b34b6d26b08994bbaf318c44f33d1cb9fc2d40342761f35c4b4f5f0411a30c",
+    "network_probe.py": "7bb2a0bed7ca0ef1b94fddc22143b5d077a1b1601973c4c5bae305ef57261e80",
+    "harness.py": "05ba8e8737dc06a3534286a4daf1a451bb31ed992e439fec4214c4127c228819",
+    "Dockerfile": "382e5d70f8dcb9f1b458beeef3298c6e602800e1b9c0aa3cc8b36991f1110a86",
+    "fixture-cert.pem": "9a2a6e44b57f22e78c80ec663fa2bdc1ab2076f147135c1508bafb21a45f7cdc"
+  },
+  "image_source_sha256": {
+    "proxy.py": "ff57e0da180b87229793ca58c03655385c018ff176de6538cd91edb722614242",
+    "fixture.py": "88b34b6d26b08994bbaf318c44f33d1cb9fc2d40342761f35c4b4f5f0411a30c",
+    "network_probe.py": "7bb2a0bed7ca0ef1b94fddc22143b5d077a1b1601973c4c5bae305ef57261e80",
+    "fixture-cert.pem": "9a2a6e44b57f22e78c80ec663fa2bdc1ab2076f147135c1508bafb21a45f7cdc"
+  },
+  "cleanup_state": "spikes/phase0/egress/.runtime/final.json",
+  "checks": [
+    {
+      "check": "browser_network_internal_and_isolated_gateway",
+      "passed": true
+    },
+    {
+      "check": "browser_network_ipv6_disabled",
+      "passed": true
+    },
+    {
+      "check": "no_published_ports_awp0-egress-d945c39d71-fixture",
+      "passed": true
+    },
+    {
+      "check": "no_published_ports_awp0-egress-d945c39d71-peer",
+      "passed": true
+    },
+    {
+      "check": "no_published_ports_awp0-egress-d945c39d71-proxy",
+      "passed": true
+    },
+    {
+      "check": "proxy_is_not_ip_router",
+      "passed": true
+    },
+    {
+      "check": "owned_host_canary_is_reachable_from_trusted_outbound_namespace",
+      "passed": true
+    },
+    {
+      "check": "fixture_http_via_proxy",
+      "passed": true
+    },
+    {
+      "check": "fixture_https_via_proxy",
+      "passed": true
+    },
+    {
+      "check": "fixture_websocket_via_proxy",
+      "passed": true
+    },
+    {
+      "check": "fixture_secure_websocket_via_proxy",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://127.0.0.1/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://10.0.0.1/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://169.254.169.254/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://host.docker.internal/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://gateway.docker.internal/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://[::1]/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://[fe80::1]/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://192.168.128.1:8080/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://192.168.96.2:3128/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://2130706433/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://127.1/",
+      "passed": true
+    },
+    {
+      "check": "proxy_denies_http://0x7f000001/",
+      "passed": true
+    },
+    {
+      "check": "connect_denies_127.0.0.1:443",
+      "passed": true
+    },
+    {
+      "check": "connect_denies_[::1]:443",
+      "passed": true
+    },
+    {
+      "check": "connect_denies_host.docker.internal:443",
+      "passed": true
+    },
+    {
+      "check": "connect_denies_fixture.agent-workspaces.test:443",
+      "passed": true
+    },
+    {
+      "check": "private_redirect_returned_as_redirect",
+      "passed": true
+    },
+    {
+      "check": "private_redirect_follow_is_denied",
+      "passed": true
+    },
+    {
+      "check": "subresource_private_destination_denied",
+      "passed": true
+    },
+    {
+      "check": "direct_tcp_fixture_denied",
+      "passed": true
+    },
+    {
+      "check": "direct_tcp_peer_agent_denied",
+      "passed": true
+    },
+    {
+      "check": "direct_tcp_proxy_management_denied",
+      "passed": true
+    },
+    {
+      "check": "direct_host_canary_denied",
+      "passed": true
+    },
+    {
+      "check": "direct_gateway_denied_192.168.112.1",
+      "passed": true
+    },
+    {
+      "check": "direct_public_example_tcp_denied",
+      "passed": true
+    },
+    {
+      "check": "direct_udp_to_fixture_denied",
+      "passed": true
+    },
+    {
+      "check": "embedded_dns_external_resolution_denied",
+      "passed": true,
+      "detail": {
+        "received": true,
+        "rcode": 2,
+        "answers": 0
+      }
+    },
+    {
+      "check": "loopback_dns_has_no_upstream",
+      "passed": true,
+      "detail": {
+        "received": false,
+        "answers": 0
+      }
+    },
+    {
+      "check": "docker_dns_override_is_loopback",
+      "passed": true
+    },
+    {
+      "check": "browser_namespace_ipv6_disabled",
+      "passed": true
+    },
+    {
+      "check": "public_example_https_via_proxy",
+      "passed": true
+    },
+    {
+      "check": "network_probe_completed",
+      "passed": true
+    },
+    {
+      "check": "probe_cleanup_completed",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "limitations": [
+    "Passing deterministic checks is a Phase 0 result, not proof against every kernel/browser exploit.",
+    "IPv6 is disabled in the browser namespace; proxy IPv6 address classification is unit-tested, not a live IPv6 routing test.",
+    "TLS CONNECT validates and pins destination IP; it does not inspect encrypted HTTP payloads or enforce artifact-upload authorization.",
+    "No required real-provider login or device MFA is established by the synthetic fixture."
+  ]
+}

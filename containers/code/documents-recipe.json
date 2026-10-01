@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "pipApkVersion": "25.1.1-r1",
+  "python": [
+    { "name": "pypdf", "version": "6.19.0", "sha256": "7e5d6e730e7dae87d560a2cee218b852f6498c8be61966f3cd02ead971e48d14" },
+    { "name": "openpyxl", "version": "3.1.5", "sha256": "5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2" },
+    { "name": "et-xmlfile", "version": "2.0.0", "sha256": "7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa" },
+    { "name": "defusedxml", "version": "0.7.1", "sha256": "a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61" }
+  ]
+}

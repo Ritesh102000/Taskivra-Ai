@@ -1,0 +1,69 @@
+{
+  "container": "aw-p0-code-c648575884a24863",
+  "image": {
+    "id": "sha256:20d943322762c150371abd5ad8bbc77ba33412dd7f3f0da6ab23bcc9c1a7d3c6",
+    "architecture": "arm64",
+    "size_bytes": 71541650
+  },
+  "limits": {
+    "memory_mib": 1024,
+    "workspace_mib": 512,
+    "tmp_mib": 128,
+    "pids": 256,
+    "timeout_seconds": 120,
+    "log_bytes": 1048576,
+    "export_bytes": 67108864,
+    "files": 4096
+  },
+  "workspace_committed": true,
+  "payload_status_source": "docker exec exit status",
+  "scope": "phase0 spike",
+  "runtime_controls": {
+    "network": "none",
+    "readonly_root": true,
+    "binds": null,
+    "ports": {},
+    "cap_drop": [
+      "ALL"
+    ],
+    "supervisor_caps": [
+      "CAP_KILL"
+    ],
+    "tmpfs": {
+      "/tmp": "rw,noexec,nosuid,nodev,size=128m,nr_inodes=1024,mode=1777",
+      "/workspace": "rw,noexec,nosuid,nodev,size=512m,nr_inodes=4224,uid=10000,gid=10000,mode=0755"
+    },
+    "memory_bytes": 1073741824,
+    "pids_limit": 256
+  },
+  "payload": {
+    "exit_code": 0,
+    "abort": null,
+    "stdout": "",
+    "stderr": "",
+    "observed_bytes": 0
+  },
+  "quiesce": {
+    "quiesced": true,
+    "killed": 0,
+    "remaining": []
+  },
+  "revision": {
+    "revision": "a00151ad30d04f27821d0313eee28627",
+    "files": [
+      {
+        "path": "input.txt",
+        "size": 11,
+        "sha256": "2065df41bf19c1ad36c390c4a8fe85a7e1978cf2bc29e4150b15a5585921b563"
+      },
+      {
+        "path": "result.txt",
+        "size": 11,
+        "sha256": "2e0616b73d4ff262c837684959fd415da244fbcf3d6731357e32863fa6d4dfc1"
+      }
+    ]
+  },
+  "status": "passed",
+  "duration_seconds": 0.588,
+  "cleanup": "removed exact owned container"
+}

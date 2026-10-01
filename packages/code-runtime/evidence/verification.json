@@ -1,0 +1,183 @@
+{
+  "verifiedAt": "2026-09-11T11:52:29.617Z",
+  "imageDigest": "sha256:8732abc1579e14403d764735670577887db6e6545eaf741654e361870650a685",
+  "sourceSha256": {
+    "workers/code/supervisor.py": "da210a49d65fe3bc90b536ec62199bd5763b531a8ad6a2f22f6adb91814f0a7a",
+    "workers/code/seed.py": "f5cd4a4ff1672a5fdc4c5e9c3a1eb10b406fabac103e7ddc3edc8a1a6c7f22a1",
+    "workers/code/exporter.py": "0aa07810913b23d3f0284ce740eb2c068179fd2951a808ff411fb0852a2ca5ec",
+    "workers/code/export_protocol.py": "5f8085f30098792fd52f2bcae24482feff7b441c38652079d2932c752b97d361",
+    "containers/code/Dockerfile": "5bef65870b70d3ecaa670f0a535264ae2f7ed2d5cf8e38de3176acfb29bcd200",
+    "packages/code-runtime/index.ts": "d8dcaeaa260d5ba657d56eeba3ed55e627a0a637afc94a1b4aa2cd1e224a9e19",
+    "packages/code-runtime/protocol.ts": "3bcb39fd309a773b25d223a36ceb9823347452e18c09a3118e9128f41a996974"
+  },
+  "limits": {
+    "memoryMiB": 256,
+    "workspaceMiB": 8,
+    "tmpMiB": 4,
+    "pids": 64,
+    "timeoutSeconds": 3,
+    "logBytes": 8192,
+    "exportBytes": 8388608,
+    "files": 128
+  },
+  "cases": [
+    {
+      "case": "python",
+      "outcome": {
+        "exitCode": 0,
+        "reason": "exited",
+        "startedAt": 1789127532655,
+        "finishedAt": 1789127532886,
+        "durationMs": 230,
+        "logsTruncated": false
+      },
+      "outputHash": "487cec460129eecc43e6e26306cb1f069481b02e45a7bfe0a7cc9a7da6ee0f50"
+    },
+    {
+      "case": "node",
+      "outcome": {
+        "exitCode": 0,
+        "reason": "exited",
+        "startedAt": 1789127533538,
+        "finishedAt": 1789127533766,
+        "durationMs": 227,
+        "logsTruncated": false
+      },
+      "outputHash": "487cec460129eecc43e6e26306cb1f069481b02e45a7bfe0a7cc9a7da6ee0f50"
+    },
+    {
+      "case": "containment",
+      "outcome": {
+        "exitCode": 0,
+        "reason": "exited",
+        "startedAt": 1789127534478,
+        "finishedAt": 1789127534689,
+        "durationMs": 211,
+        "logsTruncated": false
+      },
+      "controls": {
+        "network": "none",
+        "memory": 268435456,
+        "caps": [
+          "CAP_KILL"
+        ]
+      }
+    },
+    {
+      "case": "detached_descendant_quiesced",
+      "outcome": {
+        "exitCode": 0,
+        "reason": "exited",
+        "startedAt": 1789127535407,
+        "finishedAt": 1789127535662,
+        "durationMs": 255,
+        "logsTruncated": false
+      }
+    },
+    {
+      "case": "symlink",
+      "exportRejected": true
+    },
+    {
+      "case": "hardlink",
+      "exportRejected": true
+    },
+    {
+      "case": "fifo",
+      "exportRejected": true
+    },
+    {
+      "case": "case_collision",
+      "exportRejected": true
+    },
+    {
+      "case": "timeout",
+      "outcome": {
+        "exitCode": null,
+        "reason": "timeout",
+        "startedAt": 1789127540060,
+        "finishedAt": 1789127543145,
+        "durationMs": 3085,
+        "logsTruncated": false
+      }
+    },
+    {
+      "case": "log_limit",
+      "outcome": {
+        "exitCode": null,
+        "reason": "log_limit",
+        "startedAt": 1789127543491,
+        "finishedAt": 1789127543643,
+        "durationMs": 152,
+        "logsTruncated": true
+      }
+    },
+    {
+      "case": "memory_excess",
+      "outcome": {
+        "exitCode": 137,
+        "reason": "exited",
+        "startedAt": 1789127543957,
+        "finishedAt": 1789127544246,
+        "durationMs": 289,
+        "logsTruncated": false
+      }
+    },
+    {
+      "case": "file_bytes",
+      "outcome": {
+        "exitCode": 1,
+        "reason": "exited",
+        "startedAt": 1789127544674,
+        "finishedAt": 1789127544914,
+        "durationMs": 240,
+        "logsTruncated": false
+      }
+    },
+    {
+      "case": "inode_excess",
+      "outcome": {
+        "exitCode": 1,
+        "reason": "exited",
+        "startedAt": 1789127545334,
+        "finishedAt": 1789127545570,
+        "durationMs": 236,
+        "logsTruncated": false
+      }
+    },
+    {
+      "case": "pid_limit",
+      "outcome": {
+        "exitCode": 0,
+        "reason": "exited",
+        "startedAt": 1789127546021,
+        "finishedAt": 1789127548311,
+        "durationMs": 2290,
+        "logsTruncated": false
+      }
+    },
+    {
+      "case": "stop",
+      "outcome": {
+        "exitCode": null,
+        "reason": "stopped",
+        "startedAt": 1789127548750,
+        "finishedAt": 1789127548958,
+        "durationMs": 208,
+        "logsTruncated": false
+      }
+    },
+    {
+      "case": "fake_control_log",
+      "outcome": {
+        "exitCode": 7,
+        "reason": "exited",
+        "startedAt": 1789127549283,
+        "finishedAt": 1789127549504,
+        "durationMs": 221,
+        "logsTruncated": false
+      }
+    }
+  ],
+  "cleanup": "all exact owned resources removed"
+}

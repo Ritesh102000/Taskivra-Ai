@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-09-11T12:38:11.959Z",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "synthetic": true,
+  "generationRequests": 1,
+  "countRequests": 1,
+  "quote": {
+    "inputTokens": 71,
+    "outputTokens": 128,
+    "maxCostMicrousd": 234
+  },
+  "usage": {
+    "inputTokens": 71,
+    "outputTokens": 16,
+    "totalTokens": 87,
+    "cachedInputTokens": 0
+  },
+  "costMicrousd": 54,
+  "strictToolCallVerified": true,
+  "credentialSource": "macOS Keychain; key omitted",
+  "store": false,
+  "parallelToolCalls": false
+}

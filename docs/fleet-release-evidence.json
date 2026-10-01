@@ -1,0 +1,115 @@
+{
+  "version": "0.9.0",
+  "verifiedAt": "2026-09-30T13:28:12.437773+00:00",
+  "feature": "Fleets",
+  "scope": "Dynamic static-evidence review; no target access or code execution",
+  "replaced": "Fixed three-reviewer creation screen; historic tasks and reports retained",
+  "typecheck": "passed",
+  "build": "passed; existing renderer chunk-size advisory remains",
+  "electron": {
+    "tests": 657,
+    "pass": 639,
+    "fail": 0,
+    "skipped": 18,
+    "cancelled": 0
+  },
+  "hostFleet": {
+    "tests": 27,
+    "pass": 27,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "hostAffectedEarlier": {
+    "tests": 32,
+    "pass": 32,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0
+  },
+  "phase0": {
+    "pythonPassed": 34,
+    "javascriptPassed": 7
+  },
+  "package": {
+    "path": "dist/packages/Agent-Workspaces-0.9.0-arm64-local/Agent Workspaces.app",
+    "appVersion": "0.9.0",
+    "architecture": "arm64",
+    "signing": "ad-hoc; no Developer ID; not notarized",
+    "codesignVerification": "passed",
+    "manifestSha256": "4dcda19a133a5cea75836f0fab81ef94ed9feb364ed47ca6ad3953df3ad97a78",
+    "fileHashesVerified": 30,
+    "implementationChangedAfterPackaging": false
+  },
+  "syntheticWorkflow": {
+    "synthetic": true,
+    "realModelRequests": 0,
+    "createdAt": "2026-09-30T13:19:33.022Z",
+    "dataRoot": ".test-data/fleet-ui-final-20260930/data",
+    "fleetId": "fc461c38-52cf-4f75-8848-f92ccfd15476",
+    "status": "succeeded",
+    "revision": 2,
+    "workerItems": 3,
+    "maximumConcurrentModelCalls": 2,
+    "messages": 3,
+    "scriptedCalls": 32,
+    "finalVersionId": "db3e36ab-049d-400f-92e1-70711dcbfef9",
+    "sourceVersionId": "c9c48ce5-bff5-4830-83a0-40d37f97b203",
+    "browserLaunches": 0,
+    "codeLaunches": 0
+  },
+  "nativeDesktop": {
+    "synthetic": true,
+    "checked": [
+      "Fleet navigation replaces Security review",
+      "Dynamic team and shared board",
+      "Two plan revisions and three messages",
+      "Open combined result with evidence",
+      "Create one-objective draft",
+      "Stop whole draft fleet",
+      "Packaged production app opens Fleets without browser Keychain prompt"
+    ],
+    "fleets": [
+      {
+        "status": "stopped",
+        "count": 1
+      },
+      {
+        "status": "succeeded",
+        "count": 1
+      }
+    ],
+    "modelCalls": 32,
+    "enabledModelTasks": 0,
+    "realModelRequests": 0
+  },
+  "productionUpgrade": {
+    "fromSchema": 16,
+    "toSchema": 17,
+    "backup": "~/Desktop/Agent Workspaces Backups/before-0.9.0-20260930-185444",
+    "backupVerified": true,
+    "integrity": "ok",
+    "foreignKeyViolations": 0,
+    "savedRecordCounts": {
+      "agents": 1,
+      "tasks": 1,
+      "live_model_calls": 7,
+      "artifacts": 3,
+      "artifact_versions": 4,
+      "projects": 1,
+      "security_review_teams": 0
+    },
+    "savedRecordsPreserved": true,
+    "artifactVersionsHashVerified": 4,
+    "enabledModelTasks": 0,
+    "newModelCalls": 0,
+    "productionFleetCount": 0
+  },
+  "realProviderRequests": 0,
+  "notVerified": [
+    "Live model planning quality or provider-specific compatibility",
+    "Fresh-machine installation or public signing/notarization",
+    "Any live target or exploit workflow"
+  ],
+  "logs": ".test-data/fleet-release-proof"
+}

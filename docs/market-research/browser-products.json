@@ -1,0 +1,473 @@
+{
+  "auditDate": "2026-09-30",
+  "scope": [
+    "browser-use-desktop",
+    "skyvern"
+  ],
+  "mode": "read-only audit; recommendations only",
+  "liveRuntimeTests": false,
+  "paidModelCalls": 0,
+  "repositories": [
+    {
+      "id": "browser-use-desktop",
+      "path": "~/Desktop/Agent Workspaces Research 2026-09-30/repos/browser-use-desktop",
+      "commit": "f073b7574f7927185ebbebd87556391d5cb0cfd1",
+      "rootLicense": "MIT",
+      "evidence": [
+        {
+          "id": "BU01",
+          "classification": "source-verified",
+          "path": "app/src/renderer/onboarding/OnboardingApp.tsx",
+          "lines": [
+            130,
+            307
+          ],
+          "finding": "Persisted staged onboarding, provider checks, platform-specific cookie-sync availability."
+        },
+        {
+          "id": "BU02",
+          "classification": "source-verified",
+          "path": "app/src/main/hl/harness.ts",
+          "lines": [
+            55,
+            170
+          ],
+          "finding": "Separate stock domain/interaction skills and user skill directories."
+        },
+        {
+          "id": "BU03",
+          "classification": "source-verified",
+          "path": "app/src/main/channels/ChannelRouter.ts",
+          "lines": [
+            23,
+            155
+          ],
+          "finding": "Channel task start/resume and completion/failure/input notifications; reply mappings in memory."
+        },
+        {
+          "id": "BU04",
+          "classification": "source-verified",
+          "path": "app/src/main/channels/WhatsAppAdapter.ts",
+          "lines": [
+            292,
+            322
+          ],
+          "finding": "Explicit @BU trigger required for self-chat inbound task creation."
+        },
+        {
+          "id": "BU05",
+          "classification": "source-verified",
+          "path": "app/src/main/hl/engines/codex/adapter.ts",
+          "lines": [
+            139,
+            148
+          ],
+          "finding": "Provider sandbox and approval bypass in spawned CLI; not our confirmed execution boundary."
+        },
+        {
+          "id": "BU06",
+          "classification": "source-verified",
+          "path": "app/src/main/sessions/SessionManager.ts",
+          "lines": [
+            371,
+            397
+          ],
+          "finding": "Persisted cumulative cost and tokens, exact versus estimated source."
+        },
+        {
+          "id": "BU07",
+          "classification": "source-verified",
+          "path": "app/src/renderer/hub/chat/ChatTurn.tsx",
+          "lines": [
+            503,
+            551
+          ],
+          "finding": "File cards, image thumbnail, reveal/download."
+        },
+        {
+          "id": "BU08",
+          "classification": "documented",
+          "path": "README.md",
+          "lines": [
+            1,
+            54
+          ],
+          "finding": "Desktop download/provider/WhatsApp offering, separate from Browser Use cloud pricing."
+        },
+        {
+          "id": "BU09",
+          "classification": "negative-search-limited",
+          "path": "app/src",
+          "query": "schedule|cron excluding stock",
+          "finding": "No task recurrence scheduler located; matches were UI/system timers. Not proof of all deployment absence."
+        }
+      ]
+    },
+    {
+      "id": "skyvern",
+      "path": "~/Desktop/Agent Workspaces Research 2026-09-30/repos/skyvern",
+      "commit": "695c05698eba52716521dd2b49800e88f314b660",
+      "rootLicense": "AGPL-3.0",
+      "evidence": [
+        {
+          "id": "SK01",
+          "classification": "source-verified",
+          "path": "skyvern/schemas/workflows.py",
+          "lines": [
+            1305,
+            1398
+          ],
+          "finding": "Typed extraction, login, human checkpoint and data/file export contracts."
+        },
+        {
+          "id": "SK02",
+          "classification": "source-verified",
+          "path": "skyvern/forge/sdk/workflow/models/google_sheets_blocks.py",
+          "lines": [
+            155,
+            191
+          ],
+          "additionalLines": [
+            545,
+            692
+          ],
+          "finding": "Google Sheets read and write block implementations, OAuth-dependent."
+        },
+        {
+          "id": "SK03",
+          "classification": "source-verified",
+          "path": "skyvern/forge/agent_functions.py",
+          "lines": [
+            1038,
+            1047
+          ],
+          "finding": "OSS local scheduler default, Cloud override."
+        },
+        {
+          "id": "SK04",
+          "classification": "source-verified",
+          "path": "skyvern/config.py",
+          "lines": [
+            992,
+            992
+          ],
+          "finding": "ENABLE_WORKFLOW_SCHEDULES defaults true."
+        },
+        {
+          "id": "SK05",
+          "classification": "source-verified",
+          "path": "skyvern/services/workflow_schedule_service.py",
+          "lines": [
+            1,
+            135
+          ],
+          "additionalLines": [
+            323,
+            350
+          ],
+          "finding": "Local scanner, deterministic run IDs, bounded concurrency and scheduler start."
+        },
+        {
+          "id": "SK06",
+          "classification": "source-verified",
+          "path": "skyvern/forge/sdk/workflow/retry_policy.py",
+          "lines": [
+            114,
+            128
+          ],
+          "finding": "Cancellation never retries; bounded policy evaluation."
+        },
+        {
+          "id": "SK07",
+          "classification": "source-verified",
+          "path": "skyvern-frontend/src/routes/workflows/workflowRun/runRetryState.ts",
+          "lines": [
+            17,
+            42
+          ],
+          "finding": "Logical run completion distinguished from pending retry."
+        },
+        {
+          "id": "SK08",
+          "classification": "source-verified",
+          "path": "skyvern/schemas/self_heal.py",
+          "lines": [
+            179,
+            218
+          ],
+          "finding": "Healed, unverified and failed outcomes separate; outcome-risk tracking."
+        },
+        {
+          "id": "SK09",
+          "classification": "source-verified",
+          "path": "skyvern-frontend/src/routes/workflows/workflowRun/WorkflowRunHumanInteraction.tsx",
+          "lines": [
+            26,
+            90
+          ],
+          "finding": "Only current paused active checkpoint is actionable."
+        },
+        {
+          "id": "SK10",
+          "classification": "documented",
+          "path": "docs/developers/self-hosted/google-integrations.mdx",
+          "lines": [
+            20,
+            57
+          ],
+          "finding": "Self-hosted Google OAuth setup and per-integration scopes required."
+        },
+        {
+          "id": "SK11",
+          "classification": "source-verified",
+          "path": "skyvern-frontend/src/routes/workflows/studio/runview/HeroRecording.tsx",
+          "lines": [
+            15,
+            64
+          ],
+          "finding": "Recording replay, empty recording state and multiple recording tabs."
+        }
+      ]
+    }
+  ],
+  "ownProductEvidence": [
+    {
+      "path": "packages/agent-loop/tools.ts",
+      "lines": [
+        5,
+        34
+      ],
+      "finding": "No general click/fill/select/download; Gmail restricted header/snippet-specific tool branch."
+    },
+    {
+      "path": "packages/contracts/workflows.ts",
+      "lines": [
+        4,
+        27
+      ],
+      "finding": "Current workflow form input types and saved prose draft contract."
+    },
+    {
+      "path": "packages/workflows/index.ts",
+      "lines": [
+        99,
+        115
+      ],
+      "finding": "Saved workflow copies objective, criteria and policy only."
+    },
+    {
+      "path": "apps/desktop/renderer/Files.tsx",
+      "lines": [
+        47,
+        48
+      ],
+      "finding": "Owner bounded plain-text/metadata preview."
+    },
+    {
+      "path": "packages/artifacts/index.ts",
+      "lines": [
+        343,
+        347
+      ],
+      "finding": "Complex format preview returns metadata, parsing deferred."
+    },
+    {
+      "path": "implementation-plan.md",
+      "lines": [
+        167,
+        186
+      ],
+      "finding": "Phase 7 release/recovery/restore gates remain outstanding."
+    },
+    {
+      "path": "apps/desktop/renderer/AgentRun.tsx",
+      "lines": [
+        42,
+        42
+      ],
+      "finding": "Cost/tokens/tool steps/active time already surfaced."
+    }
+  ],
+  "publicSources": [
+    {
+      "url": "https://github.com/browser-use/desktop/issues/435",
+      "classification": "user-report-unreproduced",
+      "opened": "2026-05-16",
+      "retrievedStatus": "open",
+      "signal": "Google cookie-settings error; root cause not established"
+    },
+    {
+      "url": "https://github.com/browser-use/desktop/issues/411",
+      "classification": "user-report-unreproduced",
+      "opened": "2026-05-06",
+      "retrievedStatus": "open",
+      "signal": "Windows provider login and false connection status"
+    },
+    {
+      "url": "https://github.com/browser-use/desktop/issues/423",
+      "classification": "user-report-unreproduced",
+      "opened": "2026-05-09",
+      "retrievedStatus": "closed",
+      "signal": "Mac updater failure; closure not proof of verified fix"
+    },
+    {
+      "url": "https://github.com/Skyvern-AI/skyvern/issues/8644",
+      "classification": "user-report-unreproduced",
+      "opened": "2026-09-24",
+      "retrievedStatus": "open",
+      "signal": "Self-host UI cloud-auth dependency failure"
+    },
+    {
+      "url": "https://github.com/Skyvern-AI/skyvern/issues/8225",
+      "classification": "user-report-unreproduced",
+      "opened": "2026-08-17",
+      "retrievedStatus": "open",
+      "signal": "Remote handoff keyboard/clipboard fidelity"
+    },
+    {
+      "url": "https://github.com/Skyvern-AI/skyvern/issues/8576",
+      "classification": "user-report-unreproduced",
+      "opened": "2026-09-16",
+      "retrievedStatus": "open",
+      "signal": "Spreadsheet meaningful null-like values changed"
+    },
+    {
+      "url": "https://browser-use.com/pricing",
+      "classification": "marketed",
+      "caveat": "Separate Cloud product, not Desktop tariff"
+    },
+    {
+      "url": "https://browser-use.com/",
+      "classification": "marketed",
+      "caveat": "Vendor benchmarks not independently validated"
+    },
+    {
+      "url": "https://www.skyvern.com/pricing",
+      "classification": "marketed",
+      "summary": "Free, Hobby USD29/mo, Pro USD149/mo, custom Enterprise as retrieved",
+      "caveat": "Cloud entitlements differ from OSS source availability"
+    },
+    {
+      "url": "https://www.skyvern.com/integrations",
+      "classification": "marketed",
+      "caveat": "Published and in-progress connectors distinguished; not runtime-tested"
+    },
+    {
+      "url": "https://www.skyvern.com/use-cases",
+      "classification": "marketed",
+      "caveat": "Operational industry positioning, adoption/compliance claims not verified"
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "B1",
+      "priority": "P0",
+      "size": "M",
+      "name": "Task-aware readiness and release gates",
+      "evidence": [
+        "BU01",
+        "SK10"
+      ],
+      "metric": "Time to first useful result without developer help"
+    },
+    {
+      "id": "B2",
+      "priority": "P0",
+      "size": "L",
+      "name": "Scoped browser actions and managed downloads",
+      "evidence": [
+        "SK01",
+        "BU05"
+      ],
+      "metric": "Verified completion, zero duplicate writes/cross-profile reads in fixtures"
+    },
+    {
+      "id": "B3",
+      "priority": "P0",
+      "size": "M",
+      "name": "Rich result review desk and source coverage",
+      "evidence": [
+        "BU07",
+        "SK01",
+        "SK09"
+      ],
+      "metric": "Owner acceptance without manual repair; review time"
+    },
+    {
+      "id": "B4",
+      "priority": "P1",
+      "size": "M",
+      "name": "Parameterized versioned reusable jobs",
+      "evidence": [
+        "BU02",
+        "SK01"
+      ],
+      "metric": "Repeat setup time and acceptance over new input sets"
+    },
+    {
+      "id": "B5",
+      "priority": "P1",
+      "size": "L",
+      "name": "Focused scoped data connectors",
+      "evidence": [
+        "SK02",
+        "SK10"
+      ],
+      "metric": "Intervention/time versus browser; pagination and revocation correctness"
+    },
+    {
+      "id": "B6",
+      "priority": "P1",
+      "size": "M",
+      "name": "Local recurring jobs and meaningful notifications",
+      "evidence": [
+        "SK03",
+        "SK04",
+        "SK05"
+      ],
+      "metric": "Weekly reuse, missed/late runs, useful notification rate"
+    },
+    {
+      "id": "B7",
+      "priority": "P1",
+      "size": "M",
+      "name": "Recovery and accepted-outcome dashboard",
+      "evidence": [
+        "BU06",
+        "SK06",
+        "SK07",
+        "SK08"
+      ],
+      "metric": "Recovery time, cost per accepted result"
+    },
+    {
+      "id": "B8",
+      "priority": "P2",
+      "size": "M",
+      "name": "Tested owner-reviewed playbooks",
+      "evidence": [
+        "BU02",
+        "SK08"
+      ],
+      "metric": "Held-out repeatability versus prompt-only baseline"
+    },
+    {
+      "id": "B9",
+      "priority": "P2",
+      "size": "L",
+      "name": "Authenticated triggers and portable results",
+      "evidence": [
+        "BU03",
+        "BU04"
+      ],
+      "metric": "Deduplication, intentional dispatch, no private-data leakage"
+    }
+  ],
+  "limitations": [
+    "Selective source audit, not every-line review",
+    "Convenience issue sample, not prevalence study",
+    "No new runtime, paid-model or account tests",
+    "Market fit and willingness to pay unproven",
+    "No application implementation"
+  ]
+}

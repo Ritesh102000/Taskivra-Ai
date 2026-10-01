@@ -1,0 +1,14 @@
+test_all_dns_answers_must_be_public (egress_test.EgressPolicyTests.test_all_dns_answers_must_be_public) ... ok
+test_denies_nonpublic_literals_and_transition_addresses (egress_test.EgressPolicyTests.test_denies_nonpublic_literals_and_transition_addresses) ... ok
+test_dns_revalidated_and_addresses_pinned (egress_test.EgressPolicyTests.test_dns_revalidated_and_addresses_pinned) ... ok
+test_fixture_exception_is_explicit_exact_and_not_transitive (egress_test.EgressPolicyTests.test_fixture_exception_is_explicit_exact_and_not_transitive) ... ok
+test_public_ipv4_ipv6_and_only_standard_web_ports (egress_test.EgressPolicyTests.test_public_ipv4_ipv6_and_only_standard_web_ports) ... ok
+test_service_names_rejected_before_dns (egress_test.EgressPolicyTests.test_service_names_rejected_before_dns) ... ok
+test_normal_get_and_websocket (egress_test.ProxyParsingTests.test_normal_get_and_websocket) ... ok
+test_port_zero_is_not_silently_mapped_to_default (egress_test.ProxyParsingTests.test_port_zero_is_not_silently_mapped_to_default) ... ok
+test_smuggling_and_unsupported_protocols_rejected (egress_test.ProxyParsingTests.test_smuggling_and_unsupported_protocols_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.005s
+
+OK

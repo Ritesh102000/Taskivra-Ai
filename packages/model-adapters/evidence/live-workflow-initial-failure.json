@@ -1,0 +1,24 @@
+{
+  "synthetic": true,
+  "passed": false,
+  "source": "Observed test runner output and an intermediate read-only ledger snapshot; the temporary test root was cleaned before final usage was captured.",
+  "durationMs": 88040.188916,
+  "finalState": "paused",
+  "finalError": "The live step could not finish. Progress is saved; inspect the task before resuming.",
+  "blockedWithWrongFile": true,
+  "restartPreservedAcceptedSlot": true,
+  "fulfillmentReceipts": 1,
+  "continuationRuns": 1,
+  "successfulCodeExecutionsObserved": 3,
+  "sumIndependentlyVerified": false,
+  "observedProblem": "The model repeated code and reports instead of completing. Some reports used invalid evidence IDs. The later successful run added explicit output and evidence IDs to model context and clearer completion instructions.",
+  "lastCapturedUsage": {
+    "modelCalls": 10,
+    "costUsd": 0.015868,
+    "reservedUsd": 0,
+    "isFinal": false
+  },
+  "finalCostUsd": null,
+  "taskBudgetUsd": 0.1,
+  "credentialsOmitted": true
+}

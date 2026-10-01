@@ -1,0 +1,68 @@
+{
+  "recorded_at": "2026-09-11T06:46:07.446233+00:00",
+  "cleanup_method": "harness.py down with exact saved state and matching ownership labels",
+  "removed_topologies": [
+    {
+      "run_id": "awp0-egress-0fe36883cf",
+      "state": "integration.json",
+      "down_passed": true,
+      "errors": []
+    },
+    {
+      "run_id": "awp0-egress-105899b938",
+      "state": "verified.json",
+      "down_passed": true,
+      "errors": []
+    }
+  ],
+  "checks": [
+    {
+      "resource": "containers",
+      "label_filter": "agent-workspaces.phase0-egress",
+      "remaining": [],
+      "passed": true
+    },
+    {
+      "resource": "networks",
+      "label_filter": "agent-workspaces.phase0-egress",
+      "remaining": [],
+      "passed": true
+    },
+    {
+      "resource": "containers",
+      "label_filter": "agent-workspaces.phase=0",
+      "remaining": [],
+      "passed": true
+    },
+    {
+      "resource": "networks",
+      "label_filter": "agent-workspaces.phase=0",
+      "remaining": [],
+      "passed": true
+    },
+    {
+      "resource": "containers",
+      "label_filter": "io.agent-workspaces.phase0.code",
+      "remaining": [],
+      "passed": true
+    },
+    {
+      "resource": "networks",
+      "label_filter": "io.agent-workspaces.phase0.code",
+      "remaining": [],
+      "passed": true
+    },
+    {
+      "check": "cleanup_state_removed",
+      "path": "spikes/phase0/egress/.runtime/integration.json",
+      "passed": true
+    },
+    {
+      "check": "cleanup_state_removed",
+      "path": "spikes/phase0/egress/.runtime/verified.json",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "images_retained_for_reproduction": true
+}

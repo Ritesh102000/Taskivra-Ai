@@ -1,0 +1,3 @@
+# Preserve upstream license/notice bytes, including their original line endings.
+licenses/* -text
+licenses/PLAYWRIGHT-LICENSE.txt whitespace=trailing-space,space-before-tab,cr-at-eol

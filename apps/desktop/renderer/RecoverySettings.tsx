@@ -1,0 +1,8 @@
+import {useState} from 'react';
+import type {AppBridge} from '../../../packages/contracts';
+import type {RecoveryCommand,RecoveryState} from '../../../packages/contracts/recovery-ui';
+export function RecoverySettings({bridge}:{bridge:AppBridge}) {
+ const [busy,setBusy]=useState(false),[state,setState]=useState<RecoveryState|null>(null),[error,setError]=useState('');
+ async function act(type:RecoveryCommand['type']) { setBusy(true);setError('');try{setState(await bridge.recovery({type}));}catch(e){setError(e instanceof Error?e.message:'Recovery could not finish.');}finally{setBusy(false);} }
+ return <section className="settings-section"><h2>Backup and recovery</h2><p>Save a verified copy of tasks, messages and files. Creating a backup pauses work. Browser logins and Keychain credentials stay on this Mac and are excluded.</p><div className="modal-actions"><button className="button primary" disabled={busy} onClick={()=>void act('recovery.backup')}>Create backup</button><button className="button" disabled={busy} onClick={()=>void act('recovery.verify')}>Check backup</button><button className="button" disabled={busy} onClick={()=>void act('recovery.restore')}>Restore to new folder</button></div>{busy&&<p role="status">Choose a folder in the Mac dialog. Recovery may take a moment.</p>}{error&&<p role="alert">{error}</p>}{state&&<div role="status"><p>{state.message}</p>{state.directory&&<code style={{overflowWrap:'anywhere'}}>{state.directory}</code>}{state.files!==undefined&&<p>{state.files} files{state.bytes!==undefined?' · '+(state.bytes/1048576).toFixed(1)+' MB':''}</p>}</div>}</section>;
+}

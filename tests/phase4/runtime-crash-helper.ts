@@ -1,0 +1,10 @@
+import { writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { DockerCodeRuntimeFactory } from '../../packages/code-runtime';
+import { DEFAULT_CODE_RESOURCES } from '../../packages/code/runtime';
+const root = process.argv[2];
+const runtime = new DockerCodeRuntimeFactory({ dataRoot: root });
+const handle = await runtime.launch({ executionId: 'crash-execution', taskId: 'task-a', agentId: 'agent-a', files: [], signal: new AbortController().signal, limits: { ...DEFAULT_CODE_RESOURCES, memoryMiB: 256, workspaceMiB: 8, tmpMiB: 4, exportBytes: 8 * 1024 * 1024, pids: 64, timeoutSeconds: 120 } });
+await writeFile(join(root, 'running.json'), JSON.stringify({ pid: process.pid, info: handle.info }));
+await handle.run({ argv: ['python3', '-I', '-c', 'import time;time.sleep(120)'], cwd: '/workspace', signal: new AbortController().signal, onLog() {} });
+await runtime.close();

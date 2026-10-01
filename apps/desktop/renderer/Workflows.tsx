@@ -1,0 +1,110 @@
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
+import { DEFAULT_LIVE_LIMITS, type AppBridge, type LiveLimits, type LiveState, type Snapshot, type Task, type WorkflowCategory, type WorkflowCommand, type WorkflowDefinition, type WorkflowDraft, type WorkflowState } from '../../../packages/contracts/index';
+import './workflows.css';
+import { ReadinessPanel } from './Readiness';
+import type { ReadinessAction } from '../../../packages/contracts/readiness';
+
+export function useWorkflows(bridge?: AppBridge) {
+  const [state, setState] = useState<WorkflowState | null>(null);
+  const [busy, setBusy] = useState(false), [error, setError] = useState<string | null>(null);
+  const mounted = useRef(true), locked = useRef(false), sequence = useRef(0);
+  const refresh = useCallback(async () => {
+    if (!bridge || locked.current) return;
+    const ticket = ++sequence.current;
+    try { const next = await bridge.workflows({ type: 'workflows.state' }); if (mounted.current && ticket === sequence.current) setState(next); }
+    catch (failure) { if (mounted.current && ticket === sequence.current) setError(failure instanceof Error ? failure.message : 'Workflows could not be loaded.'); }
+  }, [bridge]);
+  useEffect(() => { mounted.current = true; void refresh(); const off = bridge?.onChanged(() => void refresh()); return () => { mounted.current = false; sequence.current++; off?.(); }; }, [bridge, refresh]);
+  const perform = async (command: WorkflowCommand) => {
+    if (!bridge || locked.current) return null;
+    locked.current = true; sequence.current++; setBusy(true); setError(null);
+    try { const next = await bridge.workflows(command); if (mounted.current) setState(next); return next; }
+    catch (failure) { if (mounted.current) setError(failure instanceof Error ? failure.message : 'This workflow action could not be completed.'); return null; }
+    finally { locked.current = false; if (mounted.current) setBusy(false); }
+  };
+  return { state, busy, error, perform, refresh, clearError: () => setError(null) };
+}
+export type WorkflowController = ReturnType<typeof useWorkflows>;
+const categoryLabels: Record<WorkflowCategory, string> = { business: 'Business', developer: 'Development', personal: 'Everyday work' };
+const symbols: Record<WorkflowCategory, string> = { business: '↗', developer: '⌘', personal: '◎' };
+interface ComposerDraft { values: Record<string, string>; agentId: string; agentName: string; model: string; limits: LiveLimits; mailDetail: boolean }
+// In-memory only: switching to setup keeps the brief, but quitting the app clears unsaved drafts.
+const composerDrafts = new Map<string, ComposerDraft>();
+
+export function Workflows({ bridge, snapshot, live, controller, onCustom, onCreated, onSetup }: { bridge: AppBridge; snapshot: Snapshot; live: LiveState | null; controller: WorkflowController; onCustom: () => void; onCreated: (taskId: string) => Promise<void>; onSetup?: (action: ReadinessAction) => void }) {
+  const [category, setCategory] = useState<WorkflowCategory | 'all' | 'saved'>('all');
+  const [selected, setSelected] = useState<WorkflowDefinition | null>(null);
+  const [search, setSearch] = useState('');
+  const list = [...(controller.state?.recipes || []), ...(controller.state?.saved || [])].filter(item => (category === 'all' || (category === 'saved' ? item.source === 'saved' : item.category === category)) && `${item.title} ${item.description} ${item.outcome}`.toLowerCase().includes(search.toLowerCase()));
+  return <div className="page-scroll workflows-page">
+    <section className="workflow-page-heading"><div><span className="eyebrow">FROM IDEA TO OUTCOME</span><h1>A head start for your next task.</h1><p>Choose a starting point. Add your brief. Let an agent take it from there.</p></div><button className="button" onClick={onCustom}>Write a custom task <span aria-hidden="true">↗</span></button></section>
+    <div className="workflow-trust-strip"><span>01 <strong>Choose a workflow</strong></span><span aria-hidden="true">→</span><span>02 <strong>Review the task & limits</strong></span><span aria-hidden="true">→</span><span>03 <strong>Run when ready</strong></span></div>
+    <div className="workflow-toolbar"><div className="filter-tabs" aria-label="Workflow categories">{(['all', 'business', 'developer', 'personal', 'saved'] as const).map(value => <button key={value} className={category === value ? 'selected' : ''} aria-pressed={category === value} onClick={() => setCategory(value)}>{value === 'all' ? 'All workflows' : value === 'saved' ? `Saved${controller.state?.saved.length ? ' · ' + controller.state.saved.length : ''}` : categoryLabels[value]}</button>)}</div><input aria-label="Find a workflow" placeholder="Find a workflow…" value={search} onChange={event => setSearch(event.target.value)} /></div>
+    {controller.error && <div className="agent-run-error" role="alert">{controller.error} <button className="inline-link" onClick={() => { controller.clearError(); void controller.refresh(); }}>Refresh</button></div>}
+    {!controller.state ? <p className="workflow-empty">Loading your workflows…</p> : list.length ? <div className="workflow-grid">{list.map(workflow => <article className={'workflow-card category-' + workflow.category} key={workflow.id}><div className="workflow-card-top"><span className="workflow-symbol" aria-hidden="true">{symbols[workflow.category]}</span><span className="workflow-category">{workflow.source === 'saved' ? 'YOUR WORKFLOW' : categoryLabels[workflow.category].toUpperCase()}</span></div><h2>{workflow.title}</h2><p>{workflow.description || 'A reusable task brief. Review its inputs before each run.'}</p><div className="workflow-outcome"><span>YOU’LL GET</span><p>{workflow.outcome}</p></div><footer><span className="workflow-tools">{workflow.tools.join(' · ')}</span><button className="text-button" onClick={() => { controller.clearError(); setSelected(workflow); }}>Use workflow <span aria-hidden="true">→</span></button></footer>{workflow.source === 'saved' && <button className="workflow-remove" disabled={controller.busy} aria-label={'Remove saved workflow ' + workflow.title} onClick={() => void controller.perform({ type: 'workflows.delete', workflowId: workflow.id })}>Remove saved workflow</button>}</article>)}</div> : <div className="workflow-empty"><strong>{category === 'saved' && !search ? 'Build a collection of work worth repeating.' : 'No workflows match this view.'}</strong><p>{category === 'saved' && !search ? 'Open a live task and choose Save workflow. Its reviewed brief becomes a reusable starting point.' : 'Try another category or search term.'}</p>{search && <button className="text-button" onClick={() => setSearch('')}>Clear search</button>}</div>}
+    <p className="workflow-library-note">Every workflow creates a separate task. Files, sign-ins, and private messages stay with their original agent.</p>
+    {selected && <WorkflowComposer key={selected.id} workflow={selected} bridge={bridge} snapshot={snapshot} live={live} controller={controller} onClose={() => setSelected(null)} onCreated={onCreated} onSetup={onSetup} />}
+  </div>;
+}
+
+function WorkflowComposer({ workflow, bridge, snapshot, live, controller, onClose, onCreated, onSetup }: { workflow: WorkflowDefinition; bridge: AppBridge; snapshot: Snapshot; live: LiveState | null; controller: WorkflowController; onClose: () => void; onCreated: (taskId: string) => Promise<void>; onSetup?: (action: ReadinessAction) => void }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const cacheKey = workflow.id + ':' + (workflow.procedure?.versionId || 'manual');
+  const savedDraft = useRef(composerDrafts.get(cacheKey));
+  const [values, setValues] = useState<Record<string, string>>(() => savedDraft.current?.values || Object.fromEntries(workflow.inputs.map(input => [input.id, input.defaultValue || ''])));
+  const [agentId, setAgentId] = useState(savedDraft.current?.agentId || snapshot.agents[0]?.id || '__new__');
+  const [agentName, setAgentName] = useState(savedDraft.current?.agentName || (workflow.category === 'developer' ? 'Development assistant' : workflow.category === 'business' ? 'Research assistant' : 'Personal assistant'));
+  const [model, setModel] = useState(savedDraft.current?.model || live?.defaultModel || '');
+  const [limits, setLimits] = useState<LiveLimits>(savedDraft.current?.limits || { ...DEFAULT_LIVE_LIMITS });
+  const [mailDetail, setMailDetail] = useState(savedDraft.current?.mailDetail ?? workflow.savedDraft?.policy.mailDetail === 'threads_and_attachments');
+  const [prepared, setPrepared] = useState<WorkflowDraft | null>(null);
+  const [localBusy, setLocalBusy] = useState(false), [error, setError] = useState<string | null>(null);
+  const key = useRef(crypto.randomUUID());
+  const busy = localBusy || controller.busy;
+  useEffect(() => { const target = dialog.current; target?.showModal(); return () => target?.close(); }, []);
+  useEffect(() => { if (!model && live?.defaultModel) setModel(live.defaultModel); }, [live?.defaultModel, model]);
+  useEffect(() => { composerDrafts.set(cacheKey, { values, agentId, agentName, model, limits, mailDetail }); if (composerDrafts.size > 20) composerDrafts.delete(composerDrafts.keys().next().value!); }, [cacheKey, values, agentId, agentName, model, limits, mailDetail]);
+  const change = (id: string, value: string) => { setValues(current => ({ ...current, [id]: value })); setPrepared(null); key.current = crypto.randomUUID(); setError(null); controller.clearError(); };
+  const limit = (name: keyof LiveLimits, value: number) => { setLimits(current => ({ ...current, [name]: value })); key.current = crypto.randomUUID(); };
+  const submit = async (event: FormEvent) => {
+    event.preventDefault(); if (busy) return; setError(null);
+    if (!prepared) { const next = await controller.perform({ type: 'workflows.preview', workflowId: workflow.id, values }); if (next?.prepared) setPrepared(next.prepared); return; }
+    setLocalBusy(true);
+    try {
+      let owner = agentId;
+      if (owner === '__new__') {
+        const before = new Set(snapshot.agents.map(agent => agent.id));
+        const next = await bridge.command({ type: 'agents.create', name: agentName.trim(), instructions: '' });
+        const created = next.agents.find(agent => !before.has(agent.id));
+        if (!created) throw new Error('The agent was not returned. Refresh the workspace before trying again.');
+        owner = created.id; setAgentId(owner);
+      }
+      const next = await controller.perform({ type: 'workflows.createTask', workflowId: workflow.id, values, agentId: owner, model, limits, idempotencyKey: key.current, ...(prepared.policy.mailAccount ? { mailDetail } : {}) });
+      if (next?.createdTaskId) { composerDrafts.delete(cacheKey); await onCreated(next.createdTaskId); onClose(); }
+    } catch (failure) { setError(failure instanceof Error ? failure.message : 'The task could not be saved.'); }
+    finally { setLocalBusy(false); }
+  };
+  return <dialog className="modal workflow-dialog" ref={dialog} aria-labelledby="workflow-title" onCancel={event => { event.preventDefault(); if (!busy) onClose(); }} onClick={event => { if (event.target === event.currentTarget && !busy) onClose(); }}><header className="modal-header"><div><span className="eyebrow">{prepared ? 'REVIEW BEFORE SAVING' : 'MAKE IT YOURS'}</span><h2 id="workflow-title">{workflow.title}</h2></div><button type="button" className="icon-button" aria-label="Close workflow" disabled={busy} onClick={onClose}>×</button></header><form className="modal-form workflow-form" onSubmit={submit}>
+    <p className="modal-description">{workflow.description}</p>
+    {workflow.procedure && <details className="workflow-example"><summary>See an example and the required result</summary><p>{workflow.procedure.example.label}</p><dl>{Object.entries(workflow.procedure.example.inputs).map(([key, value]) => <div key={key}><dt>{workflow.inputs.find(input => input.id === key)?.label || key}</dt><dd>{value}</dd></div>)}</dl><pre>{workflow.procedure.example.output}</pre><p>Result: {workflow.procedure.output.filename}. Procedure version {workflow.procedure.versionId.slice(0, 12)}. Examples are illustrative and do not grant access or import data.</p></details>}
+    {!!workflow.procedure?.fileSlots.length && <div className="workflow-required-files"><strong>Files to assign after saving</strong><ul>{workflow.procedure.fileSlots.map(slot => <li key={slot.key}>{slot.label} · {slot.constraints.formats.join(', ').toUpperCase()} · up to {Math.floor((slot.constraints.maxBytes || 1048576) / 1024)} KiB</li>)}</ul><p>Import both inputs to the new task and assign their roles in readiness. Paid work remains blocked until they pass the file checks.</p></div>}
+    {(error || controller.error) && <div className="agent-run-error" role="alert">{error || controller.error}</div>}
+    {prepared ? <div className="workflow-review"><div className="workflow-review-heading"><strong>Your task brief</strong><button type="button" className="text-button" disabled={busy} onClick={() => setPrepared(null)}>Edit brief</button></div><p className="workflow-prepared-objective">{prepared.objective}</p><h3>What done looks like</h3><p>{prepared.completionCriteria}</p><h3>Access for this task</h3><p>{prepared.policy.mode === 'read_only_browser' ? 'Read-only browser tools' : 'Private workspace and approved browser tools'}</p>{prepared.policy.allowedOrigins.length ? <ul>{prepared.policy.allowedOrigins.map(origin => <li key={origin}>{origin}</li>)}</ul> : <p className="subtle">No websites granted.</p>}{prepared.policy.mailAccount && <p>Read-only mail: {prepared.policy.mailAccount}</p>}<label className="workflow-mail-detail">{prepared.policy.mailAccount && <><input type="checkbox" checked={mailDetail} disabled={busy} onChange={event => { setMailDetail(event.target.checked); key.current = crypto.randomUUID(); }} />Allow this task to search mail, read selected full threads, and import selected safe attachments (read only).</>}</label><p className="workflow-review-note">Files and account sign-ins are requested separately when needed.</p></div> : <div className="workflow-inputs">{workflow.inputs.map(input => <label key={input.id}>{input.label}{!input.required && <span className="optional">Optional</span>}{input.kind === 'multiline' || input.kind === 'websites' ? <textarea rows={input.kind === 'websites' ? 2 : 3} required={input.required} disabled={busy} placeholder={input.placeholder} maxLength={input.id === 'objective' ? 8000 : input.id === 'criteria' ? 4000 : input.kind === 'websites' ? 4096 : 1600} value={values[input.id] || ''} onChange={event => change(input.id, event.target.value)} /> : <input type={input.kind === 'email' ? 'email' : 'text'} required={input.required} disabled={busy} placeholder={input.placeholder} maxLength={1600} value={values[input.id] || ''} onChange={event => change(input.id, event.target.value)} />}{input.kind === 'websites' && <small>One HTTPS website per line. Only the sites you choose are granted.</small>}</label>)}</div>}
+    <div className="workflow-assignment"><label>Agent<select value={agentId} disabled={busy} onChange={event => { setAgentId(event.target.value); key.current = crypto.randomUUID(); }}>{snapshot.agents.map(agent => <option key={agent.id} value={agent.id}>{agent.name}</option>)}<option value="__new__">Create a new agent…</option></select></label>{agentId === '__new__' && <label>New agent name<input required disabled={busy} maxLength={80} value={agentName} onChange={event => setAgentName(event.target.value)} /></label>}</div>
+    <div className="workflow-run-settings"><label>Model<select required disabled={busy} value={model} onChange={event => { setModel(event.target.value); key.current = crypto.randomUUID(); }}><option value="" disabled>Select a model</option>{live?.models.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label><label>Maximum model spend (USD)<input required type="number" min={0.01} max={10} step={0.01} disabled={busy} value={limits.maxCostUsd} onChange={event => limit('maxCostUsd', Number(event.target.value))} /></label></div>
+    <details className="workflow-advanced"><summary>Advanced run limits</summary><div className="workflow-run-settings"><label>Model calls<input type="number" min={1} max={100} required value={limits.maxModelCalls} disabled={busy} onChange={event => limit('maxModelCalls', Number(event.target.value))} /></label><label>Tool steps<input type="number" min={1} max={200} required value={limits.maxToolSteps} disabled={busy} onChange={event => limit('maxToolSteps', Number(event.target.value))} /></label><label>Active seconds<input type="number" min={10} max={3600} required value={limits.maxActiveSeconds} disabled={busy} onChange={event => limit('maxActiveSeconds', Number(event.target.value))} /></label><label>Total model tokens<input type="number" min={1000} max={1000000} step={1000} required value={limits.maxTokens} disabled={busy} onChange={event => limit('maxTokens', Number(event.target.value))} /></label></div></details>
+    <p className="workflow-save-note">Saved without starting. You review and run the agent from its task.</p>{live && !live.credentialConfigured && <p className="workflow-save-note">Your model key can be connected after saving.</p>}
+    {prepared && model && <ReadinessPanel targetKey={JSON.stringify([workflow.id, values, agentId, model])} check={async () => { const state=await bridge.readiness({ type: 'readiness.check', target: { kind: 'workflow', workflowId: workflow.id, values, model, ...(agentId === '__new__' ? {} : { agentId }) } }); return {...state,checks:state.checks.map(item=>item.action&&['files','browser','runtime'].includes(item.action)?{...item,action:undefined,actionLabel:undefined,detail:item.detail+' Save this task first, then open its '+(item.action==='files'?'Files':item.action==='browser'?'Browser':'Activity')+' panel to finish setup.'}:item)}; }} onAction={onSetup ? action => { onClose(); onSetup(action); } : undefined} />}
+    <p className="workflow-save-note">Your unfinished brief stays here if you visit setup and return during this app session.</p>
+    <div className="modal-actions"><button type="button" className="button" onClick={onClose} disabled={busy}>Cancel</button><button type="submit" className="button primary" disabled={busy || !model || (agentId === '__new__' && !agentName.trim())}>{busy ? 'Saving…' : prepared ? 'Save task' : 'Review task'} <span aria-hidden="true">→</span></button></div>
+  </form></dialog>;
+}
+
+export function SaveWorkflowDialog({ task, controller, onClose, onSaved }: { task: Task; controller: WorkflowController; onClose: () => void; onSaved: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null), key = useRef(crypto.randomUUID());
+  const [title, setTitle] = useState(task.objective.split(/\r?\n/)[0].slice(0, 100)), [description, setDescription] = useState(''), [category, setCategory] = useState<WorkflowCategory>('personal');
+  const supportsParameters = Boolean(controller.state?.parameterizedTaskIds?.includes(task.id));
+  const [parameterized, setParameterized] = useState(supportsParameters);
+  useEffect(() => { const dialog = ref.current; dialog?.showModal(); return () => dialog?.close(); }, []);
+  return <dialog ref={ref} className="modal" aria-labelledby="save-workflow-title" onCancel={event => { event.preventDefault(); if (!controller.busy) onClose(); }}><header className="modal-header"><div><span className="eyebrow">WORK WORTH REPEATING</span><h2 id="save-workflow-title">Save a workflow</h2></div><button type="button" className="icon-button" aria-label="Close save workflow" disabled={controller.busy} onClick={onClose}>×</button></header><form className="modal-form" onSubmit={async event => { event.preventDefault(); if (await controller.perform({ type: 'workflows.saveFromTask', taskId: task.id, title: title.trim(), description: description.trim(), category, idempotencyKey: key.current, parameterized })) onSaved(); }}><p className="modal-description">Keep this task’s brief and reviewed access as a starting point. Choose an agent and review the inputs each time you use it.</p>{controller.error && <div className="agent-run-error" role="alert">{controller.error}</div>}<label>Name<input autoFocus required maxLength={100} value={title} disabled={controller.busy} onChange={event => { setTitle(event.target.value); key.current = crypto.randomUUID(); }} /></label><label>Describe when to use it <span className="optional">Optional</span><textarea rows={2} maxLength={500} value={description} disabled={controller.busy} onChange={event => { setDescription(event.target.value); key.current = crypto.randomUUID(); }} /></label><label>Category<select value={category} disabled={controller.busy} onChange={event => { setCategory(event.target.value as WorkflowCategory); key.current = crypto.randomUUID(); }}>{Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><div className="workflow-parameter-choice">{supportsParameters && <label><input type="checkbox" checked={parameterized} disabled={controller.busy} onChange={event => { setParameterized(event.target.checked); key.current = crypto.randomUUID(); }} />Keep named inputs and the checked file/output requirements</label>}<p>{parameterized ? "Each reuse starts with empty fields and fresh file assignments. The exact procedure version is preserved." : "This saves a manual brief. Edit its objective and completion criteria for each use."}</p></div><div className="form-note">Private files, messages, account sessions, and existing access grants are not included. Review the brief for personal details before reusing it.</div><div className="modal-actions"><button type="button" className="button" disabled={controller.busy} onClick={onClose}>Cancel</button><button type="submit" className="button primary" disabled={controller.busy || !title.trim()}>{controller.busy ? 'Saving…' : 'Save workflow'}</button></div></form></dialog>;
+}

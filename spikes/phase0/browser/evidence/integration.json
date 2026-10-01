@@ -1,0 +1,43 @@
+{
+  "kind": "phase0-browser",
+  "startedAt": "2026-09-11T06:38:57.130Z",
+  "status": "passed",
+  "checks": {
+    "sandbox": true,
+    "runtimeBoundary": true,
+    "twoTabsAndJpegFrame": true,
+    "forgedTabAndStaleObservationRejected": true,
+    "exclusiveHumanControl": true,
+    "pointerKeyboardSyntheticLogin": true,
+    "freshObservationAfterReturn": true,
+    "cookiesSharedOnlyWithinAgent": true,
+    "separateAgentCookieIsolation": true,
+    "readOnlyRootEnforced": true
+  },
+  "limitations": [
+    "Synthetic login only; owner-required website/MFA not supplied.",
+    "Temporary bounded profile; persistent profile retention and quota remain unresolved.",
+    "Screenshots and credentials are intentionally absent from this report."
+  ],
+  "imageId": "sha256:46c1588c262a1061389f93e5d4d39f6ff781b9350d1c973c16d36e1b16353a0e",
+  "sandbox": {
+    "uid": 1000,
+    "chromium": "153.0.8010.12",
+    "proof": "proc-renderer-namespaces-and-additional-seccomp-filter",
+    "namespaceSandbox": true,
+    "seccompBpfSandbox": true,
+    "noNewPrivileges": true,
+    "unsafeFlags": false,
+    "workerSeccompFilters": 1,
+    "renderers": [
+      { "namespace": true, "seccomp": true, "noPrivileges": true, "filters": 2 },
+      { "namespace": true, "seccomp": true, "noPrivileges": true, "filters": 2 }
+    ]
+  },
+  "concurrency": [
+    { "BlockIO": "0B / 0B", "CPUPerc": "0.35%", "Container": "aw-phase0-browser-a-69013", "ID": "d754131f34b7", "MemPerc": "10.16%", "MemUsage": "208.1MiB / 2GiB", "Name": "aw-phase0-browser-a-69013", "NetIO": "4.22kB / 4.82kB", "PIDs": "97" },
+    { "BlockIO": "0B / 0B", "CPUPerc": "0.17%", "Container": "aw-phase0-browser-b-69013", "ID": "0edb9f58f739", "MemPerc": "8.40%", "MemUsage": "171.9MiB / 2GiB", "Name": "aw-phase0-browser-b-69013", "NetIO": "1.54kB / 1.02kB", "PIDs": "84" }
+  ],
+  "concurrencyNote": "Two simultaneous browser workers on separate networks, synthetic fixture only; not a production load benchmark.",
+  "durationMs": 3835
+}

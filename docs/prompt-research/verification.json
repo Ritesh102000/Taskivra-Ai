@@ -1,0 +1,43 @@
+{
+  "appVersion": "0.6.2",
+  "promptVersion": "2026-09-30.1",
+  "schemaChanged": false,
+  "validation": {
+    "host": {
+      "tests": 436,
+      "pass": 419,
+      "fail": 0,
+      "skipped": 17,
+      "pythonPassed": 34,
+      "totalPassed": 453
+    },
+    "electron": {
+      "tests": 429,
+      "pass": 412,
+      "fail": 0,
+      "skipped": 17
+    },
+    "typecheck": "passed",
+    "build": "passed",
+    "newChecksPassedPerRuntime": 29
+  },
+  "productionRestart": {
+    "opened": true,
+    "idle": true,
+    "countsAndUsagePreserved": true,
+    "integrity": "ok"
+  },
+  "liveModelCallsMade": 0,
+  "liveBrowserOrContainerTestsRun": false,
+  "modelQualityEvaluated": false,
+  "sourceHashes": {
+    "packages/agent-loop/bounded.ts": "9cbfb0dfa13175922348aa848e409df6640b349922e0701ab604de14e86a9d48",
+    "packages/agent-loop/context.ts": "75b58fa05bf124124364a7859575713fd053d50f0a02b3918e876a52dc615f19",
+    "packages/agent-loop/failure-policy.ts": "6c969009599df2a1e33eee82ddf7a8b02e3c60cd7f1d8bf200022bebfea09b6d",
+    "packages/agent-loop/gmail-requests.ts": "1661199bef792ff5e57bd241a8eed63f57ae78cf81dafdf4c5346097ab8b228e",
+    "packages/agent-loop/index.ts": "950328d0e5f8ee22d98c010f820bc9eb32ee966290aac1e28d4f7aeebd084908",
+    "packages/agent-loop/prompts.ts": "97f0fc8cb0e134597b47b366a52bf330f5a2a231183b211616bfaa530a13f887",
+    "packages/agent-loop/tools.ts": "626945369094482664d6640e9171b57520da03166c26ba532b33ab7ed4570ba1",
+    "packages/agent-loop/troubleshooting.ts": "2be62bcf34fc66e81b25fc09f4d051c27b429be33615c5d0f9b89e30b582dafe"
+  }
+}

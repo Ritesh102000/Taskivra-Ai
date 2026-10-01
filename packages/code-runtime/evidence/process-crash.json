@@ -1,0 +1,7 @@
+{
+  "verifiedAt": "2026-09-11T11:52:31.168Z",
+  "imageDigest": "sha256:8732abc1579e14403d764735670577887db6e6545eaf741654e361870650a685",
+  "parentSignal": "SIGKILL",
+  "supervisorSurvivedParent": true,
+  "exactOwnedContainerRemovedByStartup": true
+}

@@ -1,0 +1,21 @@
+{
+  "verifiedAt": "2026-09-11T11:43:48.680Z",
+  "testedImage": "sha256:afb2c0ac31416d382533be376dacafe4064b3d8ecfcf7840eef6472d9580a154",
+  "defaultImageUnchanged": "sha256:0c8b1c495db9af0de40fc53982025cae297a9e96947057d9e5da3bb109386127",
+  "packages": [
+    {
+      "runtime": "python",
+      "name": "six",
+      "version": "1.17.0"
+    },
+    {
+      "runtime": "node",
+      "name": "is-number",
+      "version": "7.0.0"
+    }
+  ],
+  "packageExecutionNetwork": "none",
+  "badHashRejected": true,
+  "previousRecipeImagePreserved": true,
+  "hostPackageInstalls": false
+}

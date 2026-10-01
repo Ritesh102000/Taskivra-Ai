@@ -1,0 +1,56 @@
+{
+  "recordedAt": "2026-09-11T11:04:57.088Z",
+  "images": {
+    "browser": "sha256:b7ca9a018041a5baa7977dd687218aa29053f6b9fa4127f9e59ef8228b8480f0",
+    "egress": "sha256:9b3ad76881cfa35e579e63cd071f738a060cafccce7b643d6119be73552e33a4"
+  },
+  "sourceSha256": {
+    "packages/browser-runtime/index.ts": "10671a74d30429b7ebce9216e8617f673a8ff0602967bb5580627128f5c96e04",
+    "packages/browser-runtime/profiles.ts": "41427f7d445dd6d8b8807abb6e9897784154596413b24d6a514eac7d8f67b455",
+    "packages/browser-runtime/transport.ts": "4c57a1dffb1d13e20f0aaf0a392ac529f5f0f800b95beee66ab044cece7be811",
+    "packages/browser-runtime/types.ts": "67de42a5741198af054d89337bcd9520339c7e89d2779134ea3d62482b1cfbfd",
+    "packages/browser-runtime/setup.mjs": "09e14f2a67ad6c63dc4c1d03efaab43a944bf3aefc8ae4ca25a84528bb2b3fce",
+    "containers/egress/proxy.py": "ff57e0da180b87229793ca58c03655385c018ff176de6538cd91edb722614242",
+    "tests/phase3/runtime-egress.test.ts": "8cd150ae3286f4131b1e2fbe270bb464089c36f2bd3ffc2d080a878e22322fb2",
+    "tests/phase3/runtime-profiles.test.ts": "667951d30fdc632d3d65fab3dbce97a771a8a15f449202b8ddcd4e70632fb212",
+    "tests/phase3/runtime-recovery.test.ts": "a44c61cad7b2a0cbaf73dbea728a61b0d1158833522cc2bbafc08f08fe79eab6",
+    "tests/phase3/runtime-transport.test.ts": "62e3b8dd29e9762c9ea4a90f766120a2b8ea95d39313eb897f67965da6983efe"
+  },
+  "unitTests": {
+    "host": {
+      "node": "v26.7.0",
+      "passed": 14,
+      "failed": 0
+    },
+    "electron": {
+      "electron": "44.3.0",
+      "node": "24.20.0",
+      "passed": 14,
+      "failed": 0
+    },
+    "files": [
+      "runtime-profiles.test.ts",
+      "runtime-recovery.test.ts",
+      "runtime-transport.test.ts"
+    ]
+  },
+  "liveEgress": {
+    "passed": 44,
+    "failed": 0,
+    "recordedAt": "2026-09-11T11:04:02.611132+00:00",
+    "testRunLabel": "agent-workspaces.phase0-egress=awp0-egress-56c3504d18",
+    "containersRemaining": 0,
+    "networksRemaining": 0
+  },
+  "scope": {
+    "imagesRebuilt": false,
+    "fullWorkerSuiteRerun": false,
+    "foreignDockerResourcesMutated": false,
+    "cleanup": "Only the exact temporary run label was eligible for cleanup; unrelated resources were not passed to mutation commands."
+  },
+  "previousProcessCrashEvidence": "process-crash.json",
+  "limitations": [
+    "This refresh covers runtime unit tests and the external egress boundary. Full worker/native interface verification is recorded separately.",
+    "No real-provider login or MFA/passkey compatibility claim."
+  ]
+}

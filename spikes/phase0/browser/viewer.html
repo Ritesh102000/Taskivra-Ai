@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Agent Workspaces · Phase 0 browser</title><style>
+body{font:15px system-ui,sans-serif;background:#f6f5f2;color:#222;margin:24px auto;max-width:1160px}button,input,select{font:inherit;padding:8px;border:1px solid #ccc;border-radius:6px}button{cursor:pointer;background:white}button:disabled{opacity:.5}header,.row{display:flex;gap:10px;align-items:center;margin:12px 0}h1{font-size:22px;flex:1}#url{flex:1}#screen{max-width:100%;background:white;border:1px solid #ccc;display:block}#screen:focus{outline:3px solid #645cff}.note{color:#666;font-size:13px}#status{min-height:22px}#tabs{min-width:180px;max-width:500px}#frame{position:relative}#empty{padding:100px;text-align:center;border:1px solid #ccc;background:white}
+</style><script src="/viewer-ui.js" defer></script></head><body>
+<header><h1>Phase 0 · Browser viewport</h1><span id="controller">Controller: Agent</span><button id="control">Take control</button></header>
+<p class="note">Isolated feasibility viewer. Click the page then type; Tab, Enter, arrows, deletion, and paste are forwarded. Your Mac desktop is not controlled. Frames and input are not retained. Browser profile is temporary.</p>
+<div class="row"><select id="tabs" aria-label="Browser tabs"></select><button id="refresh">Refresh view</button><button id="close">Close tab</button></div>
+<form id="navigation" class="row"><input id="url" aria-label="Website URL" placeholder="https://example.com" type="url" required><button id="go">Go</button><button id="new" type="button">New tab</button></form>
+<p id="status" role="status">Take control to begin.</p>
+<div id="frame"><div id="empty">The selected agent tab will appear here.</div><img id="screen" alt="Selected isolated browser tab" tabindex="0" hidden></div>
+</body></html>

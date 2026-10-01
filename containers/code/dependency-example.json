@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "pipApkVersion": "25.1.1-r1",
+  "python": [
+    {
+      "name": "six",
+      "version": "1.17.0",
+      "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"
+    }
+  ]
+}

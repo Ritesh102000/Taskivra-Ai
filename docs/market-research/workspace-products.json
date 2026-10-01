@@ -1,0 +1,778 @@
+{
+  "auditDate": "2026-09-30",
+  "report": "workspace-products.md",
+  "appVersion": "0.6.2",
+  "auditMode": "read_only_product_research",
+  "implementationChanges": false,
+  "paidCalls": 0,
+  "repositories": [
+    {
+      "name": "Kortix/Suna",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "license": "Root identifies Elastic License 2.0",
+      "installedDependenciesNotEquivalentToConfiguredRuntime": true
+    },
+    {
+      "name": "OpenAgents",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "license": "Apache-2.0",
+      "installedDependenciesNotEquivalentToConfiguredRuntime": true
+    }
+  ],
+  "coverage": [
+    "onboarding",
+    "activation",
+    "templates",
+    "connectors",
+    "scheduling",
+    "collaboration",
+    "human review",
+    "knowledge",
+    "artifacts",
+    "control",
+    "observability",
+    "recovery",
+    "design",
+    "distribution",
+    "commercial packaging"
+  ],
+  "publicPages": [
+    {
+      "url": "https://kortix.com/pricing",
+      "type": "current_public_offer",
+      "notes": "Free 200 monthly compute credits/1 project; Team $40/seat/month with pooled credits; Enterprise custom. No inference about willingness to pay."
+    },
+    {
+      "url": "https://kortix.com/connectors",
+      "type": "advertised_product",
+      "notes": "Large catalog, scoped broker and approval UX; not all integrations configured or tested."
+    },
+    {
+      "url": "https://kortix.com/channels",
+      "type": "explicit_availability",
+      "notes": "Slack default; Teams operator-enabled; email experimental. Generic webhook is not a bidirectional channel."
+    },
+    {
+      "url": "https://kortix.com/automations",
+      "type": "advertised_product",
+      "notes": "Cron/webhook explanation; pinned source also supports monitor."
+    },
+    {
+      "url": "https://openagents.org/faq",
+      "type": "public_offer_and_claims",
+      "notes": "Free workspace and direct model-provider spend; supported agent list lags pinned README."
+    },
+    {
+      "url": "https://openagents.org/workspace",
+      "type": "advertised_product",
+      "notes": "Shared threads/files/browser; routines, workflows, knowledge, inbox, multi-device. Current defaults and configured deployments separate."
+    }
+  ],
+  "sources": [
+    {
+      "id": "K1",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/web/src/components/projects/onboarding/onboarding-profile.ts",
+      "lines": {
+        "start": 11,
+        "end": 208
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/web/src/components/projects/onboarding/onboarding-profile.ts#L11",
+      "claim": "Job-based onboarding with capability/permission-gated connector step and starters",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K2",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/web/src/components/use-cases/template-session-install-dialog.tsx",
+      "lines": {
+        "start": 81,
+        "end": 117
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/web/src/components/use-cases/template-session-install-dialog.tsx#L81",
+      "claim": "Project provisioning and bundled starter installation; missing managed-Git error",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K3",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/api/src/connectors/policy.ts",
+      "lines": {
+        "start": 1,
+        "end": 64
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/api/src/connectors/policy.ts#L1",
+      "claim": "Layered connector policy, argument conditions, legacy allow_all default",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K4a",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/api/src/projects/trigger-schedule.ts",
+      "lines": {
+        "start": 29,
+        "end": 64
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/api/src/projects/trigger-schedule.ts#L29",
+      "claim": "Cron/timezone validation",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K4b",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/api/src/projects/lib/trigger-fire.ts",
+      "lines": {
+        "start": 209,
+        "end": 280
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/api/src/projects/lib/trigger-fire.ts#L209",
+      "claim": "Durable continuation delivery",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K4c",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/api/src/projects/lib/trigger-scheduler.ts",
+      "lines": {
+        "start": 180,
+        "end": 221
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/api/src/projects/lib/trigger-scheduler.ts#L180",
+      "claim": "Queue and terminal failure distinctions",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K5",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/api/src/projects/change-request-policy.ts",
+      "lines": {
+        "start": 53,
+        "end": 127
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/api/src/projects/change-request-policy.ts#L53",
+      "claim": "Explicit self-merge grants and agent/trigger governance change checks",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K6",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "packages/starter/templates/base/harnesses/opencode/tools/memory.ts",
+      "lines": {
+        "start": 1,
+        "end": 26
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/packages/starter/templates/base/harnesses/opencode/tools/memory.ts#L1",
+      "claim": "Project memory as file changes reviewed through change requests",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K7",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "apps/web/src/features/billing/cost-explorer/cost-summary-tiles.tsx",
+      "lines": {
+        "start": 10,
+        "end": 42
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/apps/web/src/features/billing/cost-explorer/cost-summary-tiles.tsx#L10",
+      "claim": "Real-data trends and neutral cost comparisons",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "K8",
+      "repo": "kortix-ai/suna",
+      "commit": "7df56c8b3afafe1ef89e5f06e0fd29af10bca55d",
+      "path": "packages/manifest-schema/src/constants.ts",
+      "lines": {
+        "start": 92,
+        "end": 92
+      },
+      "url": "https://github.com/kortix-ai/suna/blob/7df56c8b3afafe1ef89e5f06e0fd29af10bca55d/packages/manifest-schema/src/constants.ts#L92",
+      "claim": "Manifest includes cron, webhook and monitor trigger types",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O1",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "packages/launcher/src/renderer/components/onboarding/onboarding-shared.ts",
+      "lines": {
+        "start": 8,
+        "end": 41
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/packages/launcher/src/renderer/components/onboarding/onboarding-shared.ts#L8",
+      "claim": "Pairing-first onboarding; agent setup optional continuation",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O2a",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/frontend/components/workflows/workflow-builder-dialog.tsx",
+      "lines": {
+        "start": 26,
+        "end": 108
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/frontend/components/workflows/workflow-builder-dialog.tsx#L26",
+      "claim": "Agent/human workflow step editing and iteration limits",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O2b",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/services/workflow.py",
+      "lines": {
+        "start": 345,
+        "end": 440
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/services/workflow.py#L345",
+      "claim": "Human step parks and notifies; workflow completion and stall notifications",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O2c",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/services/workflow.py",
+      "lines": {
+        "start": 261,
+        "end": 281
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/services/workflow.py#L261",
+      "claim": "Judge unavailable fallback advances agent step",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O3",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/routers/integrations.py",
+      "lines": {
+        "start": 54,
+        "end": 81
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/routers/integrations.py#L54",
+      "claim": "Concrete Telegram/Slack/Lark channel integration list",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O4a",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/routers/routines.py",
+      "lines": {
+        "start": 33,
+        "end": 160
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/routers/routines.py#L33",
+      "claim": "Daily and interval routines with UTC scheduling",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O4b",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/main.py",
+      "lines": {
+        "start": 227,
+        "end": 245
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/main.py#L227",
+      "claim": "Compare-and-swap claim of due routines",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O5a",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/routers/knowledge.py",
+      "lines": {
+        "start": 3,
+        "end": 58
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/routers/knowledge.py#L3",
+      "claim": "Workspace knowledge documents and bounded content",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O5b",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/routers/shares.py",
+      "lines": {
+        "start": 3,
+        "end": 8
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/routers/shares.py#L3",
+      "claim": "Public read-only conversation snapshot links",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O6",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/frontend/components/files/file-preview.tsx",
+      "lines": {
+        "start": 395,
+        "end": 492
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/frontend/components/files/file-preview.tsx#L395",
+      "claim": "Rich result previews; Excel download fallback",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O7a",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/frontend/components/inbox/inbox-view.tsx",
+      "lines": {
+        "start": 144,
+        "end": 180
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/frontend/components/inbox/inbox-view.tsx#L144",
+      "claim": "Priority and read-state inbox",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    },
+    {
+      "id": "O7b",
+      "repo": "openagents-org/openagents",
+      "commit": "d46d087dca2279eac25414621e6af91bc8b3338b",
+      "path": "workspace/backend/app/services/notify.py",
+      "lines": {
+        "start": 3,
+        "end": 27
+      },
+      "url": "https://github.com/openagents-org/openagents/blob/d46d087dca2279eac25414621e6af91bc8b3338b/workspace/backend/app/services/notify.py#L3",
+      "claim": "After-commit notification dispatch",
+      "evidenceType": "pinned_source_inspection",
+      "executed": false
+    }
+  ],
+  "ourSources": [
+    {
+      "id": "AW-recipes",
+      "path": "packages/workflows/catalog.ts",
+      "lines": {
+        "start": 5,
+        "end": 119
+      },
+      "claim": "Six starters and current capability boundaries"
+    },
+    {
+      "id": "AW-file-preview",
+      "path": "apps/desktop/renderer/Files.tsx",
+      "lines": {
+        "start": 137,
+        "end": 140
+      },
+      "claim": "Bounded plain text and metadata preview"
+    },
+    {
+      "id": "AW-cost-limits",
+      "path": "apps/desktop/renderer/AgentRun.tsx",
+      "lines": {
+        "start": 42,
+        "end": 55
+      },
+      "claim": "Task cost limits and credential presence status"
+    },
+    {
+      "id": "AW-release-plan",
+      "path": "implementation-plan.md",
+      "lines": {
+        "start": 167,
+        "end": 185
+      },
+      "claim": "Remaining release gates; individual partial implementations must be verified"
+    }
+  ],
+  "issues": [
+    {
+      "id": "issue-722",
+      "repo": "openagents-org/openagents",
+      "number": 722,
+      "title": "Inability to confirm sign-in on kimi code v2.1.1 on Windows",
+      "opened": "2026-09-26",
+      "url": "https://github.com/openagents-org/openagents/issues/722",
+      "evidenceType": "public_report_not_reproduced",
+      "signal": "False negative readiness after authentication",
+      "recommendation": "task-doctor"
+    },
+    {
+      "id": "issue-679",
+      "repo": "openagents-org/openagents",
+      "number": 679,
+      "title": "Hermes adapter does not resume sessions or apply configured working directory",
+      "opened": "2026-09-13",
+      "url": "https://github.com/openagents-org/openagents/issues/679",
+      "evidenceType": "public_report_not_reproduced",
+      "signal": "Session continuity and working directory lost",
+      "recommendation": "scoped-knowledge"
+    },
+    {
+      "id": "issue-682",
+      "repo": "openagents-org/openagents",
+      "number": 682,
+      "title": "ClaudeAdapter._buildChildEnv strips CLAUDE_CONFIG_DIR, breaking per-agent multi-account setups",
+      "opened": "2026-09-13",
+      "url": "https://github.com/openagents-org/openagents/issues/682",
+      "evidenceType": "public_report_not_reproduced",
+      "signal": "Per-agent account configuration stripped",
+      "recommendation": "trusted-connectors"
+    },
+    {
+      "id": "issue-485",
+      "repo": "openagents-org/openagents",
+      "number": 485,
+      "title": "Add an end-to-end agent diagnostics command",
+      "opened": "2026-06-14",
+      "url": "https://github.com/openagents-org/openagents/issues/485",
+      "evidenceType": "public_report_not_reproduced",
+      "signal": "Feature request for unified task round-trip diagnostics",
+      "recommendation": "task-doctor"
+    },
+    {
+      "id": "issue-492",
+      "repo": "openagents-org/openagents",
+      "number": 492,
+      "title": "Multi-agent workspace can enter runaway status/event loop after restart",
+      "opened": "2026-06-16",
+      "url": "https://github.com/openagents-org/openagents/issues/492",
+      "evidenceType": "public_report_not_reproduced",
+      "signal": "Reported restart/event feedback loop",
+      "recommendation": "workflow-schedules"
+    }
+  ],
+  "issueSampling": {
+    "method": "20 most recently updated open issue/PR records each repo, PRs excluded; informative product issues selected. Kortix additional is:issue search.",
+    "kortixFirstPageIssues": 0,
+    "kortixSearchIssueCount": 0,
+    "absenceMeaning": "Evidence gap, not absence of customer friction",
+    "representativePrevalence": false
+  },
+  "cautions": [
+    "Marketing claims and selected source paths are not complete runtime or security validation.",
+    "Do not adopt Kortix legacy allow_all default.",
+    "Do not adopt OpenAgents missing-judge step-complete fallback.",
+    "Do not replace private per-agent workspaces with implicit shared files/browser.",
+    "Broad mobile/cloud and marketplace work should follow packaged local release and repeat demand.",
+    "Market fit and willingness to pay remain hypotheses."
+  ],
+  "recommendations": [
+    {
+      "id": "task-doctor",
+      "priority": "P0",
+      "title": "First-result setup and task doctor",
+      "audiences": [
+        "business",
+        "agency",
+        "developer",
+        "personal"
+      ],
+      "impact": "high",
+      "confidence": "high",
+      "effort": "M",
+      "evidence": [
+        "K1",
+        "O1",
+        "issue-722",
+        "issue-485"
+      ],
+      "dependencies": [
+        "Existing model/browser/Gmail/runtime checks",
+        "Packaged release and restore/sleep acceptance",
+        "Optional explicitly priced live smoke test"
+      ],
+      "validation": "Observe 12 new Mac users; proposed gate at least 9 first reviewed results without developer intervention; record every activation blocker."
+    },
+    {
+      "id": "trusted-connectors",
+      "priority": "P1",
+      "title": "Small trusted connection library",
+      "audiences": [
+        "business",
+        "agency",
+        "developer"
+      ],
+      "impact": "high",
+      "confidence": "medium-high",
+      "effort": "L",
+      "evidence": [
+        "K3",
+        "O3"
+      ],
+      "dependencies": [
+        "OAuth and token lifecycle",
+        "Connection broker",
+        "Immutable input snapshots",
+        "Account isolation and revoke checks"
+      ],
+      "validation": "Build the next connector only when at least 4 of 12 pilots request it; demonstrate controlled revocation and mismatch rejection plus repeat use."
+    },
+    {
+      "id": "result-review",
+      "priority": "P1",
+      "title": "Rich result review and export",
+      "audiences": [
+        "business",
+        "agency",
+        "developer",
+        "personal"
+      ],
+      "impact": "high",
+      "confidence": "high",
+      "effort": "M",
+      "evidence": [
+        "O6",
+        "K5",
+        "AW-file-preview"
+      ],
+      "dependencies": [
+        "Isolated safe document renderer",
+        "Lineage and exact versions",
+        "Owner accept/request-changes state"
+      ],
+      "validation": "At least 8 of 10 users can trace a claim and export intended version without help; measure corrections required."
+    },
+    {
+      "id": "workflow-schedules",
+      "priority": "P1",
+      "title": "Scheduled saved workflows with change summaries",
+      "audiences": [
+        "business",
+        "agency",
+        "personal"
+      ],
+      "impact": "high",
+      "confidence": "medium-high",
+      "effort": "L",
+      "evidence": [
+        "K4a",
+        "K4b",
+        "K4c",
+        "O4a",
+        "O4b"
+      ],
+      "dependencies": [
+        "Durable trigger receipts",
+        "Timezone and missed-run semantics",
+        "Non-overlap and budget reservation",
+        "Local sleep/wake behavior"
+      ],
+      "validation": "Two-week recurring job pilot; zero duplicate effects or cap overruns in fault tests; at least half retain a routine in week two."
+    },
+    {
+      "id": "scoped-knowledge",
+      "priority": "P1",
+      "title": "Client/project spaces with reviewed knowledge",
+      "audiences": [
+        "business",
+        "agency",
+        "developer",
+        "personal"
+      ],
+      "impact": "high",
+      "confidence": "medium-high",
+      "effort": "L",
+      "evidence": [
+        "K6",
+        "O5a",
+        "issue-682",
+        "issue-679"
+      ],
+      "dependencies": [
+        "Project scopes",
+        "Versioned knowledge and provenance",
+        "Cross-scope authorization",
+        "Export/delete lifecycle"
+      ],
+      "validation": "Two-client workload with adversarial isolation tests; no cross-client leakage; fewer repeated briefings and corrections over three runs."
+    },
+    {
+      "id": "starter-packs",
+      "priority": "P1",
+      "title": "Starter packs with sample inputs and example output",
+      "audiences": [
+        "business",
+        "agency",
+        "developer",
+        "personal"
+      ],
+      "impact": "high",
+      "confidence": "medium",
+      "effort": "S-M",
+      "evidence": [
+        "K1",
+        "K2",
+        "AW-recipes"
+      ],
+      "dependencies": [
+        "Supported current capabilities",
+        "Quality fixtures",
+        "Explicit source/input/output contracts"
+      ],
+      "validation": "Compare pack-first and empty-task activation; measure first accepted result and voluntary week-two reuse rather than clicks."
+    },
+    {
+      "id": "staged-workflows",
+      "priority": "P2",
+      "title": "Simple staged workflows with a human review step",
+      "audiences": [
+        "agency",
+        "business",
+        "developer"
+      ],
+      "impact": "high",
+      "confidence": "medium",
+      "effort": "L",
+      "evidence": [
+        "O2a",
+        "O2b",
+        "K5"
+      ],
+      "dependencies": [
+        "Existing acyclic dependency graph",
+        "Output contracts and verification",
+        "Leases and restart recovery",
+        "Bounded revision loops"
+      ],
+      "validation": "Three recurring jobs; restart every stage; no duplicate work, wrong upstream version or success without required stage evidence."
+    },
+    {
+      "id": "outcome-history",
+      "priority": "P1",
+      "title": "Outcome history and cost per accepted result",
+      "audiences": [
+        "business",
+        "agency",
+        "developer"
+      ],
+      "impact": "medium-high",
+      "confidence": "medium",
+      "effort": "M",
+      "evidence": [
+        "K7",
+        "AW-cost-limits"
+      ],
+      "dependencies": [
+        "Explicit owner outcome feedback",
+        "Pricing metadata history",
+        "Workflow-run linkage",
+        "Private local metrics"
+      ],
+      "validation": "Four weekly reviews; users can choose which jobs to keep/revise/stop using evidence; test willingness to pay after repeat value."
+    },
+    {
+      "id": "actionable-notifications",
+      "priority": "P1-local-P3-remote",
+      "title": "Actionable local notifications; optional remote review later",
+      "audiences": [
+        "business",
+        "agency",
+        "developer",
+        "personal"
+      ],
+      "impact": "medium-high",
+      "confidence": "medium-high",
+      "effort": "S-M-local-L-remote",
+      "evidence": [
+        "O7a",
+        "O7b"
+      ],
+      "dependencies": [
+        "After-commit delivery",
+        "Deep links",
+        "Quiet hours and deduplication",
+        "Version-bound approvals",
+        "Separate remote access design"
+      ],
+      "validation": "Users return directly to correct pending request; unchanged state does not repeat notifications; stale approvals rejected."
+    },
+    {
+      "id": "reviewed-actions",
+      "priority": "P2",
+      "title": "Bounded draft-and-approve actions",
+      "audiences": [
+        "business",
+        "agency",
+        "developer"
+      ],
+      "impact": "high",
+      "confidence": "medium",
+      "effort": "L",
+      "evidence": [
+        "K3",
+        "K5",
+        "O2b"
+      ],
+      "dependencies": [
+        "Stable read connectors",
+        "Explicit write scopes",
+        "Exact-preview/destination binding",
+        "Idempotency and reconciliation"
+      ],
+      "validation": "One pilot-demanded write operation; zero duplicate effects in failure tests; stale-preview rejection; compare manual copy time."
+    }
+  ],
+  "proposedOrder": [
+    [
+      "task-doctor",
+      "result-review",
+      "starter-packs"
+    ],
+    [
+      "trusted-connectors",
+      "scoped-knowledge",
+      "workflow-schedules"
+    ],
+    [
+      "outcome-history",
+      "actionable-notifications"
+    ],
+    [
+      "staged-workflows",
+      "reviewed-actions"
+    ]
+  ],
+  "memoryUsed": {
+    "path": "MEMORY.md",
+    "lines": [
+      847,
+      855
+    ],
+    "note": "Provider/data-root and private workspace boundaries; live source inspected for current feature status",
+    "rolloutId": "01a08f19-f275-7db1-bdee-ebf19432fb3e"
+  }
+}

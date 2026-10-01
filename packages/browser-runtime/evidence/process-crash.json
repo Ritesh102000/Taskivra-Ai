@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-09-11T10:47:10.728Z",
+  "signal": "SIGKILL",
+  "journals": 2,
+  "resourcesBefore": {
+    "containers": 3,
+    "networks": 3
+  },
+  "resourcesAfter": {
+    "containers": 0,
+    "networks": 0
+  },
+  "checks": {
+    "selfSigkillAfterReady": true,
+    "durableCreationJournal": true,
+    "matchingOwnerAndImmutableIDs": true,
+    "startupCleanup": true
+  },
+  "limitations": [
+    "The separate foreign-label regression uses a deterministic CLI fixture; no unrelated Docker resource is modified."
+  ]
+}

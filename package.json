@@ -1,0 +1,67 @@
+{
+  "name": "agent-workspaces",
+  "version": "0.9.9",
+  "private": true,
+  "description": "Mac agent workspaces with a cloud model loop, isolated browsers and container code",
+  "type": "module",
+  "main": "dist/main/main.cjs",
+  "engines": {
+    "node": ">=24.14.0"
+  },
+  "scripts": {
+    "phase0:doctor": "python3 spikes/phase0/doctor.py --write",
+    "phase0:model": "python3 spikes/phase0/model/probe.py",
+    "phase0:key": "python3 spikes/phase0/model/credentials.py",
+    "start": "npm run build && electron .",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:phase0": "python3 spikes/phase0/check.py",
+    "test:phase1": "tsx --test tests/phase1/*.test.ts",
+    "test:phase1:electron": "node scripts/test-electron.mjs phase1",
+    "test:phase2": "tsx --test tests/phase2/*.test.ts",
+    "test:phase2:electron": "node scripts/test-electron.mjs phase2",
+    "test:electron": "node scripts/test-electron.mjs",
+    "test": "npm run test:phase0 && npm run test:phase1 && npm run test:phase2 && npm run test:phase3 && npm run test:phase4 && npm run test:phase5 && npm run test:phase6 && npm run test:improvements && npm run test:phase7 && npm run test:phase8 && npm run test:fleet",
+    "test:phase3": "tsx --test tests/phase3/*.test.ts",
+    "test:phase3:electron": "node scripts/test-electron.mjs phase3",
+    "browser:setup": "node packages/browser-runtime/setup.mjs --build",
+    "browser:check": "node packages/browser-runtime/setup.mjs --check",
+    "test:phase4": "tsx --test tests/phase4/*.test.ts",
+    "test:phase4:electron": "node scripts/test-electron.mjs phase4",
+    "code:setup": "node packages/code-runtime/setup.mjs --build",
+    "code:check": "node packages/code-runtime/setup.mjs --check",
+    "test:phase5": "tsx --test tests/phase5/*.test.ts",
+    "test:phase5:electron": "node scripts/test-electron.mjs phase5",
+    "model:setup": "node packages/model-adapters/setup.mjs",
+    "gmail:setup": "node packages/gmail/setup.mjs",
+    "test:phase6": "tsx --test tests/phase6/*.test.ts",
+    "test:phase6:electron": "node scripts/test-electron.mjs phase6",
+    "browser:native:setup": "node packages/native-browser/setup.mjs",
+    "test:improvements": "tsx --test tests/improvements/*.test.ts",
+    "test:improvements:electron": "node scripts/test-electron.mjs improvements",
+    "test:phase8": "tsx --test tests/phase8/*.test.ts",
+    "test:phase8:electron": "node scripts/test-electron.mjs phase8",
+    "test:phase7": "tsx --test tests/phase7/*.test.ts",
+    "test:phase7:electron": "node scripts/test-electron.mjs phase7",
+    "package:mac": "npm run build && node scripts/package-mac.mjs",
+    "test:fleet": "tsx --test tests/fleet/*.test.ts",
+    "test:fleet:electron": "node scripts/test-electron.mjs fleet"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "electron": "44.3.0",
+    "esbuild": "0.28.2",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vite": "8.3.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-09-11T11:52:12.012Z",
+  "imageDigest": "sha256:8732abc1579e14403d764735670577887db6e6545eaf741654e361870650a685",
+  "verifiedExportBytes": 75497472,
+  "cancelledAfterFirstOutputCreated": true,
+  "cancelledExportReturnedManifest": false,
+  "limits": {
+    "memoryMiB": 512,
+    "workspaceMiB": 96,
+    "tmpMiB": 8,
+    "pids": 64,
+    "timeoutSeconds": 10,
+    "logBytes": 1048576,
+    "exportBytes": 100663296,
+    "files": 4096
+  }
+}

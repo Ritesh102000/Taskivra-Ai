@@ -1,0 +1,114 @@
+{
+  "format": "agent-workspaces-release-evidence",
+  "version": 1,
+  "appVersion": "0.8.0",
+  "recordedAt": "2026-09-30T12:58:14.330Z",
+  "package": {
+    "directory": "dist/packages/Agent-Workspaces-0.8.0-arm64-local",
+    "createdAt": "2026-09-30T12:54:13.594Z",
+    "electronVersion": "44.3.0",
+    "architecture": "arm64",
+    "signing": "ad-hoc; no Developer ID; not notarized",
+    "files": 30,
+    "manifestSha256": "5d3ca20cb4b50bd817c090f634a5718722f1f37f3b12326e4b0106d79adaf0ad",
+    "allIncludedFileHashesMatch": true,
+    "sourceBuildMatchesPackage": true,
+    "deepStrictCodesignVerification": "passed"
+  },
+  "tests": {
+    "electron": {
+      "total": 630,
+      "passed": 612,
+      "failed": 0,
+      "skipped": 18,
+      "log": ".test-data/phase8-release-proof/aw-phase8-release-electron.log"
+    },
+    "phase8": {
+      "total": 62,
+      "passed": 62,
+      "includedInElectronRun": true
+    },
+    "node": {
+      "priorCompleteRunPassed": true,
+      "finalAffectedTests": 10,
+      "finalAffectedPassed": 10,
+      "logs": [
+        ".test-data/phase8-release-proof/aw-phase8-node-tests.log",
+        ".test-data/phase8-release-proof/aw-phase8-release-scope.log"
+      ]
+    },
+    "phase0": {
+      "additionalJavaScriptPassed": 7,
+      "pythonPassed": 34
+    },
+    "typecheck": "passed",
+    "build": "passed with nonfatal renderer chunk-size warning"
+  },
+  "fixture": {
+    "root": ".test-data/phase8-ui-final-20260930",
+    "completedRoles": 3,
+    "approvedHandoffs": 2,
+    "scriptedModelCalls": 12,
+    "paidApiCalls": 0,
+    "networkRequests": 0,
+    "liveFindingsVerified": false,
+    "enabledTasks": 0,
+    "enabledRoutines": 0
+  },
+  "desktopChecks": {
+    "method": "native app UI through CUA",
+    "newReviewerCreation": "passed in isolated data",
+    "prepareThreePausedTasks": "passed in isolated data without model calls",
+    "providerSelection": "OpenAI, Anthropic, Ollama and compatible-host presets visible; no connection saved or live call made",
+    "recoveryNavigation": "passed",
+    "conciseTaskTitles": "passed",
+    "scopedResultRevisionControls": "passed; acceptance and export remain available",
+    "pdfNativeSaveDialog": "passed",
+    "pdfExportBytes": 174850,
+    "pdfExportSha256": "c18bccd1ac805987f2883cd683a262643002175d326e11dc360e686b9972dac8",
+    "finalPackageProductionLaunch": "passed after owner completed macOS Keychain prompt",
+    "finalVisiblePage": "Security review",
+    "productionReviewCreated": false
+  },
+  "exports": {
+    "proofFile": ".test-data/phase8-export-proof/parser-proof.json",
+    "independentParsersPassed": true,
+    "docxXlsxRendered": true,
+    "hostileHtmlNetworkRequests": 0,
+    "javascriptExecutionObserved": false
+  },
+  "upgrade": {
+    "from": 13,
+    "to": 16,
+    "integrity": "ok",
+    "foreignKeyViolations": 0,
+    "preservedCounts": {
+      "agents": 1,
+      "tasks": 1,
+      "artifacts": 3,
+      "artifact_versions": 4,
+      "live_task_config": 1,
+      "live_model_calls": 7,
+      "projects": 1,
+      "routines": 0,
+      "saved_workflows": 0
+    },
+    "verifiedArtifactFiles": 4,
+    "enabledTasks": 0,
+    "enabledRoutines": 0,
+    "securityReviewTeams": 0,
+    "backupRoot": "~/Desktop/Agent Workspaces Backups/before-0.8.0-20260930-180632",
+    "backupPermissions": "700",
+    "backupMatchedOriginalBeforeLaunch": true,
+    "backupType": "private filesystem copy; not portable export"
+  },
+  "limits": [
+    "Static review of selected imported code/configuration/lab evidence; no live target scanning or exploitation.",
+    "No real hosted or local LLM was used to validate model compatibility.",
+    "Local model runtimes and downloaded framework dependencies were not installed.",
+    "Provider spend tracking uses declared prices and reservations, not a provider invoice hard cap.",
+    "Local ad-hoc Mac build; not Developer ID signed, notarized or clean-Mac tested.",
+    "Keychain dialogs require owner interaction and can recur after an ad-hoc rebuild.",
+    "Source references were selectively inspected; no exhaustive upstream audit or incident chain reproduction."
+  ]
+}

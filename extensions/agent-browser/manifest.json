@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Agent Workspaces Browser Bridge",
+  "version": "0.1.0",
+  "description": "Scoped background browser commands for dedicated Agent Workspaces Chrome profiles.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsNpwOVCMxBVbAf8mttxYRuvsAaZZ/R5K6iyaQ9ErC2/txxLpQGpR976toL5mgsICWD/vfof2i1/yUNbADUMVlJylAMDiDgVhLdkjMJWvT8dqsgdaZa/XgltM4W5eMSW5+NRi1lBTuettBzMSRkXMw6n4seUnQ7X+j6kXnRVuEbQ6X8xYZcF9x+Qx4j5r69hkEScmrBii9Vu7POFEnQ+QJN7qgFWlKrvfEozXvDZQqIg9sa3WpHdbm+qF7+98ATWQEq2kvISJul0Ul6pMyrVKLVz61Wb1jxCKximSKE6ivA09fViQojI5xo5W57R9zmoYL3Bt9t428O8meQ5Sl/rptwIDAQAB",
+  "permissions": [
+    "nativeMessaging",
+    "tabs",
+    "scripting",
+    "debugger",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.mjs",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Agent Workspaces — dedicated profile bridge",
+    "default_popup": "status.html"
+  }
+}

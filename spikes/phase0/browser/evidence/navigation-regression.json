@@ -1,0 +1,48 @@
+{
+  "kind": "phase0-browser",
+  "startedAt": "2026-09-11T06:42:44.264Z",
+  "status": "passed",
+  "checks": {
+    "sandbox": true,
+    "runtimeBoundary": true,
+    "twoTabsAndJpegFrame": true,
+    "forgedTabAndStaleObservationRejected": true,
+    "exclusiveHumanControl": true,
+    "enterNavigationObservation": true,
+    "pointerKeyboardSyntheticLogin": true,
+    "freshObservationAfterReturn": true,
+    "cookiesSharedOnlyWithinAgent": true,
+    "readOnlyRootEnforced": true
+  },
+  "limitations": [
+    "Synthetic login only; owner-required website/MFA not supplied.",
+    "Temporary bounded profile; persistent profile retention and quota remain unresolved.",
+    "Screenshots and credentials are intentionally absent from this report."
+  ],
+  "imageId": "sha256:a32d31643c1ee3c0041d2f41c49e32fea386ea8d84cf579a72c0754ceb6a8817",
+  "sandbox": {
+    "uid": 1000,
+    "chromium": "153.0.8010.12",
+    "proof": "proc-renderer-namespaces-and-additional-seccomp-filter",
+    "namespaceSandbox": true,
+    "seccompBpfSandbox": true,
+    "noNewPrivileges": true,
+    "unsafeFlags": false,
+    "workerSeccompFilters": 1,
+    "renderers": [
+      {
+        "namespace": true,
+        "seccomp": true,
+        "noPrivileges": true,
+        "filters": 2
+      },
+      {
+        "namespace": true,
+        "seccomp": true,
+        "noPrivileges": true,
+        "filters": 2
+      }
+    ]
+  },
+  "durationMs": 1473
+}

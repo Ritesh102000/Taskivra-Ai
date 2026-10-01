@@ -1,0 +1,37 @@
+{
+  "phase": 0,
+  "provider": "openai",
+  "provider_status": "owner_confirmed",
+  "model": null,
+  "live_model_check": "deferred_by_owner_until_model_key_and_limits_are_chosen",
+  "data_root": "~/Library/Application Support/Agent Workspaces",
+  "data_root_status": "owner_confirmed",
+  "runtime": "docker-desktop",
+  "runtime_status": "installed_and_started_for_phase0",
+  "required_login": null,
+  "real_login_check": "deferred_by_owner_until_a_required_website_is_named",
+  "profile_retention": "remember_logins_locally",
+  "profile_retention_status": "owner_confirmed_for_phase3",
+  "profile_retention_implementation": "phase0_spikes_remain_ephemeral; phase3_uses_encrypted_per_agent_checkpoints; deletion_and_backup_controls_pending",
+  "model_limits": {
+    "max_requests": 1,
+    "max_output_tokens": 256,
+    "max_request_bytes": 8192,
+    "spend_cap_usd": null,
+    "status": "proposed; live probe requires explicit model and limits"
+  },
+  "resource_defaults": {
+    "active_agents": 2,
+    "global_code_jobs": 1,
+    "browser_tabs_per_agent": 6,
+    "code_memory_mib": 1024,
+    "browser_memory_mib": 2048,
+    "browser_shm_mib": 512,
+    "code_workspace_mib": 512,
+    "code_tmp_mib": 128,
+    "code_timeout_seconds": 120,
+    "status": "planning values, not measured concurrency guarantees"
+  },
+  "initial_formats": ["txt", "md", "csv", "json", "pdf", "xlsx", "png", "jpeg"],
+  "format_status": "planned; phase0 uses synthetic CSV/text only"
+}
