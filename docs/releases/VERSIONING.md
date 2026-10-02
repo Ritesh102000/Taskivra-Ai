@@ -42,3 +42,7 @@ Never delete the newer data root to attempt rollback. Preserve it independently 
 5. Publish a GitHub release with the matching PDF and source validation notes. Deploy only `guide-site`, verify public HTML/PDF responses and compare hosted PDF hashes with the local artifacts. Build executable artifacts after the release commit so provenance names that commit.
 
 The original review records, marketing content, credential stores, local test evidence and disposable profiles are excluded from this publication. Source publication is separate from deploying a hosted application; the Vercel site contains static guide files only.
+
+## Guide hosting revisions
+
+Application tags remain immutable. Documentation-only hosting fixes can use separately annotated guide tags without changing the application version or frozen guide bytes. `guide-v0.10.0-r2` preserves the routing repair discovered during public verification: directory URLs keep their trailing slash so archived HTML resolves CSS, JavaScript and PDF within its own edition. Application source version0.10.0 and both frozen guide contents remain unchanged.
