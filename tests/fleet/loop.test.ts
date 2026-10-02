@@ -18,7 +18,7 @@ import {OpenAIResponsesAdapter} from '../../packages/model-adapters/openai';
 import {ProviderRegistry} from '../../packages/model-adapters/registry';
 import type {ModelProviderInput,ModelProviderProfile} from '../../packages/contracts/model-providers';
 
-const tool=(name:string,args:Record<string,unknown>={}):ModelToolCall=>({id:randomUUID(),name,arguments:args});
+const tool=(name:string,args:Record<string,unknown>={}):ModelToolCall=>({id:randomUUID(),name,arguments:{...(name==='fleet_message'?{replyToMessageId:null}:{}),...(name==='fleet_context'?{beforeMessageId:null,messageId:null}:{}),...args}});
 function deferred(){let resolve!:()=>void;const promise=new Promise<void>(r=>{resolve=r;});return{promise,resolve};}
 async function until(check:()=>boolean,details:()=>unknown=()=>null){const end=Date.now()+15000;while(Date.now()<end){if(check())return;await new Promise(r=>setTimeout(r,10));}assert.fail('Fleet did not reach its expected state: '+JSON.stringify(details()));}
 type Context={fleet:{revision:number;isLeader:boolean;role:{key:string};items:Fleet['items'];members:Fleet['members']};usage:{taskId:string};inputs:{versionId:string}[];evidence:{evidenceId:string}[];producedOutputs:{outputVersionId:string}[];project:unknown;browserActions:unknown;collaboration:{board:unknown[];inbox:unknown[];sharedArtifacts:unknown[]}};
@@ -36,7 +36,7 @@ class FleetModel implements ModelAdapter {
   assert.ok(context.fleet,'Every fleet worker receives scoped saved coordination.');
   assert.equal(context.project,null);assert.equal(context.browserActions,null);
   assert.deepEqual(context.collaboration.board,[]);assert.deepEqual(context.collaboration.inbox,[]);assert.deepEqual(context.collaboration.sharedArtifacts,[]);
-  for(const name of request.tools.map(t=>t.name))assert.ok(['read_file','evidence_list','evidence_read','user_request','save_report','finish',...FLEET_TOOLS.map(t=>t.name)].includes(name),'Fleet received unexpected tool '+name);
+  for(const name of request.tools.map(t=>t.name))assert.ok(['read_file','read_file_range','evidence_list','evidence_read','user_request','save_report','finish',...FLEET_TOOLS.map(t=>t.name)].includes(name),'Fleet received unexpected tool '+name);
   this.active++;this.maximumActive=Math.max(this.maximumActive,this.active);
   try{
    if(this.hold)await this.hold(context,signal);
@@ -147,7 +147,7 @@ test('dynamic worker tasks retain an archived immutable provider revision while 
   assert.ok(!registry.options().some(model=>model.id===original.selectionId));
   assert.equal(f.current().tasks.length,1,'No specialist task exists when the connection is archived.');
   await assert.rejects(f.c.fleets.handle({...f.command,idempotencyKey:randomUUID()}),/current model connection/);
-  await f.c.fleets.handle({type:'fleet.start',fleetId:f.id});await until(()=>f.current().status==='succeeded',()=>f.current());
+  await f.c.fleets.handle({type:'fleet.start',fleetId:f.id});await until(()=>f.current().status==='succeeded',()=>({fleet:f.current(),errors:f.db.prepare("SELECT task_id,last_error FROM live_task_config WHERE last_error IS NOT NULL").all(),receipts:f.db.prepare("SELECT tool_name,state,result_json FROM live_tool_receipts WHERE state='failed'").all()}));
   const fleet=f.current();assert.equal(fleet.tasks.filter(task=>task.kind==='worker').length,3);
   assert.ok(fleet.members.every(member=>member.model===original.selectionId));
   const live=await f.c.live.state();assert.ok(live.tasks.filter(task=>fleet.tasks.some(member=>member.taskId===task.taskId)).every(task=>task.model===original.selectionId));

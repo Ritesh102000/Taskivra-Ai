@@ -1,0 +1,3 @@
+export interface RepositorySnapshot {schema:1;pilot:true;commit:string|null;entries:{path:string;sha256:string;bytes:number;text:string;tracked:boolean|null;dirty:boolean|null}[];exclusions:{path:string;reason:string}[];limits:{files:16;sourceBytes:32768;jsonBytes:65536;scannedEntries:256;depth:8};coverage:string}
+export interface RepositorySnapshotPreview {previewId:string;identity:string;projectId:string;agentId:string;expiresAt:number;snapshot:RepositorySnapshot;bytes:number}
+export type RepositorySnapshotCommand={type:'repository.preview';projectId:string;agentId:string}|{type:'repository.capture';previewId:string;identity:string;projectId:string;agentId:string};

@@ -1,8 +1,8 @@
 {
   "title": "Taskivra AI",
   "subtitle": "The complete beginner guide",
-  "version": "0.9.9",
-  "date": "1 October 2026",
+  "version": "0.10.0",
+  "date": "2 October 2026",
   "sections": [
     {
       "id": "start-here",
@@ -45,7 +45,7 @@
         {
           "type": "note",
           "title": "Current stage",
-          "text": "Version 0.9.9 is a local pre-release. Apple Silicon Mac is the validated development platform. A public installer, Windows/Linux support, Intel Mac support, automatic updates, and clean-machine installation have not been validated."
+          "text": "Version 0.10.0 is a local pre-release. Apple Silicon Mac is the validated development platform. A public installer, Windows/Linux support, Intel Mac support, automatic updates, and clean-machine installation have not been validated."
         },
         {
           "type": "heading",
@@ -1317,6 +1317,92 @@
       ]
     },
     {
+      "id": "version-010-controls",
+      "title": "New controls in version 0.10.0",
+      "summary": "Use the new source, history, access, resource and recovery controls safely.",
+      "group": "Using the app",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Capture a reviewed repository source pilot"
+        },
+        {
+          "type": "steps",
+          "items": [
+            {
+              "title": "Choose a project agent",
+              "text": "Open Fleets and the Capture a repository source pilot section. Select an active agent belonging to the current project. If none exists, create one through Projects."
+            },
+            {
+              "title": "Review before saving",
+              "text": "Choose folder and review snapshot opens the native folder picker. Read Captured files, Exclusions and limits, and Read captured content before saving. Paths are labels; the app does not execute repository code."
+            },
+            {
+              "title": "Save the exact reviewed bytes",
+              "text": "Choose Capture reviewed snapshot. The app saves the cached immutable JSON version into this project’s shared library. Select that published version as fleet evidence separately; capture does not start a model call."
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "title": "A bounded pilot",
+          "text": "Capture includes at most 16 text files, 8 KiB per file, 32 KiB total source and 64 KiB JSON, within 256 visited entries and depth 8. Symlinks, hardlinks, possible secrets, binary and oversized files are excluded. Secret detection is heuristic, so review every captured file before sharing. Unsupported packed Git objects or worktrees show unknown metadata. This feature requires /usr/bin/python3 and does not establish full repository coverage."
+        },
+        {
+          "type": "heading",
+          "text": "Read source coverage and result provenance"
+        },
+        {
+          "type": "p",
+          "text": "Exact source ranges let a task read bounded intervals from an authorized immutable version. Selected inventory, retrieved intervals, reviewer-declared inspection and validated findings are different records. In Results, inspect exact source/output identities, named roles, execution receipts, assessment and owner acceptance. Structural checks do not establish factual truth. Same-task supporting outputs remain separately identified."
+        },
+        {
+          "type": "heading",
+          "text": "Inspect access and the next-call resources"
+        },
+        {
+          "type": "p",
+          "text": "In a task’s Activity panel, inspect exact current grants. Pause the task before ending future use. Revocation does not undo earlier downloads, publications or external effects. The local resource preview explains next-call fit, remaining headroom and held reservations without contacting the provider. Unknown dispatch holds are retained; do not assume a failed display means a model call was never sent. A smaller output allowance can help when the fixed allowance alone exceeds the remaining budget."
+        },
+        {
+          "type": "heading",
+          "text": "Read history and archive finished work"
+        },
+        {
+          "type": "p",
+          "text": "Open All tasks, then History and archive. Agent, task and fleet history uses bounded pages and exact selections. Archive finished work only after operations and runtime cleanup are resolved. Archive frees active occupancy and retains historical identities and file bytes; it is not deletion. Restoring checks capacity and does not start work. Retained bytes still count toward storage."
+        },
+        {
+          "type": "heading",
+          "text": "Follow fleet questions and create fresh follow-ups"
+        },
+        {
+          "type": "p",
+          "text": "Fleet mailboxes link questions to their exact replies and support bounded older-message reads. A follow-up creates a fresh paused draft with explicit source lineage and newly reviewed limits. Review evidence and models, then start separately. It does not clone grants or silently resume a failed worker."
+        },
+        {
+          "type": "heading",
+          "text": "Use recovery and runtime diagnostics"
+        },
+        {
+          "type": "p",
+          "text": "Requests identify typed attention causes and supported next actions. Where available, repair the exact saved replan explanation within its finite admission limits. A quarantined file repair requires the owner to select bytes with the exact expected hash and size; it preserves the version identity. Code history shows effective limits, immutable workspace changes and cleanup state separately from execution outcome. Browser setup checks native extension compatibility before declaring readiness. Backups contain private content and are unencrypted."
+        },
+        {
+          "type": "heading",
+          "text": "Choose a version and plan rollback"
+        },
+        {
+          "type": "p",
+          "text": "GitHub release tags preserve each published source version. The hosted guide has a Guide versions page with matching editions and PDFs. This release migrates the database from schema 18 to schema 24. Returning to version 0.9.9 requires compatible data preserved before the upgrade; checking out old source does not downgrade the database. Close the app and runtimes before preserving data, and keep credentials and browser profiles separately protected."
+        },
+        {
+          "type": "p",
+          "text": "Read the <a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/v0.10.0/docs/releases/VERSIONING.md\">version and rollback instructions</a> and the <a href=\"https://github.com/Ritesh102000/Taskivra-Ai/blob/v0.10.0/docs/improvements/ledger.json\">complete improvement ledger</a>."
+        }
+      ]
+    },
+    {
       "id": "troubleshooting",
       "title": "Troubleshooting and realistic expectations",
       "summary": "Use the saved error and readiness state to choose the next step.",
@@ -1468,7 +1554,7 @@
       },
       {
         "type": "p",
-        "text": "Prepared 1 October 2026 for version 0.9.9. The online page and PDF share the same guide content. Examples are instructional prompts and fictional data, not claims of completed live runs. Confirm UI/source changes against the current repository before following a later release."
+        "text": "Prepared 2 October 2026 for version 0.10.0. The online page and PDF share the same guide content. Examples are instructional prompts and fictional data, not claims of completed live runs. Confirm UI/source changes against the current repository before following a later release."
       },
       {
         "type": "heading",

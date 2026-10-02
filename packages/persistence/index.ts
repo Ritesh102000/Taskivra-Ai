@@ -9,7 +9,7 @@ import { RESULTS_MIGRATION } from '../results/migration';
 import { chmodSync, existsSync, lstatSync, mkdirSync, realpathSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-export const SCHEMA_VERSION = 18;
+export const SCHEMA_VERSION = 24;
 
 /** Owned directories must never resolve through a payload-created symlink. */
 export function privateDirectory(path: string): void {
@@ -447,19 +447,25 @@ export class Persistence {
         if(current<16){this.db.exec(SECURITY_REVIEW_MIGRATION);this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(16,now);this.db.exec('PRAGMA user_version=16');}
         if(current<17){this.db.exec(FLEET_MIGRATION);this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(17,now);this.db.exec('PRAGMA user_version=17');}
         if(current<18){this.db.exec(FLEET_LAB_MIGRATION);this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(18,now);this.db.exec('PRAGMA user_version=18');}
+        if(current<19){this.db.exec(`CREATE TABLE IF NOT EXISTS fleet_followups(fleet_id TEXT PRIMARY KEY REFERENCES fleet_runs(id),source_fleet_id TEXT NOT NULL REFERENCES fleet_runs(id),source_revision INTEGER NOT NULL,source_final_version_id TEXT REFERENCES artifact_versions(id));CREATE TABLE IF NOT EXISTS fleet_message_links(message_id TEXT PRIMARY KEY REFERENCES fleet_messages(id),reply_to_message_id TEXT NOT NULL REFERENCES fleet_messages(id));`);this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(19,now);}if(current<20){this.db.exec('CREATE TABLE IF NOT EXISTS fleet_source_manifests(fleet_id TEXT PRIMARY KEY REFERENCES fleet_runs(id),manifest_json TEXT NOT NULL,sha256 TEXT NOT NULL,created_at INTEGER NOT NULL)');this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(20,now);}if(current<21){this.db.exec('CREATE TABLE IF NOT EXISTS task_archives(task_id TEXT PRIMARY KEY REFERENCES tasks(id),archived_at INTEGER NOT NULL)');this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(21,now);}if(current<22){this.db.exec('CREATE TABLE IF NOT EXISTS agent_archives(agent_id TEXT PRIMARY KEY REFERENCES agents(id),archived_at INTEGER NOT NULL);CREATE TABLE IF NOT EXISTS fleet_archives(fleet_id TEXT PRIMARY KEY REFERENCES fleet_runs(id),archived_at INTEGER NOT NULL)');this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(22,now);}if(current<23){this.db.exec("ALTER TABLE code_executions ADD COLUMN cleanup_state TEXT NOT NULL DEFAULT 'resolved' CHECK(cleanup_state IN ('pending','resolved'));UPDATE code_executions SET cleanup_state='pending' WHERE reason='cleanup_failed' OR lifecycle IN ('preparing','running','exporting','stopping')");this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(23,now);}if(current<24){this.db.exec('CREATE TABLE repository_snapshot_receipts(preview_id TEXT PRIMARY KEY,identity TEXT NOT NULL,project_id TEXT NOT NULL REFERENCES projects(id),agent_id TEXT NOT NULL REFERENCES agents(id),private_version_id TEXT REFERENCES artifact_versions(id),version_id TEXT REFERENCES artifact_versions(id))');this.db.prepare('INSERT INTO schema_migrations VALUES (?,?)').run(24,now);}this.db.exec('PRAGMA user_version=24');
       });
     } catch (error) { this.db.close(); throw error; }
   }
 
+  /** Prefer for new callers: rejects statically inferred promises and detects thenables at runtime.
+   * No signature can cancel external work already started by a callback. */
+  transactionSync<T>(callback:()=>T extends PromiseLike<unknown>?never:T):T{return this.transaction(callback) as T;}
+  readTransactionSync<T>(callback:()=>T extends PromiseLike<unknown>?never:T):T{return this.readTransaction(callback) as T;}
+
   transaction<T>(callback: () => T): T {
     this.db.exec('BEGIN IMMEDIATE');
-    try { const result = callback(); this.db.exec('COMMIT'); return result; }
+    try { const result = callback(); if(result && (typeof result==='object'||typeof result==='function') && typeof (result as {then?:unknown}).then==='function') throw new Error('Transaction callbacks must be synchronous; already-started external work cannot be cancelled.'); this.db.exec('COMMIT'); return result; }
     catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
 
   readTransaction<T>(callback: () => T): T {
     this.db.exec('BEGIN');
-    try { const result = callback(); this.db.exec('COMMIT'); return result; }
+    try { const result = callback(); if(result && (typeof result==='object'||typeof result==='function') && typeof (result as {then?:unknown}).then==='function') throw new Error('Transaction callbacks must be synchronous; already-started external work cannot be cancelled.'); this.db.exec('COMMIT'); return result; }
     catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
 

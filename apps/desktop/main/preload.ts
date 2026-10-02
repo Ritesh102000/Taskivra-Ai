@@ -13,7 +13,7 @@ import { RESULTS_CHANNEL } from '../../../packages/contracts/results';
 import { READINESS_CHANNEL } from '../../../packages/contracts/readiness';
 import { MODEL_CONNECTION_CHANNEL } from '../../../packages/contracts/model-connection';
 import { contextBridge, ipcRenderer, webUtils } from 'electron';
-import { CHANGED_CHANNEL, COMMAND_CHANNEL, FILES_CHANNEL, DROP_CHANNEL, PREVIEW_CHANNEL, BROWSER_CHANNEL, BROWSER_CHANGED_CHANNEL, CODE_CHANNEL, CODE_CHANGED_CHANNEL, REQUEST_CHANNEL, REQUEST_PICK_CHANNEL, REQUEST_CHANGED_CHANNEL, LIVE_CHANNEL, LIVE_CHANGED_CHANNEL, GMAIL_CHANNEL, GMAIL_CHANGED_CHANNEL, GMAIL_IMPORT_CHANNEL, COLLABORATION_CHANNEL, BROWSER_SETUP_CHANNEL } from '../../../packages/contracts/index';
+import { HISTORY_CHANNEL, GRANTS_CHANNEL, CHANGED_CHANNEL, COMMAND_CHANNEL, FILES_CHANNEL, DROP_CHANNEL, PREVIEW_CHANNEL, BROWSER_CHANNEL, BROWSER_CHANGED_CHANNEL, CODE_CHANNEL, CODE_CHANGED_CHANNEL, REQUEST_CHANNEL, REQUEST_PICK_CHANNEL, REQUEST_CHANGED_CHANNEL, LIVE_CHANNEL, LIVE_CHANGED_CHANNEL, GMAIL_CHANNEL, GMAIL_CHANGED_CHANNEL, GMAIL_IMPORT_CHANNEL, COLLABORATION_CHANNEL, BROWSER_SETUP_CHANNEL } from '../../../packages/contracts/index';
 import type { AppBridge, CommandResult } from '../../../packages/contracts/index';
 import { nativeDropPaths } from './drop';
 import { WORKFLOWS_CHANNEL } from '../../../packages/contracts/workflows';
@@ -25,6 +25,8 @@ async function fileInvoke<T>(channel: string, payload: unknown): Promise<T> {
 }
 
 const bridge: AppBridge = {
+  taskHistory(command){return fileInvoke(HISTORY_CHANNEL,command);},
+  grants(command){return fileInvoke(GRANTS_CHANNEL,command);},
   fleet(command){return fileInvoke(FLEET_CHANNEL,command);},
   securityReview(command){return fileInvoke(SECURITY_REVIEW_CHANNEL,command);},
   modelProviders(command){return fileInvoke(MODEL_PROVIDERS_CHANNEL,command);},

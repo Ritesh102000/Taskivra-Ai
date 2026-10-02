@@ -7,13 +7,13 @@ import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const RUNTIME_FILES = [
-  'THIRD_PARTY_NOTICES.md',
+  'THIRD_PARTY_NOTICES.md', 'dist/build-provenance.json',
   'licenses/PLAYWRIGHT-LICENSE.txt', 'licenses/PLAYWRIGHT-NOTICE.txt',
   'licenses/DOCKER-SECCOMP-LICENSE.txt', 'licenses/DOCKER-SECCOMP-NOTICE.txt',
   'labs/harbor-desk/server.mjs', 'labs/harbor-desk/domain.mjs', 'labs/harbor-desk/policy.mjs',
   'labs/harbor-desk/ticket-service.mjs', 'labs/harbor-desk/export-service.mjs', 'labs/harbor-desk/share-service.mjs',
   'labs/harbor-desk/public/index.html', 'labs/harbor-desk/public/app.js',
-  'dist/main/main.cjs', 'dist/main/preload.cjs', 'dist/main/browser-seccomp.json',
+  'dist/main/report-format-worker.cjs', 'dist/main/main.cjs', 'dist/main/preload.cjs', 'dist/main/browser-seccomp.json',
   'packages/native-browser/native-host.mjs', 'packages/native-browser/framing.mjs',
   'packages/native-browser/bin/native-host', 'packages/native-browser/bin/profile-parent',
   'packages/model-adapters/bin/keychain-helper', 'packages/gmail/bin/keychain-helper',
@@ -104,7 +104,7 @@ export async function packageMac({ sourceRoot = root, destination, inventoryOnly
   // This repairs the copied bundle's signature after metadata changes. It is NOT a distribution identity.
   execFileSync('/usr/bin/codesign', ['--force', '--deep', '--sign', '-', application], { stdio: 'pipe', timeout: 120_000 });
   execFileSync('/usr/bin/codesign', ['--verify', '--deep', '--strict', application], { stdio: 'pipe', timeout: 60_000 });
-  const manifest = { format: 'agent-workspaces-local-package', version: 1, appVersion: inventory.version, electronVersion, architecture: 'arm64', createdAt: new Date().toISOString(), signing: 'ad-hoc; no Developer ID; not notarized', includedFiles: inventory.entries, externalRequirements: ['Google Chrome and per-agent extension setup for native browsing', 'Docker Desktop and prebuilt approved runtime images for code and isolated browser execution', 'Owner-configured hosted or local model connection; OAuth for Gmail'], omitted: ['Personal data and browser profiles', 'Credentials and environment files', 'Development node_modules', 'Docker images', 'Dependency installers'] };
+  const manifest = { format: 'agent-workspaces-local-package', version: 1, appVersion: inventory.version, electronVersion, architecture: 'arm64', createdAt: new Date().toISOString(), signing: 'ad-hoc; no Developer ID; not notarized', includedFiles: inventory.entries, externalRequirements: ['Google Chrome and per-agent extension setup for native browsing', 'Docker Desktop and prebuilt approved runtime images for code and isolated browser execution', 'Owner-configured hosted or local model connection; OAuth for Gmail', 'Host /usr/bin/python3 for the optional reviewed repository snapshot pilot'], omitted: ['Personal data and browser profiles', 'Credentials and environment files', 'Development node_modules', 'Docker images', 'Dependency installers'] };
   await writeFile(join(canonical, 'package-manifest.json'), JSON.stringify(manifest, null, 2), { flag: 'wx', mode: 0o600 });
   await unlink(join(canonical, '.package-incomplete'));
   return { directory: canonical, application, version: inventory.version, electronVersion, fileCount: inventory.entries.length, signing: manifest.signing };

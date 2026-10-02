@@ -1,0 +1,12 @@
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import {ProviderSettings} from '../../apps/desktop/renderer/ProviderSettings';
+import '../../apps/desktop/renderer/styles.css';
+let initialResolve:any;
+const root=createRoot(document.getElementById('root')!);
+const existing={id:'fixture-existing',selectionId:'profile:fixture-existing:1',revision:1,createdAt:1,label:'Existing connection',kind:'openai',baseUrl:'https://api.openai.com/v1',model:'fixture-model',authentication:'api-key',billing:'metered',inputUsdPerMillion:.4,outputUsdPerMillion:1.6,maxInputTokens:32768,maxOutputTokens:4096,toolCalling:true,configured:false,archived:false,tested:false,message:'Key required'};
+const state=(profiles:any[])=>({profiles,history:[],busy:false});
+let saved:any,commands:any[]=[];
+const api={command:async(command:any)=>{commands.push(command.type);if(command.type==='providers.state')return await new Promise(r=>{initialResolve=r});saved={...existing,...command.profile,id:'fixture-new',selectionId:'profile:fixture-new:1'};return state([existing,saved]);}};
+(window as any).fixture={mount(){root.render(<ProviderSettings api={api as any}/>);},release(){initialResolve(state([existing]));},fail(){root.render(<ProviderSettings key='failure' api={{command:async()=>{throw new Error('Synthetic list failure')}}}/>)},commands:()=>commands,saved:()=>saved};
+(window as any).fixture.mount();

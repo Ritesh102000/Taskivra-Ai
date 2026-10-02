@@ -143,3 +143,21 @@ test('result commands reject overbroad fields, oversized changes and invalid bud
     assert.equal(f.c.snapshot().tasks.length, 1); assert.equal(f.c.results.state().results[0].review.state, 'unreviewed');
   } finally { await f.close(); }
 });
+
+test('C85 revision preserves named roles and effective structural requirements across restart',async()=>{
+  const f=await fixture();try{
+    const created=await f.c.workflows.handle({type:'workflows.createTask',workflowId:'data-report',values:{question:'Compare',files:'Exact period files'},agentId:f.agent.id,model:DEFAULT_MODEL,limits:{...DEFAULT_LIVE_LIMITS},idempotencyKey:randomUUID()});
+    const taskId=created.createdTaskId!;
+    const first=(await f.c.artifacts.importFiles({principal:{kind:'owner'},target:{scope:'private',agentId:f.agent.id,taskId},paths:[f.inputPath]})).versionIds[0];
+    const secondPath=join(f.root,'second.csv');await writeFile(secondPath,'period,value\nold,1\n');
+    const second=(await f.c.artifacts.importFiles({principal:{kind:'owner'},target:{scope:'private',agentId:f.agent.id,taskId},paths:[secondPath]})).versionIds[0];
+    await f.c.workflows.handle({type:'workflows.assignInputs',taskId,assignments:[{slotKey:'current_data',versionId:first},{slotKey:'comparison_data',versionId:second}]});
+    const source=await f.finish(f.c,taskId,'report.md','# Findings\nOriginal\n# Coverage\nExact versions\n# Calculation checks\nNone\n# Limitations\nSynthetic');
+    const next=(await f.c.results.handle(revise(taskId,source))).createdTaskId!;
+    assert.deepEqual(f.c.workflows.inputContext(next).map(role=>[role.slotKey,role.versionId]),[['current_data',first],['comparison_data',second]]);
+    const incomplete=await f.finish(f.c,next,'report.md','# Findings\nOnly');
+    assert.equal((await f.c.results.checkQuality(next,incomplete)).checks.find(check=>check.id==='sections')?.status,'fail');
+    await f.c.shutdown();const restarted=await f.create();assert.deepEqual(restarted.workflows.inputContext(next).map(role=>role.versionId),[first,second]);
+  }finally{await f.close();}
+});
+test('C89 bounded older pages and exact task lookup select persisted final version',async()=>{const f=await fixture();try{const db=new DatabaseSync(f.c.databasePath);try{const source=db.prepare('SELECT * FROM artifact_versions WHERE id=?').get(f.versionId)!;for(let i=0;i<200;i++){const task=f.c.createLiveTask({type:'live.createTask',agentId:f.agent.id,objective:`Newer completed fixture ${i}`,completionCriteria:'Fixture',model:DEFAULT_MODEL,policy:{mode:'workspace',allowedOrigins:[]},limits:{...DEFAULT_LIVE_LIMITS}}),artifact=randomUUID(),version=randomUUID();db.prepare("INSERT INTO artifacts(id,owner_agent_id,producer_task_id,visibility,display_name) VALUES (?,?,?,'private','synthetic.md')").run(artifact,f.agent.id,task);db.prepare("INSERT INTO artifact_versions(id,artifact_id,version_number,storage_ref,sha256,bytes,mime,format,provenance,status,created_at) VALUES (?,?,1,?,?,?,?,?,'{}','ready',?)").run(version,artifact,'synthetic-no-read-'+version,source.sha256,source.bytes,source.mime,source.format,Date.now()+i+1000);db.prepare("INSERT INTO task_artifacts(task_id,version_id,role,created_at) VALUES (?,?,'output',?)").run(task,version,Date.now());db.prepare("UPDATE tasks SET state='succeeded',updated_at=? WHERE id=?").run(Date.now()+i+1000,task);db.prepare('UPDATE live_task_config SET result_version_id=? WHERE task_id=?').run(version,task);}}finally{db.close();}const newest=f.c.results.state();assert.equal(newest.results.length,200);assert.equal(newest.results.some(item=>item.taskId===f.taskId),false);const older=await f.c.results.handle({type:'results.state',beforeTaskId:newest.results.at(-1)!.taskId});assert.equal(older.results.length,1);assert.equal(older.results[0].taskId,f.taskId);const exact=await f.c.results.handle({type:'results.inspect',taskId:f.taskId});assert.equal(exact.detail!.result.version.id,f.versionId);assert.equal(exact.detail!.integrity,'verified');}finally{await f.close();}});

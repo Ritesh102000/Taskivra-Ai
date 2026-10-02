@@ -28,7 +28,7 @@ export interface WorkflowProcedure {
   accountField?: string;
   fileSlots: FileSlotSpec[];
   requiredCapabilities: Exclude<ReadinessCapability, 'model' | 'inputs'>[];
-  output: { format: 'markdown'; filename: string; sections: string[] };
+  output: { format?: 'markdown'; filename: string; sections: string[] };
   example: { label: string; inputs: Record<string, string>; output: string };
 }
 export interface WorkflowDefinition {

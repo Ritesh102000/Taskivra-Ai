@@ -1,3 +1,4 @@
+import { StringDecoder } from 'node:string_decoder';
 import { randomUUID, createHash } from 'node:crypto';
 import { open } from 'node:fs/promises';
 import { join, relative } from 'node:path';
@@ -13,7 +14,7 @@ import { DEFAULT_CODE_RESOURCES, unavailableCodeRuntime, type CodeHandle, type C
 
 type Row = Record<string, string | number | null>;
 type ExecuteCommand = Extract<CodeCommand, { type: 'code.execute' }>;
-type Active = { id: string; taskId: string; claim: RunClaim; origin: 'owner' | 'agent'; controller: AbortController; done: Promise<void>; handle?: CodeHandle; stopped: boolean; logBytes: number; stdout: string; stderr: string; lastFlush: number; timer?: ReturnType<typeof setInterval>; beforeDispatch?: () => void; preflightError?: unknown };
+type Active = { id: string; taskId: string; claim: RunClaim; origin: 'owner' | 'agent'; controller: AbortController; done: Promise<void>; handle?: CodeHandle; stopped: boolean; logBytes: number; decoders: Record<'stdout' | 'stderr', StringDecoder>; stdout: string; stderr: string; lastFlush: number; timer?: ReturnType<typeof setInterval>; beforeDispatch?: () => void; preflightError?: unknown };
 const live = "('preparing','running','exporting','stopping')";
 const terminalTasks = new Set(['succeeded', 'failed', 'cancelled']);
 const messages: Record<string, string> = {
@@ -53,6 +54,7 @@ export class CodeService {
   private stopped = false;
   private closing = false;
   private cleanupProblem = false;
+  private cleanupHandles = new Map<string, CodeHandle>();
   private runtimeStatus: CodeRuntimeStatus = { ready: false, message: 'Checking the code runtime.', imageDigest: null, packages: [] };
   constructor(private options: { persistence: Persistence; artifacts: ArtifactService; instanceId: string; assertTaskAllowed?:(taskId:string,args?:Omit<ExecuteCommand,'type'|'taskId'>)=>void; authorize: (claim: RunClaim) => void; runtime?: CodeRuntime; now?: () => number; onChanged?: () => void }) {
     this.ready = this.reconcile();
@@ -79,8 +81,13 @@ export class CodeService {
     this.event('task.state_changed', taskId, { from: before.state, to: state, waitingReason: reason, generation: this.task(taskId).generation });
   }
   private async reconcile() {
+    if (this.stopped) return;
     await this.options.artifacts.ready;
-    try { await this.runtime.reconcile(); } catch { this.cleanupProblem = true; }
+    if (this.stopped) return;
+    let reconciled = false;
+    try { await this.runtime.reconcile(); reconciled = true; } catch { this.cleanupProblem = true; }
+    if (this.stopped) return;
+    if (reconciled) this.write("UPDATE code_executions SET cleanup_state='resolved' WHERE cleanup_state='pending'");
     if (this.stopped) return;
     this.transaction(() => {
       for (const execution of this.rows(`SELECT * FROM code_executions WHERE lifecycle IN ${live}`)) {
@@ -97,32 +104,52 @@ export class CodeService {
     });
   }
   private async refreshRuntime() {
+    if (this.stopped) return;
     if (this.cleanupProblem) {
-      try { await this.runtime.reconcile(); this.cleanupProblem = false; } catch { this.runtimeStatus = { ready: false, message: messages.cleanup_failed, imageDigest: null, packages: [] }; return; }
+      for (const [id, handle] of this.cleanupHandles) {
+        try { await handle.close(); } catch { this.runtimeStatus = { ready: false, message: messages.cleanup_failed, imageDigest: null, packages: [] }; return; }
+        if (this.stopped) return;
+        this.write("UPDATE code_executions SET cleanup_state='resolved' WHERE id=?", id);
+        this.cleanupHandles.delete(id);
+      }
+      try { await this.runtime.reconcile(); } catch { this.runtimeStatus = { ready: false, message: messages.cleanup_failed, imageDigest: null, packages: [] }; return; }
+      if (this.stopped) return;
+      this.write("UPDATE code_executions SET cleanup_state='resolved' WHERE cleanup_state='pending'");
+      this.cleanupProblem = false;
     }
     try { this.runtimeStatus = await this.runtime.status(); } catch { this.runtimeStatus = { ready: false, message: messages.runtime_unavailable, imageDigest: null, packages: [] }; }
   }
   private execution(row: Row): CodeExecution {
     const nullable = (name: string) => row[name] === null ? null : Number(row[name]);
     const limits = JSON.parse(String(row.limits_json));
-    return { id: String(row.id), taskId: String(row.task_id), agentId: String(row.agent_id), origin: row.origin as CodeExecution['origin'], runtime: row.runtime as CodeExecution['runtime'], source: String(row.source), command: (JSON.parse(String(row.argv)) as string[]).join(' '), cwd: '/workspace', lifecycle: row.lifecycle as CodeExecution['lifecycle'], imageDigest: row.image_digest ? String(row.image_digest) : null, timeoutSeconds: limits.timeoutSeconds, startedAt: Number(row.started_at), finishedAt: nullable('finished_at'), durationMs: nullable('duration_ms'), exitCode: nullable('exit_code'), error: row.error ? String(row.error) : null, reason: row.reason ? String(row.reason) : null, stdout: String(row.stdout), stderr: String(row.stderr), logsTruncated: Boolean(row.logs_truncated), inputs: JSON.parse(String(row.input_bindings)), workspaceCommitted: Boolean(row.workspace_committed), workspaceRevision: nullable('workspace_revision'), outputVersionIds: JSON.parse(String(row.output_version_ids)) };
+    return { id: String(row.id), taskId: String(row.task_id), agentId: String(row.agent_id), origin: row.origin as CodeExecution['origin'], runtime: row.runtime as CodeExecution['runtime'], source: String(row.source), command: (JSON.parse(String(row.argv)) as string[]).join(' '), cwd: '/workspace', lifecycle: row.lifecycle as CodeExecution['lifecycle'], cleanupState: row.cleanup_state as 'pending' | 'resolved', imageDigest: row.image_digest ? String(row.image_digest) : null, timeoutSeconds: limits.timeoutSeconds, startedAt: Number(row.started_at), finishedAt: nullable('finished_at'), durationMs: nullable('duration_ms'), exitCode: nullable('exit_code'), error: row.error ? String(row.error) : null, reason: row.reason ? String(row.reason) : null, stdout: String(row.stdout), stderr: String(row.stderr), logsTruncated: Boolean(row.logs_truncated), inputs: JSON.parse(String(row.input_bindings)), workspaceCommitted: Boolean(row.workspace_committed), workspaceRevision: nullable('workspace_revision'), outputVersionIds: JSON.parse(String(row.output_version_ids)) };
   }
   private state(taskId: string): CodeState {
     const task = this.task(taskId);
-    const executions = this.rows('SELECT * FROM code_executions WHERE task_id=? ORDER BY started_at DESC,rowid DESC LIMIT 25', taskId).map(row => this.execution(row));
+    const executions = this.rows('SELECT * FROM code_executions WHERE task_id=? ORDER BY started_at DESC,id DESC LIMIT 25', taskId).map(row => this.execution(row));
     const dependencies: CodeDependency[] = this.rows('SELECT d.*,i.revision,i.state FROM code_dependencies d JOIN input_requests i ON i.id=d.request_id WHERE i.task_id=? ORDER BY i.created_at', taskId).map(row => ({ requestId: String(row.request_id), revision: Number(row.revision), runtime: row.runtime as 'python' | 'node', packageName: String(row.package_name), version: row.version ? String(row.version) : null, reason: String(row.reason), state: row.state as CodeDependency['state'] }));
-    return { taskId, agentId: String(task.agent_id), executions, inputs: this.options.artifacts.codeInputManifest(taskId), workspaceRevision: this.options.artifacts.latestCodeRevision(taskId), activeExecutionId: executions.find(ex => ['preparing', 'running', 'exporting', 'stopping'].includes(ex.lifecycle))?.id || null, runtime: this.runtimeStatus, dependencies };
+    return { taskId, agentId: String(task.agent_id), executions, inputs: this.options.artifacts.codeInputManifest(taskId), workspaceRevision: this.options.artifacts.latestCodeRevision(taskId), activeExecutionId: executions.find(ex => ['preparing', 'running', 'exporting', 'stopping'].includes(ex.lifecycle))?.id || null, runtime: this.runtimeStatus, dependencies,effectiveLimits:{resources:{...DEFAULT_CODE_RESOURCES},sourceBytes:CODE_LIMITS.sourceBytes,storageBudgetBytes:this.options.artifacts.storage().budgetBytes} };
   }
   async handle(raw: unknown): Promise<CodeState> {
     const command = parseCodeCommand(raw); await this.ready;
     if (this.stopped || this.closing) fail('closed', 'The execution service is closing.');
     this.task(command.taskId);
-    if (command.type === 'code.state') await this.refreshRuntime();
+    if (command.type === 'code.state') { await this.refreshRuntime(); if (this.stopped || this.closing) fail('closed', 'The execution service is closing.'); }
     else if (command.type === 'code.execute') await this.start(command);
     else if (command.type === 'code.stop') await this.stop(command.taskId, command.executionId);
     else if (command.type === 'code.requestDependency') {this.options.assertTaskAllowed?.(command.taskId);this.requestDependency(command);}
     else if (command.type === 'code.resolveDependency') await this.resolveDependency(command);
-    return this.state(command.taskId);
+    const state=this.state(command.taskId);
+    try{state.workspaceChanges=await this.options.artifacts.codeWorkspaceChanges({kind:'owner'},command.taskId);}catch{state.workspaceChangesError='The exact workspace manifests could not be verified. Existing execution history remains available.';}
+    if(command.type==='code.history'){
+      let rows:Row[];
+      if(command.executionId){rows=this.rows('SELECT * FROM code_executions WHERE task_id=? AND id=?',command.taskId,command.executionId);if(!rows.length)fail('not_found','This execution no longer exists in this task.');}
+      else if(command.beforeExecutionId){const cursor=this.row('SELECT started_at,id FROM code_executions WHERE task_id=? AND id=?',command.taskId,command.beforeExecutionId);if(!cursor)fail('not_found','This history cursor does not belong to the selected task.');rows=this.rows('SELECT * FROM code_executions WHERE task_id=? AND (started_at<? OR (started_at=? AND id<?)) ORDER BY started_at DESC,id DESC LIMIT 26',command.taskId,cursor.started_at,cursor.started_at,cursor.id);}
+      else rows=this.rows('SELECT * FROM code_executions WHERE task_id=? ORDER BY started_at DESC,id DESC LIMIT 26',command.taskId);
+      state.executions=rows.slice(0,25).map(r=>this.execution(r));state.history={hasMore:rows.length>25,beforeExecutionId:state.executions.at(-1)?.id||null};
+      state.activeExecutionId=String(this.row("SELECT id FROM code_executions WHERE task_id=? AND lifecycle IN ('preparing','running','exporting','stopping') ORDER BY started_at DESC,id DESC LIMIT 1",command.taskId)?.id||'')||null;
+    }
+    return state;
   }
   /** Internal tool entry. Identity and run are supplied by the authenticated coordinator. */
   async executeForAgent(claim: RunClaim, input: Omit<ExecuteCommand, 'type' | 'taskId'>, beforeDispatch?: () => void): Promise<CodeExecution> {
@@ -164,9 +191,10 @@ export class CodeService {
     // Check actual mounted inputs for owner and agent entry points before touching a runtime.
     this.options.assertTaskAllowed?.(command.taskId,scopeArgs);
     await this.refreshRuntime();
+    if (this.stopped || this.closing) fail('closed', 'The execution service is closing.');
     if (!this.runtimeStatus.ready) fail('runtime_unavailable', this.runtimeStatus.message || messages.runtime_unavailable);
     // The reservation is owned by the file service's crash-recoverable staging journal.
-    const reserved = await this.options.artifacts.reserveExternal('code-execution', 4 * CODE_LIMITS.logBytes + 2 * CODE_LIMITS.sourceBytes);
+    const reserved = await this.options.artifacts.reserveExternal('code-execution', CODE_LIMITS.workspaceBytes + 4 * CODE_LIMITS.logBytes + 2 * CODE_LIMITS.sourceBytes);
     let entry: Active;
     try {
       entry = this.transaction(() => {
@@ -188,7 +216,7 @@ export class CodeService {
         this.write(`INSERT INTO code_executions(id,tool_call_id,image_digest,argv,cwd,limits_json,lifecycle,task_id,agent_id,owner_instance,owner_pid,origin,runtime,source,started_at,input_bindings) VALUES (?,?,?,?,?,?,'preparing',?,?,?,?,?,?,?,?,?)`, executionId, toolId, '', JSON.stringify(argv), '/workspace', JSON.stringify(limits), task.id, task.agent_id, this.options.instanceId, process.pid, authenticated ? 'agent' : 'owner', command.runtime, command.source, this.now(), JSON.stringify(inputs));
         if (!authenticated) for (const versionId of command.inputVersionIds) this.write('INSERT INTO run_artifact_bindings(run_id,version_id) VALUES (?,?)', claim.runId, versionId);
         this.event('execution.preparing', command.taskId, { executionId, runtime: command.runtime, inputVersionIds: command.inputVersionIds });
-        return { id: executionId, taskId: command.taskId, claim, origin: authenticated ? 'agent' as const : 'owner' as const, controller: new AbortController(), done: Promise.resolve(), stopped: false, logBytes: 0, stdout: '', stderr: '', lastFlush: 0, beforeDispatch };
+        return { id: executionId, taskId: command.taskId, claim, origin: authenticated ? 'agent' as const : 'owner' as const, controller: new AbortController(), done: Promise.resolve(), stopped: false, logBytes: 0, decoders: {stdout:new StringDecoder('utf8'),stderr:new StringDecoder('utf8')}, stdout: '', stderr: '', lastFlush: 0, beforeDispatch };
       });
     } catch (cause) { await reserved(); throw cause; }
     this.active.set(entry.id, entry);
@@ -201,7 +229,7 @@ export class CodeService {
   }
   private log(entry: Active, stream: 'stdout' | 'stderr', bytes: Uint8Array) {
     if (this.stopped || entry.stopped) return;
-    const value = boundedText(bytes, CODE_LIMITS.logBytes - entry.logBytes);
+    const value = boundedText(Buffer.from(entry.decoders[stream].write(Buffer.from(bytes))), CODE_LIMITS.logBytes - entry.logBytes);
     entry[stream] += value; entry.logBytes += Buffer.byteLength(value);
     if (Date.now() - entry.lastFlush > 250) this.flush(entry);
   }
@@ -217,6 +245,7 @@ export class CodeService {
   private async run(entry: Active, command: ExecuteCommand, reserved: (() => Promise<void>) & { directory: string }) {
     let lease: CodeWorkspaceLease | undefined, reason: string | null = null, outcomeExit: number | null = null;
     let exportReservation: ((() => Promise<void>) & { directory: string }) | undefined;
+    let cleanupFailed = false;
     try {
       this.assertCurrent(entry);
       lease = await this.options.artifacts.beginCodeWorkspace({ taskId: entry.taskId, agentId: entry.claim.agentId, executionId: entry.id, versionIds: command.inputVersionIds, assertCurrent: () => this.assertCurrent(entry) });
@@ -238,7 +267,7 @@ export class CodeService {
       if (outcome.reason !== 'exited' || outcome.exitCode !== 0) { reason = outcome.reason === 'exited' ? 'execution_failed' : outcome.reason; return; }
       this.transaction(() => { this.assertCurrent(entry); this.write("UPDATE code_executions SET lifecycle='exporting' WHERE id=?", entry.id); this.event('execution.exporting', entry.taskId, { executionId: entry.id }); });
       this.changed();
-      exportReservation = await this.options.artifacts.reserveExternal('code-execution', CODE_LIMITS.workspaceBytes);
+      exportReservation = Object.assign(async () => {}, {directory:reserved.directory});
       this.assertCurrent(entry);
       const destination = join(exportReservation.directory, 'export');
       await ensureManagedDirectory(this.options.persistence.dataRoot, relative(this.options.persistence.dataRoot, destination));
@@ -250,7 +279,8 @@ export class CodeService {
     } catch (cause) { reason = entry.stopped || entry.controller.signal.aborted ? 'stopped' : safeReason(cause, 'export_failed'); }
     finally {
       if (entry.timer) clearInterval(entry.timer);
-      try { await entry.handle?.close(); } catch { this.cleanupProblem = true; reason ||= 'cleanup_failed'; }
+      for(const stream of ['stdout','stderr'] as const){const tail=entry.decoders[stream].end();const value=boundedText(Buffer.from(tail),CODE_LIMITS.logBytes-entry.logBytes);entry[stream]+=value;entry.logBytes+=Buffer.byteLength(value);}
+      try { if (entry.handle) await entry.handle.close(); else await this.runtime.reconcile(); } catch { this.cleanupProblem = true; cleanupFailed = true; if (entry.handle) this.cleanupHandles.set(entry.id, entry.handle); }
       try { await lease?.release(); } catch { reason ||= 'export_failed'; }
       if (!this.stopped) {
         this.flush(entry);
@@ -258,6 +288,7 @@ export class CodeService {
           const row = this.row('SELECT * FROM code_executions WHERE id=?', entry.id)!;
           const committed = Boolean(row.workspace_committed);
           if (entry.stopped) reason = 'stopped';
+          this.write('UPDATE code_executions SET cleanup_state=? WHERE id=?', cleanupFailed ? 'pending' : 'resolved', entry.id);
           // A commit receipt is authoritative even if subsequent staging cleanup was interrupted.
           if (committed && reason === 'export_failed') reason = null;
           const lifecycle = entry.stopped ? 'cancelled' : committed && !reason ? 'succeeded' : 'failed';
@@ -303,7 +334,8 @@ export class CodeService {
     const stopped = await Promise.allSettled(entries.map(entry => this.stop(entry.taskId, entry.id)));
     await Promise.allSettled(entries.map(entry => entry.done));
     const failure = stopped.find(result => result.status === 'rejected');
-    if (failure?.status === 'rejected') throw failure.reason;
+    if (failure?.status === 'rejected') {this.cleanupProblem=true;throw failure.reason;}
+    if(this.cleanupProblem)fail('cleanup_failed');
   }
   private requestDependency(command: Extract<CodeCommand, { type: 'code.requestDependency' }>) {
     this.transaction(() => {
@@ -377,6 +409,7 @@ export class CodeService {
     this.closing = true;
     for (const entry of this.active.values()) {
       entry.stopped = true; entry.controller.abort(); if (entry.timer) clearInterval(entry.timer);
+      for(const stream of ['stdout','stderr'] as const){const tail=entry.decoders[stream].end();const value=boundedText(Buffer.from(tail),CODE_LIMITS.logBytes-entry.logBytes);entry[stream]+=value;entry.logBytes+=Buffer.byteLength(value);}
       this.transaction(() => {
         const execution = this.row('SELECT * FROM code_executions WHERE id=?', entry.id)!;
         const committed = Boolean(execution.workspace_committed);

@@ -5,7 +5,7 @@ import { useFilePreview } from './Files';
 import './collaboration.css';
 
 /** Owner read model only. Components never derive a shared summary from private chat. */
-export function useCollaboration(bridge?: AppBridge) {
+export function useCollaboration(bridge?: AppBridge, agentId?:string|null) {
   const [state, setState] = useState<CollaborationState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -15,12 +15,12 @@ export function useCollaboration(bridge?: AppBridge) {
     const ticket = ++sequence.current;
     reading.current = true;
     try {
-      const next = await bridge.collaboration({ type: 'collaboration.state' });
+      const next = await bridge.collaboration({ type: 'collaboration.state',...(agentId?{agentId}:{}) });
       if (alive.current && ticket === sequence.current) setState(next);
     } catch (failure) {
       if (alive.current && ticket === sequence.current) setError(failure instanceof Error ? failure.message : 'Collaboration state could not be loaded.');
     } finally { reading.current = false; }
-  }, [bridge]);
+  }, [bridge,agentId]);
   useEffect(() => {
     alive.current = true;
     void refresh();

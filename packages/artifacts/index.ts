@@ -151,7 +151,7 @@ export class ArtifactService {
       if(used+held+bytes+METADATA_RESERVE>this.storage().budgetBytes)throw error('storage_full');
       this.write("INSERT INTO artifact_operations(id,owner_id,owner_pid,kind,state,manifest,reserved_bytes,lease_until,created_at,updated_at) VALUES (?,?,?,?,'staging',?,?,?,?,?)",op.id,this.instanceId,process.pid,op.kind,JSON.stringify(op),bytes,this.now()+OPERATION_LEASE_MS,this.now(),this.now());
     });
-    await ensureManagedDirectory(this.root,op.stage);
+    try { await ensureManagedDirectory(this.root,op.stage); } catch(cause) { await this.abandoned(op); throw cause; }
   }
   private async heartbeat(op:Operation):Promise<void> {
     this.open(); this.transaction(()=>this.write('UPDATE artifact_operations SET manifest=?,lease_until=?,updated_at=? WHERE id=?',JSON.stringify(op),this.now()+OPERATION_LEASE_MS,this.now(),op.id));
@@ -184,9 +184,13 @@ export class ArtifactService {
   private async abandoned(op:Operation):Promise<void> {
     if(op.committed)return;
     if(!this.closed)this.transaction(()=>this.write("UPDATE artifact_operations SET state='abandoned',reserved_bytes=0,lease_until=0,manifest=?,updated_at=? WHERE id=?",JSON.stringify(op),this.now(),op.id));
-    else {for(const final of op.finals)await this.removeManaged(final);if(op.snapshot)await this.removeManaged(op.snapshot.final);await this.removeManaged(op.stage);}
+    {for(const final of op.finals)await this.removeManaged(final);if(op.snapshot)await this.removeManaged(op.snapshot.final);await this.removeManaged(op.stage);}
     // The persisted journal lets startup safely clean either filesystem crash point.
     if(!this.closed)await this.measure().catch(()=>undefined);
+  }
+  private async postcommitCleanup(op:Operation):Promise<void> {
+    try{await this.removeManaged(op.stage);await this.measure();}
+    catch{try{if(!this.closed)this.event('artifact.cleanup_pending',op.id,1,{committed:true,operation:op.kind,versionIds:op.candidates.map(c=>c.versionId),message:'Saved files are committed. Staging cleanup needs retry; do not repeat the import or export.'});}catch{/* Diagnostics cannot revoke committed success. */}}
   }
   private candidate(versionId:string,artifactId:string,displayName:string,target:ImportTarget,version:number,sourceVersionId:string|null,publishedFrom:string|null,stage:string):Candidate {
     const extension=/^\.[A-Za-z0-9]{1,12}$/.test(extname(displayName))?extname(displayName).toLowerCase():'.bin';
@@ -321,7 +325,7 @@ export class ArtifactService {
     });
     op.committed=true;
     this.fault?.('after_metadata_commit');
-    await this.removeManaged(op.stage);await this.measure();
+    await this.postcommitCleanup(op);
     if(op.queueTaskId)await this.deliverQueuedInputs(op.queueTaskId).catch(()=>undefined);
   }
 
@@ -342,6 +346,46 @@ export class ArtifactService {
   }
   async createSnapshot({principal,taskId}:{principal:Principal;taskId:string}):Promise<WorkspaceSnapshot> {
     return this.run(async()=>{this.taskAccess(principal,taskId);const op=this.operation('snapshot');await this.reserve(op,this.taskInputBytes(taskId)+METADATA_RESERVE);try{op.snapshot=await this.prepareSnapshot(op,taskId,[]);this.fault?.('after_stage');await this.finalizeOperation(op);return this.snapshots().find(s=>s.id===op.snapshot!.id)!;}catch(cause){await this.abandoned(op);throw cause;}});
+  }
+  /** Owner-selected replacement restores only the immutable bytes recorded for this exact version. */
+  async repairVersion({principal,versionId,sourcePath}:{principal:Principal;versionId:string;sourcePath:string}):Promise<ArtifactVersion> {
+    return this.run(async()=>{
+      this.owner(principal);const version=this.version(versionId);
+      if(!['missing','corrupt'].includes(String(version.status)))throw error('integrity_error');
+      const op=this.operation('repair');await this.reserve(op,Number(version.bytes)+METADATA_RESERVE);
+      try{
+        const staged=join(this.root,op.stage,'replacement');
+        const copied=await secureCopy(sourcePath,staged,{managedRoot:this.root,maxBytes:FILE_LIMITS.file,expectedSha256:String(version.sha256),fileName:String(version.display_name)});
+        if(copied.bytes!==Number(version.bytes))throw error('integrity_error');
+        const destination=join(this.root,String(version.storage_ref));await ensureManagedDirectory(this.root,dirname(String(version.storage_ref)));
+        await assertManagedPath(this.root,destination,{allowMissingLeaf:true});
+        await chmod(staged,0o444);await rename(staged,destination);await this.syncParents(dirname(String(version.storage_ref)));
+        await this.verify(version);
+        this.transaction(()=>{this.write("UPDATE artifact_versions SET status='ready' WHERE id=?",versionId);this.write("UPDATE artifact_operations SET state='committed',reserved_bytes=0 WHERE id=?",op.id);this.event('artifact.repaired',String(version.artifact_id),Number(version.version_number),{versionId});});
+        op.committed=true;await this.postcommitCleanup(op);return this.display(this.version(versionId));
+      }catch(cause){await this.abandoned(op);throw cause;}
+    });
+  }
+  /** Exact immutable source byte interval, UTF8 boundaries expand at most three bytes per edge. */
+  async readRange({principal,versionId,offset,length}:{principal:Principal;versionId:string;offset:number;length:number}):Promise<{version:ArtifactVersion;requestedOffset:number;requestedLength:number;start:number;end:number;text:string;complete:boolean}> {
+    return this.run(async()=>{
+      const version=this.access(principal,versionId);
+      if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(length)||length<1||length>65536||offset>Number(version.bytes))throw error('limit_exceeded');
+      if(!['txt','text','md','markdown','csv','json'].includes(String(version.format)))throw error('file_invalid');
+      const path=await assertManagedPath(this.root,join(this.root,String(version.storage_ref))),file=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
+      try{
+        const before=await file.stat({bigint:true});if(!before.isFile()||before.nlink!==1n||before.size!==BigInt(Number(version.bytes)))throw error('integrity_error');
+        const lower=Math.max(0,offset-3),upper=Math.min(Number(version.bytes),offset+length+3),selected=Buffer.alloc(upper-lower),chunk=Buffer.alloc(65536),hash=createHash('sha256');let position=0;
+        while(true){const read=await file.read(chunk,0,chunk.length,position);if(!read.bytesRead)break;hash.update(chunk.subarray(0,read.bytesRead));const a=Math.max(position,lower),b=Math.min(position+read.bytesRead,upper);if(a<b)chunk.copy(selected,a-lower,a-position,b-position);position+=read.bytesRead;if(position>FILE_LIMITS.file)throw error('limit_exceeded');}
+        const after=await file.stat({bigint:true}),named=await lstat(path,{bigint:true});
+        if(position!==Number(version.bytes)||hash.digest('hex')!==version.sha256||before.ino!==after.ino||before.dev!==after.dev||before.ctimeNs!==after.ctimeNs||before.mtimeNs!==after.mtimeNs||named.ino!==after.ino||named.dev!==after.dev||named.ctimeNs!==after.ctimeNs||after.nlink!==1n)throw error('integrity_error');
+        let start=offset-lower,end=Math.min(offset+length,position)-lower;
+        while(start>0&&(selected[start]&0xc0)===0x80)start--;
+        while(end<selected.length&&(selected[end]&0xc0)===0x80)end++;
+        const text=new TextDecoder('utf-8',{fatal:true}).decode(selected.subarray(start,end));
+        return{version:this.display(version),requestedOffset:offset,requestedLength:length,start:lower+start,end:lower+end,text,complete:lower+start===0&&lower+end===position};
+      }finally{await file.close();}
+    });
   }
   async preview({principal,versionId}:{principal:Principal;versionId:string}):Promise<ArtifactPreview> {
     return this.run(async()=>{
@@ -382,7 +426,7 @@ export class ArtifactService {
           this.event('artifact.exported',versionId,Number(version.version_number),{});
           this.write("UPDATE artifact_operations SET state='committed',reserved_bytes=0,updated_at=? WHERE id=?",this.now(),op.id);
         });
-        op.committed=true;await this.removeManaged(op.stage);await this.measure();
+        op.committed=true;await this.postcommitCleanup(op);
       }catch(cause){await this.abandoned(op);throw cause;}
     });
   }
@@ -396,9 +440,9 @@ export class ArtifactService {
     const op=this.operation(kind);
     await this.run(()=>this.reserve(op,bytes+METADATA_RESERVE));
     let released=false;
-    const release=async()=>{if(released)return;released=true;
-      if(this.closed){await this.removeManaged(op.stage);return;}
-      await this.run(async()=>{this.transaction(()=>this.write("UPDATE artifact_operations SET state='committed',reserved_bytes=0,updated_at=? WHERE id=?",this.now(),op.id));op.committed=true;await this.removeManaged(op.stage);await this.measure();});
+    const release=async()=>{if(released)return;
+      if(this.closed){await this.removeManaged(op.stage);released=true;return;}
+      await this.run(async()=>{this.transaction(()=>this.write("UPDATE artifact_operations SET state='committed',reserved_bytes=0,updated_at=? WHERE id=?",this.now(),op.id));op.committed=true;await this.removeManaged(op.stage);await this.measure();});released=true;
     };
     return Object.assign(release,{directory:join(this.root,op.stage)});
   }
@@ -412,13 +456,27 @@ export class ArtifactService {
       try{await secureCopy(join(this.root,String(version.storage_ref)),path,{sourceRoot:this.root,managedRoot:this.root,maxBytes:FILE_LIMITS.file,expectedSha256:String(version.sha256),fileName:String(version.display_name)});}
       catch(cause){await this.abandoned(op);throw cause;}
       let released=false;
-      return{path,version:this.display(version),release:async()=>{if(released)return;released=true;
-        if(this.closed){await this.removeManaged(op.stage);return;}
-        await this.run(async()=>{this.transaction(()=>this.write("UPDATE artifact_operations SET state='committed',reserved_bytes=0 WHERE id=?",op.id));op.committed=true;await this.removeManaged(op.stage);await this.measure();});
+      return{path,version:this.display(version),release:async()=>{if(released)return;
+        if(this.closed){await this.removeManaged(op.stage);released=true;return;}
+        await this.run(async()=>{this.transaction(()=>this.write("UPDATE artifact_operations SET state='committed',reserved_bytes=0 WHERE id=?",op.id));op.committed=true;await this.removeManaged(op.stage);await this.measure();});released=true;
       }};
     });
   }
 
+  async codeWorkspaceChanges(principal:Principal,taskId:string):Promise<{revision:number;parentRevision:number|null;added:string[];removed:string[];modified:string[]}> {
+    return this.run(async()=>{
+      this.taskAccess(principal,taskId);
+      const head=this.row('SELECT r.* FROM code_workspace_heads h JOIN code_workspace_revisions r ON r.id=h.revision_id WHERE h.task_id=?',taskId);
+      if(!head)return{revision:0,parentRevision:null,added:[],removed:[],modified:[]};
+      await this.verifyCodeRevision(head);
+      const parent=head.parent_id?this.row('SELECT * FROM code_workspace_revisions WHERE id=? AND task_id=?',head.parent_id,taskId):undefined;
+      if(head.parent_id&&!parent)throw error('integrity_error');if(parent)await this.verifyCodeRevision(parent);
+      const after=new Map((JSON.parse(String(head.manifest)) as CodeWorkspaceFile[]).map(f=>[f.path,f]));
+      const priorFiles=(parent?JSON.parse(String(parent.manifest)):[]) as CodeWorkspaceFile[];
+      const before=new Map<string,CodeWorkspaceFile>(priorFiles.map(f=>[f.path,f]));
+      return{revision:Number(head.revision),parentRevision:parent?Number(parent.revision):null,added:[...after.keys()].filter(p=>!before.has(p)).sort(),removed:[...before.keys()].filter(p=>!after.has(p)).sort(),modified:[...after.keys()].filter(p=>before.has(p)&&(after.get(p)!.sha256!==before.get(p)!.sha256||after.get(p)!.bytes!==before.get(p)!.bytes)).sort()};
+    });
+  }
   latestCodeRevision(taskId:string):number {
     return Number(this.row('SELECT r.revision FROM code_workspace_heads h JOIN code_workspace_revisions r ON r.id=h.revision_id WHERE h.task_id=?',id(taskId))?.revision||0);
   }
@@ -465,9 +523,9 @@ export class ArtifactService {
       });
       let released=false;
       const releaseInternal=async()=>{
-        if(released)return;released=true;
+        if(released)return;
         this.transaction(()=>this.write('DELETE FROM code_workspace_leases WHERE task_id=? AND execution_id=? AND owner_id=?',taskId,executionId,this.instanceId));
-        await this.deliverQueuedInputs(taskId);
+        await this.deliverQueuedInputs(taskId);released=true;
       };
       try{
         const files:CodeSeedFile[]=[];
@@ -556,7 +614,7 @@ export class ArtifactService {
         this.write("UPDATE artifact_operations SET state='committed',reserved_bytes=0,updated_at=? WHERE id=?",this.now(),op.id);
         this.event('workspace.code_committed',options.taskId,revision.revision,{executionId:options.executionId,revisionId,outputVersionIds:receipt.outputVersionIds});
       });
-      op.committed=true;this.fault?.('after_metadata_commit');await this.removeManaged(op.stage);await this.measure();return receipt;
+      op.committed=true;this.fault?.('after_metadata_commit');await this.postcommitCleanup(op);return receipt;
     }catch(cause){await this.abandoned(op);throw cause;}
   }
   private codeRevisionManifest(revision:Pick<CodeRevisionCandidate,'taskId'|'executionId'|'parentId'|'revision'|'files'>):string {

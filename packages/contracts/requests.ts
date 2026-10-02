@@ -23,6 +23,7 @@ export interface RequestSlot extends FileSlotSpec {
 export interface ReducedScopeProposal { description: string; completionCriteria: string; waiveSlotKeys: string[] }
 export interface UserRequest {
   legacy?: boolean;
+  replan?:{used:number;limit:number;remaining:number;status:'available'|'exhausted'};
   id: string; taskId: string; agentId: string;
   type: 'files' | 'clarification' | 'browser_handoff' | 'permission_change'; kind: RequestKind;
   title: string; reason: string; state: RequestState; revision: number; continuationKey: string;
@@ -44,3 +45,5 @@ export interface ValidationResult { accepted: boolean; explanation: string }
 export const REQUEST_LIMITS = { slots: 16, requestsPerTask: 32, openPerTask: 8, assignments: 16, responseBytes: 8000, validationBytes: 1024 * 1024, replansPerRequest: 3, validationMs: 2000 } as const;
 export const REQUEST_CHANNEL = 'agent-workspaces:requests';
 export const REQUEST_CHANGED_CHANNEL = 'agent-workspaces:requests-changed';
+
+export interface ExactCapabilityGrant { requestId:string; taskId:string; capability:CapabilitySpec; grantedAt:number; revokedAt:number|null;currentAuthority:boolean;authorityReason:string }

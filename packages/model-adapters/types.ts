@@ -16,8 +16,11 @@ export interface ModelAdapter {
   readonly limits?: { readonly maxInputTokens: number; readonly maxOutputTokens: number; readonly requestInputBytes?:number };
   status(): Promise<ModelStatus>;
   prepare(request: ModelRequest): PreparedTurn;
+  localQuote?(prepared:PreparedTurn):ModelQuote;
   quote(prepared: PreparedTurn, options: { signal: AbortSignal }): Promise<ModelQuote>;
   complete(prepared: PreparedTurn, options: { signal: AbortSignal }): Promise<ModelTurn>;
+  /** Adapter-owned evidence for this exact generation attempt; unknown adapters retain holds. */
+  generationWasNotDispatched?(prepared:PreparedTurn):boolean;
   discard(prepared: PreparedTurn): void;
 }
 export type ModelErrorCode = 'model_request_invalid' | 'model_request_limit' | 'model_schema_invalid' | 'model_credentials' | 'model_cancelled' | 'model_timeout' | 'model_network' | 'model_http' | 'model_rate_limited' | 'model_response_limit' | 'model_response_invalid' | 'model_tool_invalid' | 'model_incomplete' | 'model_refusal' | 'model_quote_required' | 'model_already_used' | 'model_capacity' | 'model_usage_invalid' | 'model_reservation_exceeded';

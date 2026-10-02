@@ -116,3 +116,35 @@ test('revoking acceptance of the source result prevents future routine dispatch'
  }finally{await f.close();}
 });
 test('DST missing hours skip, repeated hours share a durable local-day key, and invalid zones fail',()=>{const base={timezone:'America/New_York',hour:2,minute:30,weekdays:[0,1,2,3,4,5,6]};assert.equal(new Date(nextOccurrence(Date.parse('2026-03-08T06:00:00Z'),base)).toISOString(),'2026-03-09T06:30:00.000Z');const one=nextOccurrence(Date.parse('2026-11-01T04:00:00Z'),{...base,hour:1});const two=nextOccurrence(one,{...base,hour:1});assert.equal(localParts(one,base.timezone).date,localParts(two,base.timezone).date);assert.throws(()=>nextOccurrence(Date.now(),{...base,timezone:'not-a-timezone'}));});
+test('C82 independent scheduled child preserves approved replacement criteria instead of restoring original headings',async()=>{const f=await fixture();try{const requestId=randomUUID();f.db.prepare("INSERT INTO input_requests(id,task_id,type,title,reason,state,continuation_key,created_at) VALUES (?,?,'files','Reduced scope fixture','Owner accepted replacement','fulfilled',?,?)").run(requestId,f.source,randomUUID(),Date.now());f.db.prepare("INSERT INTO request_details(request_id,kind,spec_json,payload_json) VALUES (?,'reduced_scope','{}',?)").run(requestId,JSON.stringify({completionCriteria:'Required sections: Findings',waiveSlotKeys:[]}));f.db.prepare('UPDATE tasks SET completion_criteria=? WHERE id=?').run('Required sections: Findings',f.source);f.create();f.setTime('2026-09-30T09:00:00Z');await f.tick();const child=f.started[0];assert.ok(child);const requirements=f.c.workflows.requirementsForTask(child)!;assert.deepEqual(requirements.output.sections,[]);assert.equal(requirements.output.format,undefined);assert.equal(f.c.snapshot().tasks.find(task=>task.id===child)!.completionCriteria,'Required sections: Findings');const file=join(f.root,'child-report.md');await writeFile(file,'# Findings\nReduced scope result');const output=(await f.c.artifacts.importFiles({principal:{kind:'owner'},target:{scope:'private',agentId:f.c.snapshot().tasks.find(task=>task.id===child)!.agentId,taskId:child},paths:[file]})).versionIds[0];f.db.prepare("UPDATE task_artifacts SET role='output' WHERE task_id=? AND version_id=?").run(child,output);const quality=await f.c.results.checkQuality(child,output);assert.equal(quality.checks.find(check=>check.id==='sections')!.status,'pass');assert.equal(f.db.prepare('SELECT count(*) AS n FROM request_capability_grants WHERE task_id=?').get(child)!.n,0);}finally{await f.close();}});
+test('a saved schedule domain blocker pauses only that routine and leaves a later healthy routine dispatchable',async()=>{
+ const f=await fixture();try{
+  const broken=f.create().routines[0];f.create({idempotencyKey:'healthy-independent',title:'Healthy'});
+  f.db.prepare("UPDATE routines SET timing_json=? WHERE id=?").run(JSON.stringify({timezone:'America/New_York',hour:2,minute:30,weekdays:[]}),broken.id);
+  f.setTime('2026-09-30T09:00:00Z');await f.tick();
+  assert.equal(f.started.length,1);const state=f.service.state();assert.equal(state.routines.find(r=>r.id===broken.id)!.enabled,false);assert.match(state.routines.find(r=>r.id===broken.id)!.lastError!,/schedule needs review/);
+  assert.doesNotThrow(()=>f.service.handle({type:'routines.setEnabled',id:broken.id,enabled:false}));
+ }finally{await f.close();}
+});
+test('routine alert paging exposes older unread alerts and exact history without acknowledgement',async()=>{
+ const f=await fixture();try{
+  const routine=f.create().routines[0];const insert=f.db.prepare('INSERT INTO routine_change_alerts VALUES (?,?,?,?,?,?,?,?,?,?)');
+  for(let n=0;n<102;n++)insert.run(`alert_${String(n).padStart(3,'0')}`,routine.id,f.source,f.version,f.source,f.version,String(n),JSON.stringify({added:1,removed:0,addedExamples:[],removedExamples:[],unit:'sections',format:'markdown',baselineHash:'a',resultHash:String(n)}),n,n===0?0:1);
+  const first=f.service.handle({type:'routines.state'});assert.equal(first.alerts[0].id,'alert_000');assert.equal(first.unreadAlerts,1);assert.equal(first.alertPage!.hasMore,true);
+  const second=f.service.handle({type:'routines.state',beforeAlertId:first.alertPage!.beforeAlertId!});assert.equal(second.alerts.length,2);assert.equal(new Set([...first.alerts,...second.alerts].map(a=>a.id)).size,102);
+  const unread=f.service.handle({type:'routines.state',unreadOnly:true});assert.deepEqual(unread.alerts.map(a=>a.id),['alert_000']);
+  assert.equal(f.service.handle({type:'routines.state',alertId:'alert_001'}).alerts[0].id,'alert_001');assert.equal(f.service.state().unreadAlerts,1);
+ }finally{await f.close();}
+});
+test('no-baseline candidates cannot monopolize the next bounded comparison batch',async()=>{
+ const f=await fixture();try{
+  const routine=f.create({alertsEnabled:true}).routines[0];
+  const alerts=(f.service as unknown as {alerts:{rows(sql:string,...args:(string|number)[]):Record<string,string|number|null>[];baseline(candidate:Record<string,string|number|null>):Record<string,string|number|null>|undefined;reconcile(check:()=>void):Promise<void>}}).alerts;
+  const originalRows=alerts.rows.bind(alerts),originalBaseline=alerts.baseline.bind(alerts);const inspected:string[]=[];
+  const candidates=Array.from({length:21},(_,n)=>({routine_id:routine.id,due_at:1,task_id:n===20?f.source:`ineligible_${n}`,agent_id:f.service.state().routines[0].agentId,completed_at:Date.parse('2026-09-30T08:59:00Z'),version_id:f.version}));
+  alerts.rows=(sql,...args)=>sql.includes('FROM routine_occurrences o JOIN tasks')?candidates.slice(Number(args.at(-1)||0),Number(args.at(-1)||0)+20):originalRows(sql,...args);
+  alerts.baseline=candidate=>{inspected.push(String(candidate.task_id));return candidate.task_id===f.source?originalBaseline(candidate):undefined;};
+  await alerts.reconcile(()=>{});assert.equal(inspected.includes(f.source),false);await alerts.reconcile(()=>{});assert.equal(inspected.includes(f.source),true);
+  assert.equal(Number(f.db.prepare('SELECT count(*) AS n FROM routine_result_comparisons WHERE task_id=?').get(f.source)!.n),1);
+ }finally{await f.close();}
+});

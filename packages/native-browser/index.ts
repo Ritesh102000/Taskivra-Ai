@@ -10,10 +10,11 @@ import type {BrowserRuntime,BrowserHandle,BrowserReply} from '../browser/runtime
 import {Decoder,encode} from './framing.mjs';
 import {describeProfileHealth,profileExtensionInstalled,profileIsRunning} from './health';
 import type {BrowserHealth} from '../contracts/browser-setup';
-export type NativeProfileStatus={backend:'desktop_chrome';registered:boolean;connected:boolean;extensionPath:string;setupRequired:boolean;message:string|null;health:BrowserHealth;extensionInstalled:boolean|null;profileRunning:boolean|null};
+export type NativeProfileStatus={backend:'desktop_chrome';registered:boolean;connected:boolean;taskReady?:boolean;extensionPath:string;setupRequired:boolean;message:string|null;health:BrowserHealth;extensionInstalled:boolean|null;profileRunning:boolean|null};
 type Options={dataRoot:string;extensionPath:string;hostPath:string;nodePath?:string;chromePath?:string;onChanged?:()=>void;bridgeInstallRoot?:string};
 type Pending={resolve:(value:any)=>void;reject:(error:Error)=>void;timer:ReturnType<typeof setTimeout>};
-type Connection={socket:Socket;agentId:string;pending:Map<string,Pending>;send:(method:string,params:Record<string,unknown>)=>Promise<any>;handle?:Handle};
+type Connection={compatible?:boolean;socket:Socket;agentId:string;pending:Map<string,Pending>;send:(method:string,params:Record<string,unknown>)=>Promise<any>;handle?:Handle};
+export function compatibleExtension(value:unknown):boolean {const v=value as {protocol?:unknown;capabilities?:unknown};return !!v&&v.protocol===1&&Array.isArray(v.capabilities)&&['generation-fence','dom-fence','readonly-fill','navigation-completion','owner-handoff'].every(c=>(v.capabilities as unknown[]).includes(c));}
 const ID=/^[a-zA-Z0-9_-]{1,96}$/;
 function fail(code:string):never{throw Object.assign(new Error(code),{code});}
 async function privateFile(path:string,content:string|Uint8Array,mode:number){
@@ -74,9 +75,10 @@ export class NativeChromeRuntime implements BrowserRuntime {
   async setup(agentId:string):Promise<NativeProfileStatus>{if(this.closed)fail('runtime_closed');await this.prerequisites();await this.ensure();await this.register(agentId);this.profileProblems.delete(agentId);return this.agentStatus(agentId);}
   async agentStatus(agentId:string):Promise<NativeProfileStatus>{
     const profile=this.profile(agentId),registered=await access(join(profile,'NativeMessagingHosts/com.agent_workspaces.browser.json')).then(()=>true,()=>false),connected=this.connections.has(agentId);
+    const connection=this.connections.get(agentId);if(connection&&connection.compatible===undefined){try{connection.compatible=compatibleExtension(await connection.send('bridge.capabilities',{}));}catch{connection.compatible=false;}}
     const [extensionInstalled,profileRunning]=connected?[true,true]:await Promise.all([this.extensionId().then(id=>profileExtensionInstalled(profile,id)).catch(()=>null),profileIsRunning(profile)]);
     const health=describeProfileHealth({registered,connected,damaged:this.profileProblems.has(agentId),installed:extensionInstalled,running:profileRunning});
-    return{backend:'desktop_chrome',registered,connected,extensionPath:resolve(this.options.extensionPath),extensionInstalled,profileRunning,...health};
+    return{backend:'desktop_chrome',registered,connected,taskReady:connected&&connection?.compatible===true,extensionPath:resolve(this.options.extensionPath),extensionInstalled,profileRunning,...health,...(connected&&!this.connections.get(agentId)?.compatible?{message:'Chrome is connected. Reload the extension to verify compatibility before running tasks.'}:{})};
   }
   async openProfile(agentId:string,{setup=false}:{setup?:boolean}={}):Promise<NativeProfileStatus>{await this.setup(agentId);const connection=this.connections.get(agentId);if(connection){await connection.send(setup?'owner.setup':'owner.show',{});}else this.startChrome(agentId,setup?'chrome://extensions/':'about:blank');return this.agentStatus(agentId);}
   private startChrome(agentId:string,ownerURL?:string){const args=[`--user-data-dir=${this.profile(agentId)}`,'--no-first-run','--no-default-browser-check',...(ownerURL?['--new-window',ownerURL]:['--no-startup-window'])];const executable=ownerURL?'/usr/bin/open':this.chromePath;const launchArgs=ownerURL?['-n','-a',resolve(this.chromePath,'../../..'),'--args',...args]:args;const child=spawn(executable,launchArgs,{detached:true,stdio:'ignore'});child.on('error',()=>this.options.onChanged?.());child.unref();}
@@ -85,6 +87,7 @@ export class NativeChromeRuntime implements BrowserRuntime {
     if(!this.connections.has(options.agentId))this.startChrome(options.agentId);
     const deadline=Date.now()+10_000;while(!this.connections.has(options.agentId)&&Date.now()<deadline&&!this.closed)await delay(100);
     const connection=this.connections.get(options.agentId);if(!connection)fail('extension_setup_required');if(connection.handle)fail('session_already_running');
+    if(!compatibleExtension(await connection.send('bridge.capabilities',{})))fail('extension_reload_required');connection.compatible=true;
     const handle=new Handle(this,connection,options.sessionId,options.onExit,options.initialGeneration);connection.handle=handle;
     try{await connection.send('session.bind',{sessionId:options.sessionId,generation:options.initialGeneration});if(this.closed||handle.stopped)fail('runtime_closed');return handle;}catch(error){connection.handle=undefined;await handle.stop();throw error;}
   }

@@ -12,6 +12,7 @@ export interface ReportExportOptions {
   results: ResultService; artifacts: ArtifactService;
   saveDialog: (suggestedName: string, format: ReportExportFormat) => Promise<string | null>;
   renderPdf: (html: string) => Promise<Buffer>;
+  formatOffice?: (source:ExportSource,format:'docx'|'xlsx')=>Promise<Buffer>;
 }
 /** Owner-only boundary: source identities arrive through IPC; destination paths
  * originate only in a native save dialog. No model export or path argument. */
@@ -40,14 +41,16 @@ export class ReportExportController {
     if (content.text === null) throw new Error('The complete report text is unavailable.');
     const source: ExportSource = { version: content.version, text: content.text, taskId, review: fresh.result.review.state };
     const release = await this.options.artifacts.reserveExternal('agent-report', MAX_FORMATTED_EXPORT_BYTES * 2);
+    let committed=false;let committedResult:ReportExportResult|undefined;
     try {
-      const bytes = format === 'pdf' ? await this.options.renderPdf(renderReportHtml(source)) : format === 'docx' ? createDocxReport(source) : createXlsxReport(source);
+      const bytes = format === 'pdf' ? await this.options.renderPdf(renderReportHtml(source)) : this.options.formatOffice ? await this.options.formatOffice(source,format) : format === 'docx' ? createDocxReport(source) : createXlsxReport(source);
       if (!Buffer.isBuffer(bytes) || !bytes.length || bytes.length > MAX_FORMATTED_EXPORT_BYTES || (format === 'pdf' && !bytes.subarray(0, 5).equals(Buffer.from('%PDF-')))) throw new Error('The report renderer did not return a valid bounded export.');
       const sha256 = createHash('sha256').update(bytes).digest('hex'), path = join(release.directory, `report.${format}`);
       await writeFile(path, bytes, { mode: 0o600, flag: 'wx' });
       await exportVerifiedFile(path, destination, { sourceRoot: release.directory, expectedSha256: sha256, maxBytes: MAX_FORMATTED_EXPORT_BYTES, fileName: `report.${format}` });
-      return { cancelled: false, format, sourceVersionId: versionId, sourceSha256: content.version.sha256, bytes: bytes.length, sha256, message: `Exported ${format.toUpperCase()} from the complete saved version. The original result is unchanged.` };
-    } finally { await release(); }
+      committed=true;
+      return committedResult = { cancelled: false, format, sourceVersionId: versionId, sourceSha256: content.version.sha256, bytes: bytes.length, sha256, message: `Exported ${format.toUpperCase()} from the complete saved version. The original result is unchanged.` };
+    } finally { try {await release();}catch(error){if(!committed)throw error;if(committedResult)committedResult.message+=' The file was saved, but temporary cleanup is still pending. It will be retried through storage recovery; do not export again to repair cleanup.';} }
   }
   async drain(): Promise<void> { await this.active?.catch(() => undefined); }
 }

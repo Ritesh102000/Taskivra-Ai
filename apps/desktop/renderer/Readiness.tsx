@@ -9,7 +9,7 @@ export interface ReadinessPanelProps {
   check: () => Promise<ReadinessState>;
   onAction?: (action: ReadinessAction) => void;
   inputVersions?: { id: string; displayName: string }[];
-  onAssign?: (slotKey: string, versionId: string) => Promise<void>;
+  onAssign?: (assignments: {slotKey: string; versionId: string}[]) => Promise<void>;
 }
 /** All controls use typed owner APIs. Renderer never receives runtime commands or credential paths. */
 export function ReadinessPanel({ targetKey, check, onAction, inputVersions = [], onAssign }: ReadinessPanelProps) {
@@ -33,7 +33,11 @@ export function ReadinessPanel({ targetKey, check, onAction, inputVersions = [],
     if (!onAssign || !versionId || locked.current) return;
     locked.current = true; const revision = ++ticket.current; setBusy(true); setError(null);
     try {
-      await onAssign(slotKey, versionId);
+      const current = state?.inputSlots.find(slot => slot.slotKey === slotKey);
+      const occupied = state?.inputSlots.find(slot => slot.slotKey !== slotKey && slot.versionId === versionId);
+      if (occupied && !current?.versionId) throw new Error('Assign an unused version first, or swap two occupied roles.');
+      const assignments = [{slotKey,versionId}, ...(occupied && current?.versionId ? [{slotKey:occupied.slotKey,versionId:current.versionId}] : [])];
+      await onAssign(assignments);
       const next = await currentCheck.current();
       if (mounted.current && revision === ticket.current) setState(next);
     } catch (failure) { if (mounted.current && revision === ticket.current) setError(failure instanceof Error ? failure.message : 'This file could not be assigned.'); }

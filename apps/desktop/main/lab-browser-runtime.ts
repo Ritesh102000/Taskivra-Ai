@@ -12,7 +12,7 @@ export class ElectronLabRuntime implements BrowserRuntime {
  async status(){return{ready:this.lab.status().ready,message:this.lab.status().message,backend:'local_lab' as const,setupRequired:false,supportsTransfers:false};}
  async cookies(agentId:string){const entry=this.handles.get(agentId);if(!entry)return'';return(await entry.partition.cookies.get({url:LAB_ORIGIN})).map(c=>`${c.name}=${c.value}`).join('; ');}
  async reconcile(){}
- async close(){await Promise.allSettled([...this.handles.values()].map(x=>x.handle.stop()));this.handles.clear();await this.lab.close();}
+ async close(){const results=await Promise.allSettled([...this.handles.values()].map(x=>x.handle.stop()));await this.lab.close();if(results.some(result=>result.status==='rejected'))throw new Error('lab_cleanup_pending');this.handles.clear();}
  async launch(options:Parameters<BrowserRuntime['launch']>[0]):Promise<BrowserHandle>{
   if(!this.lab.status().ready||this.handles.has(options.agentId))throw new Error('lab_browser_unavailable');
   const partitionName='lab-'+randomUUID(),partition=session.fromPartition(partitionName,{cache:false});
@@ -28,7 +28,7 @@ export class ElectronLabRuntime implements BrowserRuntime {
    window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
    window.webContents.on('will-navigate',(event,target)=>{try{labURL(target);}catch{event.preventDefault();}});
    window.webContents.on('will-redirect',(event,target)=>{try{labURL(target);}catch{event.preventDefault();}});
-   window.on('closed',()=>{pages.delete(id);if(active===id)active=pages.keys().next().value||'';if(!closed&&!pages.size){closed=true;this.handles.delete(options.agentId);options.onExit();}});
+   window.on('closed',()=>{pages.delete(id);if(active===id)active=pages.keys().next().value||'';if(!closed&&!pages.size){void stop().catch(()=>{});options.onExit();}});
    await window.loadURL(page.url);guard();window.showInactive();return page;
   };
   const execute=async(page:Page,command:Record<string,unknown>)=>{
@@ -53,7 +53,8 @@ export class ElectronLabRuntime implements BrowserRuntime {
    }
    return observe(page);
   };
-  const stop=async()=>{if(closed)return;closed=true;this.handles.delete(options.agentId);for(const p of pages.values())if(!p.window.isDestroyed())p.window.destroy();pages.clear();await partition.clearStorageData();};
+  let cleanupPromise:Promise<void>|undefined;
+  const stop=()=>cleanupPromise??=(async()=>{closed=true;for(const p of pages.values())if(!p.window.isDestroyed())p.window.destroy();pages.clear();await partition.clearStorageData();this.handles.delete(options.agentId);})().catch(error=>{cleanupPromise=undefined;throw error;});
   const handle:BrowserHandle={stop,close:async()=>{await stop();return{saved:false};},request:async(method,params,actor)=>{
    guard();if(actor.generation!==generation)throw new Error('stale_generation');
    if(method==='control.take'||method==='control.release'){

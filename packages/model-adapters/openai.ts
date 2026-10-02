@@ -80,6 +80,8 @@ export class OpenAIResponsesAdapter implements ModelAdapter {
   private readonly entries = new Map<string, Entry>(); private readonly used = new WeakSet<PreparedTurn>();
   private readonly transport: typeof globalThis.fetch;
   private readonly timeout: number; private readonly quoteTimeout: number;
+  private generationDispatch = new WeakMap<PreparedTurn, boolean>();
+  generationWasNotDispatched(prepared:PreparedTurn):boolean{return this.generationDispatch.get(prepared)===false;}
   constructor(private readonly options: OpenAIAdapterOptions) {
     this.model = options.model || DEFAULT_MODEL; modelChoice(this.model); this.transport = options.fetch || globalThis.fetch;
     this.timeout = options.timeoutMs ?? MODEL_LIMITS.timeoutMs; this.quoteTimeout = options.quoteTimeoutMs ?? MODEL_LIMITS.quoteTimeoutMs;
@@ -97,20 +99,21 @@ export class OpenAIResponsesAdapter implements ModelAdapter {
       const countBody = JSON.stringify(shared), body = JSON.stringify({ ...shared, store: false, stream: false, service_tier: 'default', max_output_tokens: request.maxOutputTokens });
       if (Buffer.byteLength(body) > MODEL_LIMITS.requestBytes) throw new ModelAdapterError('model_request_limit');
       const prepared = Object.freeze({ id: randomUUID(), model: this.model, requestHash: createHash('sha256').update(body).digest('hex'), requestBytes: Buffer.byteLength(body), maxOutputTokens: request.maxOutputTokens });
-      this.entries.set(prepared.id, { public: prepared, body, countBody, tools, createdAt: Date.now(), quoteAttempted: false, quote: null }); return prepared;
+      this.entries.set(prepared.id, { public: prepared, body, countBody, tools, createdAt: Date.now(), quoteAttempted: false, quote: null }); this.generationDispatch.set(prepared,false); return prepared;
     } catch (error) { if (error instanceof ModelAdapterError) throw error; throw new ModelAdapterError('model_request_invalid'); }
   }
   private entry(prepared: PreparedTurn): Entry {
     if (this.used.has(prepared)) throw new ModelAdapterError('model_already_used');
     const entry = this.entries.get(prepared.id); if (!entry || entry.public !== prepared || Date.now() - entry.createdAt > 300_000) throw new ModelAdapterError('model_request_invalid'); return entry;
   }
-  private async post(path: string, body: string, signal: AbortSignal, timeoutMs: number): Promise<unknown> {
+  private async post(path: string, body: string, signal: AbortSignal, timeoutMs: number, prepared?:PreparedTurn): Promise<unknown> {
     check(signal); let key = '';
     const local = new AbortController(), combined = AbortSignal.any([signal, local.signal]); let timedOut = false;
     const timer = setTimeout(() => { timedOut = true; local.abort(); }, timeoutMs);
     try {
       try { key = await abortable(this.options.credentials.read(), combined); } catch { throw new ModelAdapterError('model_credentials'); }
       check(combined); if (!/^sk-[A-Za-z0-9_-]{16,512}$/.test(key)) throw new ModelAdapterError('model_credentials');
+      if(prepared)this.generationDispatch.set(prepared,true);
       const fetching = this.transport(ENDPOINT + path, { method: 'POST', redirect: 'error', headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' }, body, signal: combined });
       // Even a custom transport resolving after cancellation must release its body.
       void fetching.then(response => { if (combined.aborted) void response.body?.cancel().catch(() => {}); }, () => {});
@@ -151,7 +154,7 @@ export class OpenAIResponsesAdapter implements ModelAdapter {
   async complete(prepared: PreparedTurn, { signal }: { signal: AbortSignal }): Promise<ModelTurn> {
     check(signal); const entry = this.entry(prepared); if (!entry.quote) throw new ModelAdapterError('model_quote_required');
     this.used.add(prepared);
-    try { return parseModelResponse(await this.post('', entry.body, signal, this.timeout), this.model, entry.quote, entry.tools); }
+    try { return parseModelResponse(await this.post('', entry.body, signal, this.timeout,prepared), this.model, entry.quote, entry.tools); }
     finally { this.entries.delete(prepared.id); }
   }
   discard(prepared: PreparedTurn): void { if (this.entries.get(prepared.id)?.public === prepared) this.entries.delete(prepared.id); this.used.add(prepared); }

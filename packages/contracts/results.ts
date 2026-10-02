@@ -33,21 +33,22 @@ export interface ResultQuality {
   limitation: string;
 }
 export interface ResultDetail {
-  result: ResultItem; preview: ArtifactPreview; inputs: ArtifactVersion[];
+  result: ResultItem; preview: ArtifactPreview; inputs: ArtifactVersion[]; supportingOutputs?:ArtifactVersion[];
   evidence: ResultEvidence[]; totalEvidence: number; evidenceTruncated: boolean;
   /** Technical receipts are not a factual or semantic judgment. */
   integrity: 'verified'; criteriaStatus: 'needs_owner_review' | 'accepted_by_owner' | 'changes_requested';
   quality: ResultQuality;
   /** Omitted by older services; ordinary results remain revisable by default. */
   canRequestChanges?: boolean;
+  provenance?: {inputRoles:{slotKey:string;versionId:string|null}[];routine:{routineId:string;occurrenceKey:string}|null;assessment:{checkerVersion:string;sourceVersionId:string;sourceSha256:string;checkedAt:number};acceptance:ResultReview};
 }
 export interface ResultsState {
   results: ResultItem[]; revisionJobs: ResultRevisionJob[]; detail?: ResultDetail;
   createdTaskId?: string;
 }
 export type ResultsCommand =
-  | { type: 'results.state' }
-  | { type: 'results.inspect'; taskId: string; versionId: string }
+  | { type: 'results.state'; beforeTaskId?:string }
+  | { type: 'results.inspect'; taskId: string; versionId?: string }
   | { type: 'results.accept'; taskId: string; versionId: string; revision: number; idempotencyKey: string }
   | { type: 'results.requestChanges'; taskId: string; versionId: string; revision: number; feedback: string; limits: LiveLimits; idempotencyKey: string }
   | { type: 'results.retryPreparation'; revisionId: string };

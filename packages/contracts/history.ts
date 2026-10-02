@@ -1,0 +1,4 @@
+import type {Agent,Task,TaskMessage,InputRequest} from './index';
+export const HISTORY_CHANNEL='agent-workspaces:history';
+export type TaskHistoryCommand={type:'agents.history';scope:'active'|'archived';cursor:string|null}|{type:'agents.archive';agentId:string;archived:boolean}|{type:'tasks.history';scope:'active'|'archived';agentId:string|null;cursor:string|null}|{type:'tasks.archive';taskId:string;archived:boolean}|{type:'tasks.inspect';taskId:string;cursor:string|null};
+export interface TaskHistoryState{agents?:Agent[];nextAgentCursor?:string|null;tasks:Task[];nextCursor:string|null;scope:'active'|'archived'|'exact';messages?:TaskMessage[];messageNextCursor?:string|null;requests?:InputRequest[];versionIds?:string[];accounting?:{reservedMicrousd:number;heldInputTokens:number;heldOutputTokens:number;uncertainCalls:number};archiveFreesCapacity:true}

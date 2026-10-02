@@ -1,0 +1,575 @@
+{
+  "items": [
+    {
+      "id": "C02",
+      "status": "implemented_verified",
+      "decision": "Explicit legacy provenance; unavailable structured requests retain loading/error/retry controls without false generic replies.",
+      "changed_files": [
+        "apps/desktop/renderer/App.tsx",
+        "apps/desktop/renderer/Requests.tsx",
+        "packages/contracts/index.ts"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-renderer-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/renderer-ui.log",
+          "boundary": "Mounted actual App/Files with synthetic bridge and disposable custom Electron main; no real credentials."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C06",
+      "status": "implemented",
+      "decision": "Document current owner navigation, local startup and reproducible tests separately from historical package context.",
+      "changed_files": [
+        "README.md",
+        "docs/improvements/CURRENT-CAPABILITIES.md"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C23",
+      "status": "implemented",
+      "decision": "Required failed/cancelled fleet workers cannot Resume; explicit fresh follow-up draft remains available.",
+      "changed_files": [
+        "apps/desktop/renderer/Fleets.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C35",
+      "status": "implemented",
+      "decision": "Accepted immutable slots expose no replacement import action.",
+      "changed_files": [
+        "apps/desktop/renderer/Requests.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C37",
+      "status": "implemented",
+      "decision": "Native browser choice discloses own-Mac host network and task policy boundary.",
+      "changed_files": [
+        "apps/desktop/renderer/BrowserSetup.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C50",
+      "status": "implemented_verified",
+      "decision": "Refresh project membership and scope chooser/destinations before limits; shared labels identify project access.",
+      "changed_files": [
+        "apps/desktop/renderer/Files.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-renderer-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/renderer-ui.log",
+          "boundary": "Mounted actual App/Files with synthetic bridge and disposable custom Electron main; no real credentials."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C54",
+      "status": "implemented",
+      "decision": "Recovery and routines distinguish pending, unavailable, loaded-empty and recovered data, clear repaired errors and expose history paging.",
+      "changed_files": [
+        "apps/desktop/renderer/RecoveryCenter.tsx",
+        "apps/desktop/renderer/Routines.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C56",
+      "status": "implemented",
+      "decision": "Backup creation explains unencrypted private data locally without adding an unrequested approval flow.",
+      "changed_files": [
+        "apps/desktop/renderer/RecoverySettings.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C65",
+      "status": "implemented_verified",
+      "decision": "Review-only task copy routes owners to current Fleets.",
+      "changed_files": [
+        "apps/desktop/renderer/App.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-renderer-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/renderer-ui.log",
+          "boundary": "Mounted actual App/Files with synthetic bridge and disposable custom Electron main; no real credentials."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C67",
+      "status": "implemented_verified",
+      "decision": "Overview overflow opens All tasks, including sixth failed task.",
+      "changed_files": [
+        "apps/desktop/renderer/Overview.tsx",
+        "apps/desktop/renderer/App.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-renderer-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/renderer-ui.log",
+          "boundary": "Mounted actual App/Files with synthetic bridge and disposable custom Electron main; no real credentials."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C68",
+      "status": "implemented_verified",
+      "decision": "Both Run controls use exact selected model readiness.",
+      "changed_files": [
+        "apps/desktop/renderer/App.tsx",
+        "apps/desktop/renderer/AgentRun.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-renderer-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/renderer-ui.log",
+          "boundary": "Mounted actual App/Files with synthetic bridge and disposable custom Electron main; no real credentials."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C69",
+      "status": "implemented_verified",
+      "decision": "Generation-aware provider reads cannot overwrite a newer save; failed loads retain error and retry without empty-state claim.",
+      "changed_files": [
+        "apps/desktop/renderer/ProviderSettings.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-provider-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/provider-ui.log",
+          "boundary": "Mounted actual ProviderSettings: delayed read/save/stale reply, load failure and measured native checkbox; screenshot inspected."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C70",
+      "status": "implemented_verified",
+      "decision": "Use actual secondary text token; measure rendered light/dark explanatory text.",
+      "changed_files": [
+        "apps/desktop/renderer/provider-settings.css"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-provider-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/provider-ui.log",
+          "boundary": "Mounted actual ProviderSettings: delayed read/save/stale reply, load failure and measured native checkbox; screenshot inspected."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C71",
+      "status": "implemented_verified",
+      "decision": "Checkbox uses explicit16px native dimensions.",
+      "changed_files": [
+        "apps/desktop/renderer/provider-settings.css"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-provider-fixture.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/provider-ui.log",
+          "boundary": "Mounted actual ProviderSettings: delayed read/save/stale reply, load failure and measured native checkbox; screenshot inspected."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C73",
+      "status": "implemented",
+      "decision": "Unresolved browser backend displays checking until known.",
+      "changed_files": [
+        "apps/desktop/renderer/Browser.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C74",
+      "status": "implemented",
+      "decision": "Fresh Code setup shows supported --prepare-base before image build.",
+      "changed_files": [
+        "apps/desktop/renderer/Code.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C75",
+      "status": "implemented_verified",
+      "decision": "Bounded25 stable older execution pages plus exact-ID diagnostics remain task scoped; reset cached rows on task switch. No speculative lazy-log architecture.",
+      "changed_files": [
+        "apps/desktop/renderer/Code.tsx",
+        "packages/code/index.ts",
+        "packages/contracts/code.ts"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node scripts/test-electron.mjs improvements",
+          "result": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "Actual Code service31 equal-timestamp rows, disjoint25+6 pages, old exact lookup and foreign-task refusal; UI source review caught/reset cross-task cache."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C76",
+      "status": "implemented",
+      "decision": "Atomic two-role swap preserves occupied CSV assignments; accepted immutable slots stay protected.",
+      "changed_files": [
+        "apps/desktop/renderer/Readiness.tsx",
+        "apps/desktop/renderer/TaskReadiness.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C83",
+      "status": "implemented",
+      "decision": "Unread alert border uses defined teal token.",
+      "changed_files": [
+        "apps/desktop/renderer/routines.css"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C84",
+      "status": "implemented",
+      "decision": "Blocked routine guidance uses Stop, repair source/setup and Enable future; no automatic replay.",
+      "changed_files": [
+        "apps/desktop/renderer/Routines.tsx"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C95",
+      "status": "implemented",
+      "decision": "Promote confirmed failure boundaries into focused actual-service and isolated mounted-component regressions.",
+      "changed_files": [
+        "tests/improvements",
+        "tests/renderer",
+        "tests/phase5/loop.test.ts"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C96",
+      "status": "implemented_verified",
+      "decision": "Matched bounded Office export evaluation exceeds50ms main response budget in sync path; worker satisfies14.49ms main p95 and identical output hashes, within1000ms IPC budget. No production UI speedup claim.",
+      "changed_files": [
+        "apps/desktop/main/report-format.ts",
+        "apps/desktop/main/report-format-worker.ts",
+        "apps/desktop/main/report-export-controller.ts",
+        "scripts/build.mjs",
+        "scripts/package-mac.mjs",
+        "tests/renderer/report-performance.cjs",
+        "tests/renderer/run-report-performance.mjs"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "node tests/renderer/run-report-performance.mjs",
+          "result": "passed",
+          "log": ".test-data/improvements/report-performance.json",
+          "boundary": "Eight matched samples;489079byte10krows100k cells; mainp95 sync270.77ms worker14.49ms; IPC290.8/251.1ms; identical output hash."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C97",
+      "status": "implemented",
+      "decision": "Nonsecret provenance receipt hashes current source tree, lock/build inputs and tool versions; package inventory includes receipt and worker.",
+      "changed_files": [
+        "scripts/build-provenance.mjs",
+        "scripts/build.mjs",
+        "scripts/package-mac.mjs"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C100",
+      "status": "implemented_verified",
+      "decision": "Validate actual guide content strings and fragment targets; missing-anchor injection fails before outputs.",
+      "changed_files": [
+        "scripts/build-guide.py",
+        "tests/improvements/guide-validation.py"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "python3 scripts/build-guide.py --validate; python3 tests/improvements/guide-validation.py; python3 scripts/build-guide.py",
+          "result": "passed",
+          "log": ".test-data/improvements/guide-build.log",
+          "boundary": "Real builder missing-anchor injection and no-write version guard; local57-page PDF generated; affected page54 visually inspected, no publishing."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C101",
+      "status": "implemented_verified",
+      "decision": "Guide uses fresh synthetic registration and explicitly states no returning sign-in. Regenerated local PDF/HTML; changed page54 visually inspected.",
+      "changed_files": [
+        "docs/guide/use-cases.json",
+        "guide-site/index.html",
+        "output/pdf/Taskivra-AI-Guide.pdf",
+        "guide-site/Taskivra-AI-Guide.pdf"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "python3 scripts/build-guide.py --validate; python3 tests/improvements/guide-validation.py; python3 scripts/build-guide.py",
+          "result": "passed",
+          "log": ".test-data/improvements/guide-build.log",
+          "boundary": "Real builder missing-anchor injection and no-write version guard; local57-page PDF generated; affected page54 visually inspected, no publishing."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    },
+    {
+      "id": "C102",
+      "status": "implemented_verified",
+      "decision": "Single edition metadata drives footer; package version must match; --validate performs no output writes and --html-out names exact target.",
+      "changed_files": [
+        "scripts/build-guide.py",
+        "docs/guide/README.md",
+        "tests/improvements/guide-validation.py"
+      ],
+      "verification": [
+        {
+          "command": "npm run typecheck && npm run build",
+          "result": "passed",
+          "log": ".test-data/improvements/typecheck-final.log; .test-data/improvements/build-final.log",
+          "boundary": "Integrated compile/build; does not exercise owner interactions."
+        },
+        {
+          "command": "python3 scripts/build-guide.py --validate; python3 tests/improvements/guide-validation.py; python3 scripts/build-guide.py",
+          "result": "passed",
+          "log": ".test-data/improvements/guide-build.log",
+          "boundary": "Real builder missing-anchor injection and no-write version guard; local57-page PDF generated; affected page54 visually inspected, no publishing."
+        }
+      ],
+      "remaining_blocker": null,
+      "dependencies": []
+    }
+  ]
+}

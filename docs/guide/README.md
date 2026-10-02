@@ -51,3 +51,9 @@ npx vercel deploy --prod --yes --local-config guide-site/vercel.json
 ```
 
 Local `.vercel` metadata and credentials must remain ignored. Verify the deployment is Ready, the guide and PDF are accessible without authentication, and the published PDF matches the final local copy before updating or announcing links.
+
+Validate this edition without generating or publishing files: `python3 scripts/build-guide.py --validate`. For a separate reviewed HTML output, use `--html-only --html-out PATH`. Edition metadata comes from guide-content.json, and its version must match package.json.
+
+## Versioned editions
+
+The current guide follows application version 0.10.0 (2 October 2026). Frozen version 0.9.9 and 0.10.0 web/PDF copies are linked from [Guide versions](https://taskivra-ai-guide.vercel.app/versions/). Each archive has its own styles/script/PDF and SHA256 edition manifest. The 0.9.9 archive was taken from the exact baseline Git commit; original source files remain unchanged. Do not overwrite published edition directories; see [release procedure and data rollback](../releases/VERSIONING.md).

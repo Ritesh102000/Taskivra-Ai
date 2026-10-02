@@ -1,0 +1,1122 @@
+{
+  "items": [
+    {
+      "id": "C10",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C11",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C12",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C13",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C14",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C15",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C16",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C29",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/artifacts/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C34",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/task-recovery/index.ts",
+        "packages/contracts/task-recovery.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C36",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C38",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C39",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C40",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C41",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/browser/index.ts",
+        "packages/browser-runtime/index.ts",
+        "workers/browser/worker.mjs",
+        "extensions/agent-browser/page.mjs",
+        "extensions/agent-browser/session.mjs",
+        "extensions/agent-browser/background.mjs",
+        "packages/native-browser/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_browser_worker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/browser-current.log",
+          "boundary": "2 actual current-worker runtime/service gates passed after offline current image rebuild; original stale-source and owner-redaction failures preserved separately.",
+          "command": "AW_BROWSER_DOCKER_TEST=1 AW_DOCKER_TESTS=1 npx tsx --test tests/phase3/worker-docker.test.ts tests/phase3/service-docker-input.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C42",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/code/index.ts",
+        "packages/code-runtime/index.ts",
+        "packages/code-runtime/recipe.mjs",
+        "packages/contracts/code.ts",
+        "packages/contracts/code-validation.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_docker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/code.log",
+          "boundary": "2 actual existing-image isolated runtime/service gates; no paid providers or credentials.",
+          "command": "AW_CODE_DOCKER_TEST=1 npx tsx --test tests/phase4/runtime-docker.test.ts tests/phase4/service-docker.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C43",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/code/index.ts",
+        "packages/code-runtime/index.ts",
+        "packages/code-runtime/recipe.mjs",
+        "packages/contracts/code.ts",
+        "packages/contracts/code-validation.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_docker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/code.log",
+          "boundary": "2 actual existing-image isolated runtime/service gates; no paid providers or credentials.",
+          "command": "AW_CODE_DOCKER_TEST=1 npx tsx --test tests/phase4/runtime-docker.test.ts tests/phase4/service-docker.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C44",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/code/index.ts",
+        "packages/code-runtime/index.ts",
+        "packages/code-runtime/recipe.mjs",
+        "packages/contracts/code.ts",
+        "packages/contracts/code-validation.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_docker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/code.log",
+          "boundary": "2 actual existing-image isolated runtime/service gates; no paid providers or credentials.",
+          "command": "AW_CODE_DOCKER_TEST=1 npx tsx --test tests/phase4/runtime-docker.test.ts tests/phase4/service-docker.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C45",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/code/index.ts",
+        "packages/code-runtime/index.ts",
+        "packages/code-runtime/recipe.mjs",
+        "packages/contracts/code.ts",
+        "packages/contracts/code-validation.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_docker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/code.log",
+          "boundary": "2 actual existing-image isolated runtime/service gates; no paid providers or credentials.",
+          "command": "AW_CODE_DOCKER_TEST=1 npx tsx --test tests/phase4/runtime-docker.test.ts tests/phase4/service-docker.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C46",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/code/index.ts",
+        "packages/code-runtime/index.ts",
+        "packages/code-runtime/recipe.mjs",
+        "packages/contracts/code.ts",
+        "packages/contracts/code-validation.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "real_docker_gate",
+          "status": "passed",
+          "log": ".testdata/improvements/runtime-gates/code.log",
+          "boundary": "2 actual existing-image isolated runtime/service gates; no paid providers or credentials.",
+          "command": "AW_CODE_DOCKER_TEST=1 npx tsx --test tests/phase4/runtime-docker.test.ts tests/phase4/service-docker.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C47",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/artifacts/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C48",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/artifacts/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C49",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/artifacts/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C51",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/artifacts/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C52",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/artifacts/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C53",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/recovery/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C55",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/recovery/index.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C79",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/routines/index.ts",
+        "packages/routines/timing.ts",
+        "packages/routines/alerts.ts",
+        "packages/contracts/routines.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C80",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/routines/index.ts",
+        "packages/routines/timing.ts",
+        "packages/routines/alerts.ts",
+        "packages/contracts/routines.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C81",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/routines/index.ts",
+        "packages/routines/timing.ts",
+        "packages/routines/alerts.ts",
+        "packages/contracts/routines.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C82",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "packages/routines/index.ts",
+        "packages/routines/timing.ts",
+        "packages/routines/alerts.ts",
+        "packages/contracts/routines.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C98",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "labs/harbor-desk/public/app.js",
+        "apps/desktop/main/lab-browser-runtime.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    },
+    {
+      "id": "C99",
+      "status": "implemented",
+      "decision": "Implemented scoped changes; exact decisions and verification boundaries in docs/improvements/storage-runtime.md. Root owns renderer integration where noted.",
+      "changed_files": [
+        "labs/harbor-desk/public/app.js",
+        "apps/desktop/main/lab-browser-runtime.ts",
+        "docs/improvements/storage-runtime.md"
+      ],
+      "verification": [
+        {
+          "kind": "focused_suite",
+          "status": "passed",
+          "log": ".testdata/improvements/storage-final-all.log",
+          "boundary": "265 checks:254 passed,11 explicit skips,0 failures; overlapping suite covers source changes and synthetic transports, not every ID has independent regression.",
+          "command": "npx tsx --test tests/phase2/*.test.ts tests/phase4/*.test.ts tests/phase5/*.test.ts tests/phase6/native-browser.test.ts tests/phase7/routines.test.ts tests/phase7/recovery-package.test.ts tests/improvements/storage-runtime.test.ts"
+        },
+        {
+          "kind": "focused_regressions",
+          "status": "passed",
+          "command": "npx tsx --test tests/improvements/storage-runtime.test.ts",
+          "log": ".testdata/improvements/storage-final-regressions.log",
+          "boundary": "14 actual source/service boundary regressions with synthetic resources; includes C98 full app.js VM bootstrap404/500 cases and C99 actual factory mock Electron cleanup failure/retry."
+        }
+      ],
+      "remaining_blocker": null
+    }
+  ],
+  "runtime_gates": {
+    "code": {
+      "status": "passed",
+      "passed": 2,
+      "skipped": 0,
+      "log": ".testdata/improvements/runtime-gates/code.log"
+    },
+    "documents": {
+      "status": "passed",
+      "passed": 2,
+      "skipped": 0,
+      "log": ".testdata/improvements/runtime-gates/documents.log",
+      "image": "agent-workspaces-code:documents-portable-test",
+      "command": "AW_DOCUMENT_DOCKER_TEST=1 AW_DOCUMENT_TEST_IMAGE=agent-workspaces-code:documents-portable-test npx tsx --test tests/phase7/documents.test.ts"
+    },
+    "browser": {
+      "status": "passed",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0,
+      "log": ".testdata/improvements/runtime-gates/browser-current.log",
+      "rebuild": {
+        "status": "passed",
+        "log": ".testdata/improvements/runtime-gates/browser-copy-only-rebuild.log",
+        "proof": ".testdata/improvements/runtime-gates/browser-build-proof.json",
+        "boundary": "Root explicitly authorized measured COPY-only local build below8GiB setup guard; production guard unchanged, pinned base checks/networknone/pullfalse."
+      },
+      "failure_history": [
+        ".testdata/improvements/runtime-gates/browser.log",
+        ".testdata/improvements/runtime-gates/browser-current-owner-redaction-failure.log"
+      ]
+    },
+    "native_chrome": {
+      "status": "not_run",
+      "reason": "Exact authorized owner-installed QA root/agent not supplied."
+    }
+  },
+  "notes": [
+    "Existing historical runtime evidence restored after copies saved in disposable testdata.",
+    "Existing-image initial gates followed by explicitly authorized measured COPY-only browser rebuild; pinned base checks/networknone/pullfalse; no image downloads, paid providers or personal credentials.",
+    "Counts overlap; do not sum focused suites."
+  ],
+  "latest_runtime_gates": {
+    "code": {
+      "status": "passed",
+      "tests": 7,
+      "skipped": 0,
+      "command": "AW_CODE_DOCKER_TEST=1 npx tsx --test tests/phase4/runtime-boundaries.test.ts tests/phase4/runtime-permissions.test.ts tests/phase4/runtime-recovery.test.ts tests/phase4/runtime-docker.test.ts tests/phase4/service-docker.test.ts",
+      "log": ".testdata/improvements/runtime-gates/latest/code-all.log"
+    },
+    "browser": {
+      "status": "passed",
+      "tests": 3,
+      "skipped": 0,
+      "command": "AW_DOCKER_TESTS=1 AW_BROWSER_DOCKER_TEST=1 AW_RUNTIME_EVIDENCE=1 npx tsx --test tests/phase3/runtime-crash.test.ts tests/phase3/runtime-egress.test.ts tests/phase3/worker-delay.test.ts",
+      "log": ".testdata/improvements/runtime-gates/latest/browser-extra.log"
+    },
+    "evidence": ".testdata/improvements/runtime-gates/latest/fresh-code and fresh-browser",
+    "cleanup": "No awp containers remain; original evidence directories restored; no image builds or downloads."
+  }
+}

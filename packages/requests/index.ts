@@ -4,7 +4,7 @@ import type { Persistence } from '../persistence/index';
 import type { ArtifactService } from '../artifacts/index';
 import type { RunClaim } from '../coordinator/index';
 import { parseRequestCommand, parseUserRequest, parseReplanResult } from '../contracts/request-validation';
-import { REQUEST_LIMITS, type CapabilitySpec, type FileConstraints, type ReplanClaim, type ReplanResult, type RequestCommand, type RequestSlot, type UserRequest, type UserRequestSpec, type ValidationResult } from '../contracts/requests';
+import { REQUEST_LIMITS, type ExactCapabilityGrant, type CapabilitySpec, type FileConstraints, type ReplanClaim, type ReplanResult, type RequestCommand, type RequestSlot, type UserRequest, type UserRequestSpec, type ValidationResult } from '../contracts/requests';
 import { validateContent } from './validation';
 type Row=Record<string,string|number|null>;
 const closedStates=['fulfilled','cancelled','superseded'],terminal=['succeeded','failed','cancelled'];
@@ -47,11 +47,11 @@ export class RequestService {
     const gmailConnection=!!this.row('SELECT 1 FROM gmail_connection_requests WHERE request_id=?',row.id);
     const payload=JSON.parse(String(row.payload_json||'{}'));
     const slots:RequestSlot[]=this.rows('SELECT * FROM request_slots WHERE request_id=? ORDER BY rowid',row.id).map(s=>({id:String(s.id),key:String(s.slot_key),label:String(s.label||s.slot_key),required:Boolean(s.required),constraints:JSON.parse(String(s.constraints_json)),state:s.state as RequestSlot['state'],candidateVersionId:s.candidate_version_id===null?null:String(s.candidate_version_id),revision:Number(s.revision),explanation:s.explanation===null?null:String(s.explanation)}));
-    return{legacy:!row.kind&&!gmailConnection,id:String(row.id),taskId:String(row.task_id),agentId:String(row.agent_id),type:row.type as UserRequest['type'],kind:(gmailConnection?'gmail_connection':row.kind||(row.type==='permission_change'?'capability':row.type)) as UserRequest['kind'],title:String(row.title),reason:String(row.reason),state:row.state as UserRequest['state'],revision:Number(row.revision),continuationKey:String(row.continuation_key),slots,response:row.response===null?null:String(row.response),createdAt:Number(row.created_at),...(row.kind==='capability'?{capability:payload.capability}:{}),...(row.kind==='reduced_scope'?{reducedScope:payload,parentRequestId:String(row.parent_request_id),parentRevision:Number(row.parent_revision)}:{})};
+    return{replan:{used:Number(row.replan_count||0),limit:REQUEST_LIMITS.replansPerRequest,remaining:Math.max(0,REQUEST_LIMITS.replansPerRequest-Number(row.replan_count||0)),status:Number(row.replan_count||0)>=REQUEST_LIMITS.replansPerRequest?'exhausted':'available'},legacy:!row.kind&&!gmailConnection,id:String(row.id),taskId:String(row.task_id),agentId:String(row.agent_id),type:row.type as UserRequest['type'],kind:(gmailConnection?'gmail_connection':row.kind||(row.type==='permission_change'?'capability':row.type)) as UserRequest['kind'],title:String(row.title),reason:String(row.reason),state:row.state as UserRequest['state'],revision:Number(row.revision),continuationKey:String(row.continuation_key),slots,response:row.response===null?null:String(row.response),createdAt:Number(row.created_at),...(row.kind==='capability'?{capability:payload.capability}:{}),...(row.kind==='reduced_scope'?{reducedScope:payload,parentRequestId:String(row.parent_request_id),parentRevision:Number(row.parent_revision)}:{})};
   }
   list(taskId?:string):UserRequest[]{
     if(this.closed)fail('closed','The request service is closing.');
-    return this.rows(`SELECT i.*,d.kind,d.payload_json,d.parent_request_id,d.parent_revision,t.agent_id FROM input_requests i LEFT JOIN request_details d ON d.request_id=i.id JOIN tasks t ON t.id=i.task_id ${taskId?'WHERE i.task_id=?':''} ORDER BY i.created_at,i.rowid`,...(taskId?[taskId]:[])).map(row=>this.view(row));
+    return this.rows(`SELECT i.*,d.kind,d.payload_json,d.parent_request_id,d.parent_revision,d.replan_count,t.agent_id FROM input_requests i LEFT JOIN request_details d ON d.request_id=i.id JOIN tasks t ON t.id=i.task_id ${taskId?'WHERE i.task_id=?':''} ORDER BY i.created_at,i.rowid`,...(taskId?[taskId]:[])).map(row=>this.view(row));
   }
   createForAgent(claim:RunClaim,raw:UserRequestSpec|unknown,options:{onCreate?:(request:UserRequest)=>void}={}):UserRequest{
     const spec=parseUserRequest(raw);
@@ -76,6 +76,20 @@ export class RequestService {
       this.write("INSERT INTO task_messages(id,task_id,role,content,created_at) VALUES (?,?,'agent',?,?)",randomUUID(),claim.taskId,`${spec.title}\n${spec.reason}`,this.now());
       this.event('input.requested',request,{agentId:claim.agentId,kind:spec.kind});return view;
     });this.changed();return result;
+  }
+  grants(taskId?:string):ExactCapabilityGrant[]{
+    if(taskId!==undefined&&(!/^[A-Za-z0-9_-]{1,128}$/.test(taskId)||!this.row('SELECT 1 FROM tasks WHERE id=?',taskId)))fail('not_found','Choose an existing task.');
+    return this.rows('SELECT * FROM request_capability_grants'+(taskId?' WHERE task_id=?':'')+' ORDER BY granted_at,request_id LIMIT 200',...(taskId?[taskId]:[])).map(row=>{const capability=JSON.parse(String(row.capability_json)) as CapabilitySpec,task=this.row('SELECT t.state,t.agent_id,l.policy_json FROM tasks t LEFT JOIN live_task_config l ON l.task_id=t.id WHERE t.id=?',row.task_id);let reason=row.revoked_at!==null?'The owner revoked future use.':!task||terminal.includes(String(task.state))?'The task ended; this is historical authority.':'';
+      if(!reason){try{for(const versionId of capability.versionIds){this.options.artifacts.getForAgent(String(task!.agent_id),versionId);if(!this.row("SELECT 1 FROM task_artifacts b JOIN artifact_versions v ON v.id=b.version_id WHERE b.task_id=? AND b.version_id=? AND v.status='ready'",row.task_id,versionId))reason='An exact granted version is unavailable or detached.';}if(capability.name==='browser_upload'){const policy=JSON.parse(String(task!.policy_json));if(!policy.allowedOrigins?.includes(capability.origin))reason='The exact upload origin is outside current policy.';}}catch{reason='Current source or project authority is unavailable.';}}
+      return{requestId:String(row.request_id),taskId:String(row.task_id),capability,grantedAt:Number(row.granted_at),revokedAt:row.revoked_at===null?null:Number(row.revoked_at),currentAuthority:!reason,authorityReason:reason||'Current exact authority for future task use; execution still requires fresh authorization.'};});
+  }
+  revokeGrant(requestId:string):ExactCapabilityGrant[]{
+    return this.tx(()=>{const grant=this.row('SELECT * FROM request_capability_grants WHERE request_id=?',requestId);if(!grant)fail('not_found','Choose an existing exact grant.');
+      const task=this.row('SELECT state FROM tasks WHERE id=?',grant!.task_id);
+      if(!task||!['paused','waiting','succeeded','failed','cancelled'].includes(String(task.state))||this.row("SELECT 1 FROM runs WHERE task_id=? AND state='running'",grant!.task_id))fail('task_busy','Pause the task and wait for the active operation to stop before revoking future use.');
+      if(grant!.revoked_at===null){this.write('UPDATE request_capability_grants SET revoked_at=? WHERE request_id=? AND revoked_at IS NULL',this.now(),requestId);this.event('input.capability_revoked',this.request(requestId),{futureUseOnly:true});}
+      return this.grants(String(grant!.task_id));
+    });
   }
   async handle(raw:unknown):Promise<UserRequest[]>{
     const command=parseRequestCommand(raw);await this.ready;
@@ -118,6 +132,9 @@ export class RequestService {
     const revision=Number(request.revision)+1;
     this.write("UPDATE input_requests SET state='fulfilled',revision=? WHERE id=?",revision,requestId);
     this.write('INSERT INTO resume_receipts(request_id,fulfillment_revision,continuation_key,created_at) VALUES (?,?,?,?)',requestId,revision,request.continuation_key,this.now());
+    this.write("UPDATE request_validation_jobs SET state='cancelled',finished_at=? WHERE request_id=? AND state IN ('queued','running')",this.now(),requestId);
+    this.write("UPDATE slot_candidates SET state='superseded' WHERE state='checking' AND slot_id IN (SELECT id FROM request_slots WHERE request_id=?)",requestId);
+    this.write("UPDATE request_slots SET state='missing',candidate_version_id=NULL,revision=revision+1 WHERE request_id=? AND state='checking'",requestId);
     this.cancelReplans(requestId);this.supersedeProposals(requestId);this.event('input.fulfilled',this.request(requestId));this.updateTask(String(request.task_id));
   }
   private ownerReply(request:Row,revision:number,response:string,action:'reply'|'accept'|'decline'):boolean{
@@ -138,6 +155,16 @@ export class RequestService {
     const reply=this.row('SELECT id FROM request_owner_replies WHERE request_id=? ORDER BY created_at DESC,rowid DESC LIMIT 1',requestId)!;
     this.write("INSERT INTO request_replan_jobs(id,request_id,request_revision,reply_id,state,created_at) VALUES (?,?,?,?,'queued',?)",randomUUID(),requestId,request.revision,reply.id,this.now());
     this.write('UPDATE request_details SET replan_count=replan_count+1 WHERE request_id=?',requestId);this.event('input.replan_queued',request);
+  }
+  retryFailedReplan(requestId:string,revision:number):void{
+    this.tx(()=>{const request=this.current(requestId,revision);if(!['files','capability'].includes(String(request.kind)))fail('unsupported_replan','Only a blocked file or capability request can be repaired.');
+      if(request.task_state!=='waiting')fail('invalid_state','The task must still be waiting for this request.');
+      if(this.row("SELECT 1 FROM request_replan_jobs WHERE request_id=? AND state IN ('queued','running')",requestId))fail('replan_busy','A request review is already queued or running.');
+      if(Number(request.replan_count)>=REQUEST_LIMITS.replansPerRequest)fail('replan_limit','The bounded request-review allowance is exhausted. The saved reply remains available.');
+      if(!this.row('SELECT 1 FROM request_owner_replies WHERE request_id=?',requestId))fail('missing_reply','Save an explanation before requesting repair.');
+      const job=this.row("SELECT j.id FROM request_replan_jobs j JOIN request_owner_replies r ON r.id=j.reply_id WHERE j.request_id=? AND j.request_revision=? AND j.state='completed' ORDER BY r.created_at DESC,r.rowid DESC LIMIT 1",requestId,revision);if(!job)fail('stale_replan','No completed current request review can be repaired.');
+      this.write("UPDATE request_replan_jobs SET state='queued',owner_id=NULL,owner_pid=NULL,generation=generation+1,lease_until=0,finished_at=NULL WHERE id=?",job.id);this.write('UPDATE request_details SET replan_count=replan_count+1 WHERE request_id=?',requestId);this.event('input.replan_repair_queued',request);
+    });this.changed();
   }
   private reply(command:Extract<RequestCommand,{type:'requests.reply'}>){this.tx(()=>{
     const request=this.request(command.requestId);if(!this.ownerReply(request,command.revision,command.response,'reply'))return;

@@ -3,11 +3,11 @@ import type { ResultQuality, ResultQualityCheck } from '../contracts/results';
 import { CsvCoverageError, parseCompleteCsv } from './csv';
 import { parseMarkdownPreview, PREVIEW_CHAR_LIMIT } from './preview';
 
-export const QUALITY_CHECKER_VERSION = 'structural-2026-09-30.2';
+export const QUALITY_CHECKER_VERSION = 'structural-2026-10-02.1';
 export interface QualityInput {
   version: ArtifactVersion; text: string | null; complete: boolean; completionCriteria: string;
   requiredSections?: string[]; requiredFormat?: string;
-  inputVersionIds: string[]; evidenceIds: string[]; reportEvidenceIds?: string[];
+  inputVersionIds: string[]; supportingOutputVersionIds?: string[]; evidenceIds: string[]; reportEvidenceIds?: string[];
   now?: number;
 }
 const normalized = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[*_`]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
@@ -39,7 +39,7 @@ export function checkResultQuality(input: QualityInput): ResultQuality {
     catch { add('json', 'JSON structure', 'fail', 'The selected output is not complete valid JSON.'); }
   }
   const explicitSections = [...input.completionCriteria.matchAll(/^Required sections:\s*(.+)$/gmi)].flatMap(match => match[1].split(/[,;|]/).map(value => value.trim()).filter(Boolean));
-  const requiredSections = [...new Set([...(input.requiredSections || []), ...explicitSections])].slice(0, 24);
+  const requiredSections = [...new Set([...(input.requiredSections || []), ...explicitSections])];
   if (requiredSections.length) {
     const markdown = format === 'markdown' && complete ? parseMarkdownPreview(text) : null;
     if (!complete || (markdown?.truncated) || text.length > PREVIEW_CHAR_LIMIT) add('sections', 'Required sections', 'warn', 'Section checks could not cover the complete output; review all required sections manually.');
@@ -50,12 +50,12 @@ export function checkResultQuality(input: QualityInput): ResultQuality {
     }
   }
   if (complete) {
-    const evidence = new Set(input.evidenceIds), versions = new Set(input.inputVersionIds);
+    const evidence = new Set(input.evidenceIds), versions = new Set(input.inputVersionIds), outputs = new Set(input.supportingOutputVersionIds || []);
     const invalid = (input.reportEvidenceIds || []).filter(id => !evidence.has(id));
-    for (const match of text.matchAll(/\b(evidence|receipt|artifact|version):(?:\/\/)?([A-Za-z0-9_-]{8,96})\b/g)) {
-      if (!(match[1] === 'evidence' || match[1] === 'receipt' ? evidence : versions).has(match[2])) invalid.push(`${match[1]}:${match[2]}`);
+    for (const match of text.matchAll(/\b(evidence|receipt|artifact|version|output):(?:\/\/)?([A-Za-z0-9_-]{8,96})\b/g)) {
+      if (!(match[1] === 'evidence' || match[1] === 'receipt' ? evidence : match[1] === 'output' ? outputs : versions).has(match[2])) invalid.push(`${match[1]}:${match[2]}`);
     }
-    if (invalid.length) add('references', 'Exact source references', 'fail', `These references do not belong to this task's successful evidence or selected inputs: ${[...new Set(invalid)].slice(0, 8).join(', ')}.`);
+    if (invalid.length) add('references', 'Exact source references', 'fail', `These references do not belong to this task's successful evidence, selected inputs or exact same-task supporting outputs: ${[...new Set(invalid)].slice(0, 8).join(', ')}.`);
     else if (input.reportEvidenceIds?.length) add('references', 'Saved report references', 'pass', `${input.reportEvidenceIds.length} saved evidence references belong to successful source observations for this task. This does not establish that they support every claim.`);
     else add('references', 'Source references', 'warn', 'This output has no saved report evidence references. Review the source coverage and claims manually.');
     if (/\b(?:TODO|TBD|FIXME)\b|\[(?:insert|add|fill in)\b[^\]]*\]/i.test(text)) add('placeholders', 'Unfinished text', 'warn', 'Potential placeholder text remains (for example TODO or “insert…”). Review whether it is intentional source content.');

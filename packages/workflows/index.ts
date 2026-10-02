@@ -1,3 +1,4 @@
+import { effectiveProcedure } from './effective';
 import { createHash, randomUUID } from 'node:crypto';
 import type { SQLInputValue } from 'node:sqlite';
 import type { Persistence } from '../persistence';
@@ -58,8 +59,7 @@ export class WorkflowService {
   /** Returns the immutable procedure stored when this task was created, never a later catalog version. */
   requirementsForTask(taskId: string): WorkflowProcedure | null {
     identity(taskId);
-    const origin = this.row('SELECT definition_json FROM workflow_task_origins WHERE task_id=?', taskId);
-    return origin?.definition_json ? readProcedure(String(origin.definition_json)) : null;
+    return effectiveProcedure(this.db, taskId);
   }
   previewRequirements(workflowId: string, values: Record<string, string>, model: string, agentId?: string): ReadinessRequirements {
     const workflow = this.find(identity(workflowId));

@@ -266,8 +266,44 @@ test('synchronous abandonment leaves manual work paused across reopening without
 test('cleanup failure reports attention while retaining the authoritative committed receipt', async () => {
   const f = await fixture(); try {
     const a = f.agent(), t = f.task(a.id); f.runtime.plans.push({ closeFailure: true }); await f.c.code.handle(command(t.id)); const result = await finished(f.c, t.id);
-    assert.equal(result.workspaceCommitted, true); assert.equal(result.workspaceRevision, 1); assert.equal(result.reason, 'cleanup_failed'); assert.equal(result.lifecycle, 'failed');
+    assert.equal(result.workspaceCommitted, true); assert.equal(result.workspaceRevision, 1); assert.equal(result.cleanupState, 'pending'); assert.equal(result.lifecycle, result.workspaceCommitted ? 'succeeded' : 'failed');
     assert.equal((await f.c.artifacts.preview({ principal: { kind: 'owner' }, versionId: result.outputVersionIds[0] })).text, 'verified result');
+  } finally { await f.close(); }
+});
+
+test('failed execution retains cleanup debt instead of masking it with its execution reason', async () => {
+  const f = await fixture(); try {
+    const a = f.agent(), t = f.task(a.id); f.runtime.plans.push({ closeFailure: true, outcome: { reason: 'timeout', exitCode: null, logsTruncated: false } });
+    await f.c.code.handle(command(t.id)); const result = await finished(f.c, t.id);
+    assert.equal(result.reason, 'timeout'); assert.equal(result.cleanupState, 'pending'); assert.equal(result.lifecycle, 'failed'); assert.equal(result.workspaceCommitted, false);
+    f.c.handle({ type: 'tasks.cancel', taskId: t.id });
+    assert.throws(() => f.c.taskHistory({ type: 'tasks.archive', taskId: t.id, archived: true }), /resolved operation accounting/);
+    f.runtime.handles[0].plan.closeFailure = false;
+    const refreshed = await f.c.code.handle({ type: 'code.state', taskId: t.id });
+    assert.equal(refreshed.executions[0].cleanupState, 'resolved'); assert.equal(refreshed.executions[0].reason, 'timeout');
+    f.c.taskHistory({ type: 'tasks.archive', taskId: t.id, archived: true });
+  } finally { await f.close(); }
+});
+
+test('synchronous close fences late startup reconciliation before any closed database write', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'aw-code-late-init-')); const runtime = new FakeRuntime(), wait = gate();
+  runtime.reconcile = async () => { wait.entered.resolve(); await wait.release.promise; };
+  const c = new Coordinator({ dataRoot: root, codeRuntime: runtime });
+  try { await wait.entered.promise; c.close(); wait.release.resolve(); await c.code.ready; await c.artifacts.drain(); }
+  finally { wait.release.resolve(); c.close(); await rm(root, { recursive: true, force: true }); }
+});
+
+test('restart resolves durable cleanup debt only after runtime reconciliation proof', async () => {
+  const f = await fixture(); try {
+    const a = f.agent(), t = f.task(a.id); f.runtime.plans.push({ closeFailure: true, outcome: { reason: 'timeout', exitCode: null, logsTruncated: false } });
+    await f.c.code.handle(command(t.id)); const result = await finished(f.c, t.id); assert.equal(result.cleanupState, 'pending');
+    f.c.handle({ type: 'tasks.cancel', taskId: t.id }); f.c.close(); await f.c.artifacts.drain();
+    const replacement = new FakeRuntime(); let cleanupProved = false; replacement.reconcile = async () => { replacement.reconciled++; if (!cleanupProved) throw new Error('code_cleanup_incomplete'); }; const next = await f.create(replacement);
+    const held = await next.code.handle({ type: 'code.state', taskId: t.id }); assert.equal(held.executions[0].cleanupState, 'pending');
+    assert.throws(() => next.taskHistory({ type: 'tasks.archive', taskId: t.id, archived: true }), /resolved operation accounting/); cleanupProved = true;
+    const recovered = await next.code.handle({ type: 'code.state', taskId: t.id });
+    assert.ok(replacement.reconciled > 0); assert.equal(recovered.executions[0].cleanupState, 'resolved'); assert.equal(recovered.executions[0].reason, 'timeout'); assert.equal(replacement.launches.length, 0);
+    next.taskHistory({ type: 'tasks.archive', taskId: t.id, archived: true });
   } finally { await f.close(); }
 });
 
@@ -376,4 +412,18 @@ test('shutdown signals runtimes before waiting for a live worker dependent on ru
     await Promise.race([closing,new Promise<never>((_,reject)=>{const timer=setTimeout(()=>reject(new Error('Shutdown waited for a worker before stopping its runtime.')),2000);timer.unref();})]);
     assert.equal(f.runtime.closed,true);assert.equal(f.runtime.handles[0].closed,true);
   }finally{running.release.resolve();await f.runtime.handles[0]?.stop();await closing;await f.close();}
+});
+test('code history retrieves older exact executions with stable same-timestamp pagination and verified workspace changes',async()=>{
+ const f=await fixture();try{
+  const agent=f.agent(),task=f.task(agent.id);await f.c.code.handle(command(task.id));const execution=await finished(f.c,task.id);
+  const db=new DatabaseSync(f.c.databasePath);try{
+   const original=db.prepare('SELECT * FROM code_executions WHERE id=?').get(execution.id)!;
+   const columns=Object.keys(original);const insert=db.prepare(`INSERT INTO code_executions (${columns.join(',')}) VALUES (${columns.map(()=>'?').join(',')})`);
+   for(let n=0;n<30;n++){const row={...original,id:`history_${String(n).padStart(2,'0')}`,started_at:100};insert.run(...columns.map(k=>row[k as keyof typeof row]) as (string|number|null)[]);}
+   const first=await f.c.code.handle({type:'code.history',taskId:task.id});assert.equal(first.executions.length,25);assert.equal(first.history!.hasMore,true);
+   const second=await f.c.code.handle({type:'code.history',taskId:task.id,beforeExecutionId:first.history!.beforeExecutionId!});assert.equal(second.executions.length,6);assert.equal(second.history!.hasMore,false);assert.equal(new Set([...first.executions,...second.executions].map(e=>e.id)).size,31);
+   const exact=await f.c.code.handle({type:'code.history',taskId:task.id,executionId:'history_00'});assert.equal(exact.executions[0].id,'history_00');assert.deepEqual(exact.workspaceChanges!.added,['outputs/result.txt','work/state.txt']);assert.equal(exact.effectiveLimits!.resources.memoryMiB,1024);
+   const other=f.task(agent.id);await assert.rejects(f.c.code.handle({type:'code.history',taskId:other.id,executionId:'history_00'}),/no longer exists/);
+  }finally{db.close();}
+ }finally{await f.close();}
 });

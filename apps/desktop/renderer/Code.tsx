@@ -47,11 +47,12 @@ export function CodePanel({ bridge, snapshot, task, onFiles }: { bridge: AppBrid
   const [packageName, setPackageName] = useState('');
   const [packageVersion, setPackageVersion] = useState('');
   const [reason, setReason] = useState('');
+  const historyCache=useRef<CodeExecution[]>([]),[historyRevision,setHistoryRevision]=useState(0),[historyMore,setHistoryMore]=useState(true);
   const alive = useRef(true);
   const sequence = useRef(0);
   const reading = useRef(false);
   const actionLock = useRef(false);
-  const readAgain = useRef(false);
+  const readAgain = useRef(false),readCurrent=useRef<()=>Promise<void>>(async()=>{});
   const preview = useFilePreview();
   const readState = useCallback(async () => {
     if (reading.current || actionLock.current) { readAgain.current = true; return; }
@@ -59,34 +60,36 @@ export function CodePanel({ bridge, snapshot, task, onFiles }: { bridge: AppBrid
     const ticket = ++sequence.current;
     try {
       const next = await bridge.code({ type: 'code.state', taskId: task.id });
-      if (alive.current && ticket === sequence.current) setState(next);
+      if (alive.current && ticket === sequence.current) {setState(next);setError(null);}
     } catch (failure) {
       if (alive.current && ticket === sequence.current) setError(failure instanceof Error ? failure.message : 'Code status could not be read. Refresh before running another command.');
-    } finally { reading.current = false; }
+    } finally { reading.current = false; if(alive.current&&readAgain.current){readAgain.current=false;void readCurrent.current();} }
   }, [bridge, task.id]);
+  readCurrent.current=readState;
   useEffect(() => {
-    alive.current = true;
+    alive.current = true;historyCache.current=[];setState(null);setDialog(null);setHistoryMore(true);setHistoryRevision(n=>n+1);
     void readState();
     const off = bridge.onCodeChanged(() => void readState());
-    const interval = setInterval(() => { if (document.visibilityState === 'visible') { readAgain.current = false; void readState(); } }, 1000);
+    const interval = setInterval(() => { if (document.visibilityState === 'visible') { readAgain.current = false; void readCurrent.current(); } }, 1000);
     return () => { alive.current = false; sequence.current += 1; off(); clearInterval(interval); };
   }, [bridge, readState]);
   const perform = async (command: CodeCommand) => {
     if (actionLock.current) return null;
-    actionLock.current = true; sequence.current += 1; setBusy(true); setError(null);
+    actionLock.current = true; const ticket=++sequence.current; setBusy(true); setError(null);
     try {
       const next = await bridge.code(command);
-      if (alive.current) setState(next);
+      if (alive.current && ticket===sequence.current) setState(next);
       return next;
     } catch (failure) {
       if (alive.current) setError(failure instanceof Error ? failure.message : 'This code operation did not finish. Read its current status before trying again.');
       return null;
     } finally {
       actionLock.current = false;
-      if (alive.current) { setBusy(false); if (readAgain.current) { readAgain.current = false; void readState(); } }
+      if (alive.current) { setBusy(false); if (readAgain.current) { readAgain.current = false; void readCurrent.current(); } }
     }
   };
-  const executions = [...(state?.executions || [])].sort((a, b) => b.startedAt - a.startedAt);
+  const executions = [...(state?.executions || []),...historyCache.current.filter(old=>!state?.executions.some(item=>item.id===old.id))].sort((a, b) => b.startedAt - a.startedAt || b.id.localeCompare(a.id));
+  async function older(){if(actionLock.current)return;actionLock.current=true;const ticket=++sequence.current;setBusy(true);setError(null);try{const next=await bridge.code({type:'code.history',taskId:task.id,beforeExecutionId:executions.at(-1)?.id});if(alive.current&&ticket===sequence.current){historyCache.current=[...next.executions,...executions.filter(old=>!next.executions.some(item=>item.id===old.id))].slice(0,CODE_LIMITS.executions);setHistoryMore(next.history?.hasMore??false);setHistoryRevision(n=>n+1);}}catch(e){if(alive.current&&ticket===sequence.current)setError(e instanceof Error?e.message:'Code history unavailable.');}finally{actionLock.current=false;if(alive.current){setBusy(false);if(readAgain.current){readAgain.current=false;void readCurrent.current();}}}}
   const selected = executions.find(item => item.id === dialog);
   const active = executions.find(item => item.id === state?.activeExecutionId);
   const taskEnded = ['cancelled', 'failed', 'succeeded'].includes(task.state);
@@ -108,7 +111,7 @@ export function CodePanel({ bridge, snapshot, task, onFiles }: { bridge: AppBrid
     <div className="code-heading"><div><h2>Code execution</h2><p>Run a script for this task. Files and logs are real.</p></div><span className="code-live">Container</span></div>
     {!dialog && errorView}
     {!state ? <div className="code-empty" role="status">Reading the local code runtime…</div> : <>
-      {!state.runtime.ready && <div className="code-runtime-note"><strong>Code runtime needs setup</strong><p>{state.runtime.message || 'Start Docker Desktop and prepare the code runtime.'}</p><code>npm run code:setup</code><p>Run this setup command from the project folder in your terminal. Images are prepared only through that deliberate setup step.</p><button className="inline-link" disabled={busy} onClick={() => void readState()}>Check again</button></div>}
+      {!state.runtime.ready && <div className="code-runtime-note"><strong>Code runtime needs setup</strong><p>{state.runtime.message || 'Start Docker Desktop and prepare the code runtime.'}</p><code>npm run code:setup -- --prepare-base</code><p>On a fresh installation, review and prepare the base image first. This deliberate setup may use the network.</p><code>npm run code:setup</code><p>Run this setup command from the project folder in your terminal. Images are prepared only through that deliberate setup step.</p><button className="inline-link" disabled={busy} onClick={() => void readState()}>Check again</button></div>}
       <div className="code-actions"><button className="button primary small" disabled={busy || !state.runtime.ready || !!state.activeExecutionId || taskEnded} onClick={showRun}>Run code</button><button className="button small" disabled={busy || taskEnded || dependencyCount >= CODE_LIMITS.dependencies} onClick={() => { setError(null); setDialog('dependency'); }}>Request dependency</button></div>
       {taskEnded && <p className="code-note">This task has finished. Create another task to run more code.</p>}
       {dependencyCount >= CODE_LIMITS.dependencies && <p className="code-note">This task has reached its limit of {CODE_LIMITS.dependencies} saved dependency requests. Existing requests remain available below.</p>}
@@ -122,6 +125,9 @@ export function CodePanel({ bridge, snapshot, task, onFiles }: { bridge: AppBrid
         <div className="code-actions"><button className="button small" onClick={() => { setDialog(execution.id); setError(null); }}>Details & logs</button>{activeStates.has(execution.lifecycle) && <button className="button small danger-outline" disabled={busy || execution.lifecycle === 'stopping'} onClick={() => stop(execution)}>{execution.lifecycle === 'stopping' ? 'Stopping…' : 'Stop execution'}</button>}</div>
       </article>) : <div className="code-empty"><strong>A private place to process files</strong><p>Choose Python, Node.js, or shell and run a script inside an isolated container. Deliverables stay private until you publish them.</p></div>}
       {state.dependencies.map(dependencyCard)}
+      {state.effectiveLimits&&<details><summary>Effective execution limits</summary><pre>{JSON.stringify(state.effectiveLimits,null,2)}</pre><p>These are actual resource and storage ceilings, not additional permission.</p></details>}
+      {state.workspaceChangesError&&<p role="status">{state.workspaceChangesError}</p>}{state.workspaceChanges&&<details><summary>Immutable workspace changes · revision {state.workspaceChanges.revision}</summary><p>Compared with exact parent revision {state.workspaceChanges.parentRevision??'none'}.</p><pre>{JSON.stringify(state.workspaceChanges,null,2)}</pre></details>}
+      {historyMore&&<button className="button small" disabled={busy} onClick={()=>void older()}>Load older executions</button>}
       <p className="code-note">Saved workspace revision {state.workspaceRevision}. {task.executionMode === 'live' ? 'Live agent code and manually started scripts share this task’s isolated workspace.' : 'This task uses the simulation; manual code execution makes no model calls.'}</p>
     </>}
     {dialog && <CodeDialog title={dialog === 'run' ? 'Run code for this task' : dialog === 'dependency' ? 'Request a runtime dependency' : selected ? `${languageLabels[selected.runtime]} execution` : 'Execution details'} close={closeDialog}>
@@ -149,7 +155,7 @@ export function CodePanel({ bridge, snapshot, task, onFiles }: { bridge: AppBrid
       </form> : selected ? <>
         <StateBadge execution={selected} /><p className={'code-workspace-note' + (selected.workspaceCommitted ? ' saved' : !activeStates.has(selected.lifecycle) ? ' incomplete' : '')}>{commitMessage(selected)}</p>
         {selected.error && <div className="code-error" role="alert">{selected.error}</div>}
-        <dl className="code-detail-grid"><dt>Command</dt><dd><code>{selected.command}</code></dd><dt>Working directory</dt><dd><code>{selected.cwd}</code></dd><dt>Duration</dt><dd>{elapsed(selected)}</dd><dt>Timeout</dt><dd>{selected.timeoutSeconds} seconds</dd><dt>Exit code</dt><dd>{selected.exitCode === null ? 'Not available' : selected.exitCode}</dd><dt>Runtime outcome</dt><dd>{selected.reason?.replaceAll('_', ' ') || (selected.lifecycle === 'succeeded' ? 'Exited successfully' : activeStates.has(selected.lifecycle) ? 'Pending' : 'Unavailable')}</dd><dt>Runtime image</dt><dd><code>{selected.imageDigest || 'Not assigned yet'}</code></dd></dl>
+        <dl className="code-detail-grid"><dt>Command</dt><dd><code>{selected.command}</code></dd><dt>Working directory</dt><dd><code>{selected.cwd}</code></dd><dt>Duration</dt><dd>{elapsed(selected)}</dd><dt>Timeout</dt><dd>{selected.timeoutSeconds} seconds</dd><dt>Exit code</dt><dd>{selected.exitCode === null ? 'Not available' : selected.exitCode}</dd><dt>Runtime outcome</dt><dd>{selected.reason?.replaceAll('_', ' ') || (selected.lifecycle === 'succeeded' ? 'Exited successfully' : activeStates.has(selected.lifecycle) ? 'Pending' : 'Unavailable')}</dd><dt>Cleanup</dt><dd>{selected.cleanupState==='pending'?'Pending cleanup — refresh Code status to retry before archiving.':selected.cleanupState==='resolved'?'Resolved separately from the saved runtime outcome':'Not recorded for this historical execution'}</dd><dt>Runtime image</dt><dd><code>{selected.imageDigest || 'Not assigned yet'}</code></dd></dl>
         {activeStates.has(selected.lifecycle) && <div className="code-actions"><button className="button danger-outline" disabled={busy || selected.lifecycle === 'stopping'} onClick={() => stop(selected)}>{selected.lifecycle === 'stopping' ? 'Stopping…' : 'Stop execution'}</button></div>}
         <div className="code-log-heading"><h3>Standard output</h3><span>Untrusted process text{selected.logsTruncated ? ' · Truncated' : ''}</span></div><pre className="code-log" tabIndex={0} aria-label="Standard output">{selected.stdout || '(No standard output)'}</pre>
         <div className="code-log-heading"><h3>Standard error</h3><span>Untrusted process text{selected.logsTruncated ? ' · Truncated' : ''}</span></div><pre className="code-log stderr" tabIndex={0} aria-label="Standard error">{selected.stderr || '(No standard error)'}</pre>

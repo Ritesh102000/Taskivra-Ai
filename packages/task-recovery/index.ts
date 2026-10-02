@@ -44,8 +44,13 @@ export class TaskRecoveryService {
     this.write('INSERT INTO events(type,aggregate_id,aggregate_revision,payload,created_at) VALUES (?,?,1,?,?)', type, taskId, JSON.stringify({taskId, incidentId: id}), this.now());
     this.options.onChanged?.();
   }
-  state(): TaskRecoveryState {
-    return {incidents: this.rows('SELECT * FROM task_recovery_incidents ORDER BY created_at DESC,id LIMIT 100').map(r => ({
+  state(input:{beforeIncidentId?:string;incidentId?:string}={}): TaskRecoveryState {
+    const rank="CASE WHEN state IN ('exhausted','interrupted') AND acknowledged=0 THEN 0 ELSE 1 END";
+    let selected:Row[];
+    if(input.incidentId){selected=this.rows('SELECT * FROM task_recovery_incidents WHERE id=?',input.incidentId);if(!selected.length)throw new Error('This recovery item no longer exists.');}
+    else if(input.beforeIncidentId){const cursor=this.row(`SELECT *,${rank} AS priority FROM task_recovery_incidents WHERE id=?`,input.beforeIncidentId);if(!cursor)throw new Error('This recovery history cursor no longer exists.');selected=this.rows(`SELECT * FROM task_recovery_incidents WHERE (${rank})>? OR ((${rank})=? AND (created_at<? OR (created_at=? AND id>?))) ORDER BY ${rank},created_at DESC,id LIMIT 101`,cursor.priority,cursor.priority,cursor.created_at,cursor.created_at,cursor.id);}
+    else selected=this.rows(`SELECT * FROM task_recovery_incidents ORDER BY ${rank},created_at DESC,id LIMIT 101`);
+    return {page:{hasMore:selected.length>100,beforeIncidentId:selected.slice(0,100).at(-1)?.id as string||null},incidents: selected.slice(0,100).map(r => ({
       id: String(r.id), taskId: String(r.task_id), runId: String(r.run_id), operation: 'browser_read', code: String(r.code),
       state: r.state as TaskRecoveryIncident['state'], attempts: Number(r.attempts), nextAttemptAt: r.next_attempt_at === null ? null : Number(r.next_attempt_at),
       createdAt: Number(r.created_at), updatedAt: Number(r.updated_at), acknowledged: Boolean(r.acknowledged), message: messages[r.state as TaskRecoveryIncident['state']],
@@ -53,8 +58,8 @@ export class TaskRecoveryService {
     maxRetriesPerIncident: RECOVERY_LIMITS.maxRetriesPerIncident, maxRetriesPerTask: RECOVERY_LIMITS.maxRetriesPerTask};
   }
   handle(raw: unknown): TaskRecoveryState {
-    const input = record(raw, ['type','id']);
-    if (input.type === 'taskRecovery.state') {record(input, ['type']); return this.state();}
+    const input = record(raw, ['type','id','beforeIncidentId','incidentId']);
+    if (input.type === 'taskRecovery.state') {record(input, ['type','beforeIncidentId','incidentId']);if(input.beforeIncidentId!==undefined&&input.incidentId!==undefined)throw new Error('Choose one recovery history selection.');return this.state({...('beforeIncidentId' in input?{beforeIncidentId:identity(input.beforeIncidentId)}:{}),...('incidentId' in input?{incidentId:identity(input.incidentId)}:{})});}
     if (input.type !== 'taskRecovery.acknowledge') throw new Error('Choose a supported recovery action.');
     record(input, ['type','id']);
     const id = identity(input.id), row = this.row('SELECT task_id FROM task_recovery_incidents WHERE id=?', id);

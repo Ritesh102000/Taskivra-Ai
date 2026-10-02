@@ -7,6 +7,8 @@ import './agent-run.css';
 export const requestIsPending = (state: string) => !['fulfilled', 'cancelled', 'superseded'].includes(state);
 export function useRequests(bridge?: AppBridge) {
   const [requests, setRequests] = useState<UserRequest[]>([]);
+  const [loadStatus, setLoadStatus] = useState<'pending' | 'loaded' | 'failed'>('pending');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const alive = useRef(true), lock = useRef(false), reading = useRef(false), readAgain = useRef(false), sequence = useRef(0);
@@ -14,8 +16,8 @@ export function useRequests(bridge?: AppBridge) {
     if (!bridge || !alive.current) return;
     if (lock.current || reading.current) { readAgain.current = true; return; }
     const ticket = ++sequence.current; reading.current = true; readAgain.current = false;
-    try { const next = await bridge.requests({ type: 'requests.list', taskId: null }); if (alive.current && ticket === sequence.current) setRequests(next); }
-    catch (failure) { if (alive.current && ticket === sequence.current) setError(failure instanceof Error ? failure.message : 'Requests could not be loaded.'); }
+    try { const next = await bridge.requests({ type: 'requests.list', taskId: null }); if (alive.current && ticket === sequence.current) { setRequests(next); setLoadError(null); setLoadStatus('loaded'); } }
+    catch (failure) { if (alive.current && ticket === sequence.current) { setLoadError(failure instanceof Error ? failure.message : 'Requests could not be loaded.'); setLoadStatus('failed'); } }
     finally { reading.current = false; if (alive.current && readAgain.current && !lock.current) void refresh(); }
   }, [bridge]);
   useEffect(() => { alive.current = true; void refresh(); const off = bridge?.onRequestsChanged(() => void refresh()); const offWorkspace = bridge?.onChanged(() => void refresh()); return () => { alive.current = false; sequence.current++; off?.(); offWorkspace?.(); }; }, [bridge, refresh]);
@@ -26,7 +28,7 @@ export function useRequests(bridge?: AppBridge) {
     catch (failure) { if (alive.current) setError(failure instanceof Error ? failure.message : 'The request could not be updated. Refresh it before trying again.'); return false; }
     finally { lock.current = false; if (alive.current) { setBusy(false); void refresh(); } }
   };
-  return { requests, error, busy, refresh, clearError: () => setError(null),
+  return { requests, loadStatus, loadError, error, busy, refresh, clearError: () => setError(null),
     perform: (command: RequestCommand) => bridge ? operation(() => bridge.requests(command)) : Promise.resolve(false),
     pick: (command: RequestPick) => bridge ? operation(async () => (await bridge.requestPick(command)).requests) : Promise.resolve(false),
   };
@@ -59,7 +61,7 @@ export function StructuredRequestCard({ request, agent, task, snapshot, controll
       {constraints.json?.requiredKeys.length ? <p>Required fields: {constraints.json.requiredKeys.join(', ')}</p> : null}
       {slot.explanation && <p role={slot.state === 'needs_replacement' ? 'alert' : 'status'}>{slot.explanation}</p>}
       {candidate && <button className="inline-link" onClick={() => preview(candidate.id)}>{candidate.displayName} · v{candidate.version}</button>}
-      {pending && <div className="request-slot-actions"><button className="button small" disabled={busy || importing} onClick={() => void controller.pick({ requestId: request.id, revision: request.revision, slotId: slot.id, slotRevision: slot.revision })}>{slot.candidateVersionId ? 'Replace from Mac' : 'Choose file from Mac'}</button><button className="button small" disabled={busy || importing} onClick={() => { setChooseSlot(slot.id); setVersionId(''); controller.clearError(); }}>Use saved version</button></div>}
+      {pending && slot.state !== 'accepted' && <div className="request-slot-actions"><button className="button small" disabled={busy || importing} onClick={() => void controller.pick({ requestId: request.id, revision: request.revision, slotId: slot.id, slotRevision: slot.revision })}>{slot.candidateVersionId ? 'Replace from Mac' : 'Choose file from Mac'}</button><button className="button small" disabled={busy || importing} onClick={() => { setChooseSlot(slot.id); setVersionId(''); controller.clearError(); }}>Use saved version</button></div>}
       {pending && chooseSlot === slot.id && <form className="request-version-picker" onSubmit={async event => { event.preventDefault(); if (versionId && await controller.perform({ type: 'requests.assign', requestId: request.id, revision: request.revision, assignments: [{ slotId: slot.id, slotRevision: slot.revision, versionId }] })) { setChooseSlot(null); setVersionId(''); } }}>
         <label>Exact file version<select autoFocus required value={versionId} disabled={busy} onChange={event => setVersionId(event.target.value)}><option value="">Select a permitted version</option>{canUse.map(item => <option key={item.id} value={item.id}>{item.displayName} · v{item.version} · {item.visibility === 'shared' ? 'Shared' : 'Private'}</option>)}</select></label>
         <div className="request-slot-actions"><button type="button" className="button small" disabled={busy} onClick={() => setChooseSlot(null)}>Cancel</button><button type="submit" className="button primary small" disabled={busy || !versionId}>Check this version</button></div>
@@ -71,6 +73,7 @@ export function StructuredRequestCard({ request, agent, task, snapshot, controll
     <div className="request-card-top"><span className="request-symbol" aria-hidden="true">{pending ? '?' : '✓'}</span><div><span className="eyebrow">{pending ? heading : request.state === 'fulfilled' ? 'REQUEST FULFILLED' : request.state === 'superseded' ? 'REQUEST REVISED' : 'REQUEST CLOSED'}</span><h3>{request.title}</h3></div></div>
     <p className="request-context">{agent?.name || 'Agent'}{onOpen && task ? <> <span>·</span> <button className="inline-link" onClick={onOpen}>{task.objective}</button></> : null}</p><p className="request-reason">{request.reason}</p>
     {controller.error && pending && <div className="agent-run-error" role="alert">{controller.error}<button className="inline-link" disabled={busy} onClick={() => { controller.clearError(); void controller.refresh(); }}>Refresh requests</button></div>}
+    {request.replan && <p role="status">Explanation saved · {request.replan.used}/{request.replan.limit} continuations admitted · {request.replan.status}. {request.replan.remaining===0?'No further replans can be admitted. Supply the required files, keep the original scope, or prepare fresh work.':''}</p>}
     {request.slots.length > 0 && <><p className="request-partial-note">{accepted} of {required} required files accepted. {pending ? 'Only accepted versions count; replacing one file preserves the other accepted files.' : ''}</p>{request.slots.map(slotView)}</>}
     {request.reducedScope && <div className="request-reduced-scope"><h4>Review the proposed outcome</h4><p>{request.reducedScope.description}</p><p><strong>Done means:</strong> {request.reducedScope.completionCriteria}</p>{request.reducedScope.waiveSlotKeys.length > 0 && <p>Proceed without: {request.reducedScope.waiveSlotKeys.join(', ')}. Missing files will not be marked accepted.</p>}{pending && <div className="request-slot-actions"><button className="button small" disabled={busy} onClick={() => action('decline')}>Keep original outcome</button><button className="button primary small" disabled={busy} onClick={() => action('accept')}>Accept revised outcome</button></div>}</div>}
     {request.capability && <div className="request-reduced-scope"><h4>{request.capability.name === 'browser_upload' ? 'Share selected files with this website' : 'Publish selected files for all agents'}</h4>{request.capability.origin && <p>Destination: <strong>{request.capability.origin}</strong></p>}<p>{request.capability.versionIds.map(id => { const version = snapshot.artifacts.find(item => item.id === id); return version ? `${version.displayName} · v${version.version}` : id; }).join('\n')}</p><p>{request.capability.name === 'browser_upload' ? 'The website will receive these exact file bytes. This approval applies only to the named destination and versions.' : 'Every agent will be able to discover and use these exact published versions.'}</p>{pending && <div className="request-slot-actions"><button className="button small" disabled={busy} onClick={() => action('decline')}>Decline</button><button className="button primary small" disabled={busy} onClick={() => action('accept')}>{request.capability.name === 'browser_upload' ? 'Approve file upload' : 'Approve publication'}</button></div>}</div>}

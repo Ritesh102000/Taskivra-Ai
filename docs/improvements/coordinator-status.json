@@ -1,0 +1,811 @@
+{
+  "items": [
+    {
+      "id": "C01",
+      "title": "Task-local preparation blocker aborts global expired-run recovery",
+      "source_ids": [
+        "R02-F01"
+      ],
+      "kind": "defect",
+      "priority": "P2",
+      "root_note": "Post-initialization runtime recovery defect, selected for an early repair. R29 strengthens R02 with actual public fleet/task creation/start and synthetic readiness, clock and held model, without SQL-created state: lost lab readiness plus an expired lease makes two unrelated claims throw and rolls cleanup back. Restoring readiness permits recovery and an unrelated claim; the stale lease remains rejected and the 1000 microusd reserve remains held. A separate same-process second-Coordinator constructor control recovers despite missing lab readiness; initial startup failure, a real crash/restart failure, frequency and financial loss are not established. Final adversarial review supports P2. Isolate only known per-task preparation blockers; do not swallow unexpected database or invariant errors.",
+      "additional_evidence": [
+        "[R29 public-path recovery probe](reviewers/R29/repro-supported-recovery.ts) and [recorded output](reviewers/R29/repro-supported-recovery-output.json): actual services, synthetic dependencies and clock, no SQL-created task state.",
+        "[R29 constructor control](reviewers/R29/repro-constructor-recovery.ts) and [recorded output](reviewers/R29/repro-constructor-recovery-output.json): same-process reconstructed Coordinator succeeds; not a real application crash/restart test."
+      ],
+      "current_behavior": "Task-local preparation blocker aborts global expired-run recovery",
+      "intended_outcome": "Post-initialization runtime recovery defect, selected for an early repair. R29 strengthens R02 with actual public fleet/task creation/start and synthetic readiness, clock and held model, without SQL-created state: lost lab readiness plus an expired lease makes two unrelated claims throw and rolls cleanup back. Restoring readiness permits recovery and an unrelated claim; the stale lease remains rejected and the 1000 microusd reserve remains held. A separate same-process second-Coordinator constructor control recovers despite missing lab readiness; initial startup failure, a real crash/restart failure, frequency and financial loss are not established. Final adversarial review supports P2. Isolate only known per-task preparation blockers; do not swallow unexpected database or invariant errors.",
+      "dependencies": [],
+      "decision": "Isolate preparation blockers only inside expired-run recovery: interrupt the old run, retain accounting, pause/wait its task and continue recovering unrelated tasks. `packages/coordinator/index.ts`.",
+      "changed_files": [
+        "packages/coordinator/index.ts"
+      ],
+      "verification": [
+        "Actual Coordinator/Fleet/AgentLoop public creation/start with fake readiness/clock and held model passes `recovery-isolation.test.ts`; old claims fenced, 1000 microusd retained. Unexpected DB/invariant failures still escape. Real crash/restart not claimed."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual Coordinator/Fleet/AgentLoop public creation/start with fake readiness/clock and held model passes `recovery-isolation.test.ts`; old claims fenced, 1000 microusd retained. Unexpected DB/invariant failures still escape. Real crash/restart not claimed."
+    },
+    {
+      "id": "C02",
+      "title": "Missing structured request data renders active file requests as legacy replies or closed requests",
+      "source_ids": [
+        "R06-F04",
+        "R01-F01",
+        "R02-F03",
+        "R16-F01"
+      ],
+      "kind": "defect",
+      "priority": "P2",
+      "root_note": "Actual mounted App with synthetic bridge confirms false closed/generic file request controls and stale error after repaired load; backend rejects wrong response. Preserve known legacy requests and explicit loading provenance.",
+      "current_behavior": "Missing structured request data renders active file requests as legacy replies or closed requests",
+      "intended_outcome": "Actual mounted App with synthetic bridge confirms false closed/generic file request controls and stale error after repaired load; backend rejects wrong response. Preserve known legacy requests and explicit loading provenance.",
+      "dependencies": [],
+      "decision": "Snapshot request metadata now LEFT JOINs structured details and explicitly marks legacy provenance. `packages/coordinator/index.ts`, root contract/renderer changes.",
+      "changed_files": [
+        "packages/coordinator/index.ts"
+      ],
+      "verification": [
+        "Baseline Coordinator and request suites pass. Renderer unavailable/legacy behavior is root-owned verification."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Baseline Coordinator and request suites pass. Renderer unavailable/legacy behavior is root-owned verification."
+    },
+    {
+      "id": "C03",
+      "title": "Use a narrow event watermark for idle change detection",
+      "source_ids": [
+        "R01-F02",
+        "R02-F02",
+        "R24-P01"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Performance proposal, not a UI/SLO/IPC or allocation defect. Root and R24 independently measure actual synthetic Coordinator snapshots. R24 short/3800-byte seeded-agent-text shapes show p95 2.707/12.946ms and548160/6212160 JSON bytes; no artifacts.2000 total messages is fixture size, not maximum history. No before/after improvement exists. Preserve refresh and observer-isolation correctness before optimizing.",
+      "current_behavior": "Use a narrow event watermark for idle change detection",
+      "intended_outcome": "Performance proposal, not a UI/SLO/IPC or allocation defect. Root and R24 independently measure actual synthetic Coordinator snapshots. R24 short/3800-byte seeded-agent-text shapes show p95 2.707/12.946ms and548160/6212160 JSON bytes; no artifacts.2000 total messages is fixture size, not maximum history. No before/after improvement exists. Preserve refresh and observer-isolation correctness before optimizing.",
+      "dependencies": [],
+      "decision": "Add read-only `eventWatermark()` and use it for notification polling. Advance watermark only after successful send. `packages/coordinator/index.ts`, `apps/desktop/main/main.ts`.",
+      "changed_files": [
+        "packages/coordinator/index.ts",
+        "apps/desktop/main/main.ts"
+      ],
+      "verification": [
+        "Actual source-extracted notifier regression passes. Root matched fixture benchmark: full snapshot p95 44.26ms / 6.24MB versus watermark p95 0.005125ms; this is service serialization, not an IPC/UI SLO. Root stores benchmark evidence."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual source-extracted notifier regression passes. Root matched fixture benchmark: full snapshot p95 44.26ms / 6.24MB versus watermark p95 0.005125ms; this is service serialization, not an IPC/UI SLO. Root stores benchmark evidence."
+    },
+    {
+      "id": "C04",
+      "title": "Sustained use needs coupled archive and pagination semantics",
+      "source_ids": [
+        "R01-F03",
+        "R02-F05",
+        "R03-F05",
+        "R24-P02"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Define archive browsing and capacity freeing separately; hidden rows still counted by current queries. Couple bounded scope-first retrieval with lifetime policy, preserving exact immutable incoming/outgoing references and actionable uncertain accounting across restart. No archive implementation or physical deletion authority is implied.",
+      "current_behavior": "Sustained use needs coupled archive and pagination semantics",
+      "intended_outcome": "Define archive browsing and capacity freeing separately; hidden rows still counted by current queries. Couple bounded scope-first retrieval with lifetime policy, preserving exact immutable incoming/outgoing references and actionable uncertain accounting across restart. No archive implementation or physical deletion authority is implied.",
+      "dependencies": [],
+      "decision": "Schema22 reversible task/agent/fleet archive metadata preserves exact history. Task archival rejects unfinished work, unknown accounting, active browser/code runtime and cleanup failure. Agent archival requires all task history safely archived. Creation occupancy excludes archived identities and owner-message history; restore enforces caps and never dispatches. Compatibility snapshot excludes archived task/agent/message/request rows; exact paged inspection remains available. `packages/contracts/history.ts`, `packages/coordinator/index.ts`, `packages/persistence/index.ts`, root main/preload/History UI and results fleet service. Bounded agents.history pages25 retained archived identities; task restore requires active parent agent and rechecks aggregate owner-message count/byte occupancy. Schema23 persists code cleanup debt separately from historical failure reason; preparing/exporting/stopping/running stages, pending cleanup debt and workspace lease block archive.",
+      "changed_files": [
+        "packages/contracts/history.ts",
+        "packages/coordinator/index.ts",
+        "packages/persistence/index.ts",
+        "tests/improvements/task-history.test.ts",
+        "apps/desktop/main/main.ts",
+        "apps/desktop/main/preload.ts",
+        "apps/desktop/renderer/TaskHistory.tsx"
+      ],
+      "verification": [
+        "Actual service test creates101 successive archived agents and251 archived tasks across cap boundaries, reopens Coordinator, verifies exact owner messages and terminal restore:2/2 pass. Fleet20 boundary verification belongs to results owner. Files, artifact bindings and uncertain resources are retained; no physical deletion.",
+        "npm run typecheck (passed)",
+        "npx tsx --test tests/improvements/task-history.test.ts (2/2 passed after schema22/archive cap implementation)",
+        "npx tsx --test tests/improvements/task-history.test.ts (latest2/2, including25 archived-agent page and restart)",
+        "npm run typecheck (latestpassed)"
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual service test creates101 successive archived agents and251 archived tasks across cap boundaries, reopens Coordinator, verifies exact owner messages and terminal restore:2/2 pass. Fleet20 boundary verification belongs to results owner. Files, artifact bindings and uncertain resources are retained; no physical deletion."
+    },
+    {
+      "id": "C05",
+      "title": "An escaping postcommit cleanup error can relabel a committed wait as failed",
+      "source_ids": [
+        "R04-F04",
+        "R02-F04",
+        "R03-F02"
+      ],
+      "kind": "risk",
+      "priority": "P2",
+      "root_note": "Root classifies as fault-injection consistency risk; ordinary browser close errors are caught; no permanent continuation loss proven.",
+      "current_behavior": "An escaping postcommit cleanup error can relabel a committed wait as failed",
+      "intended_outcome": "Root classifies as fault-injection consistency risk; ordinary browser close errors are caught; no permanent continuation loss proven.",
+      "dependencies": [],
+      "decision": "Fence postcommit connection-wait browser cleanup and trace cleanup so they cannot replace committed results. `packages/agent-loop/index.ts`.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Actual saved connection wait plus injected browser cleanup rejection preserves waiting task/open request; loop regression passes. This is an injected consistency boundary, not proof of real cleanup failure frequency."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual saved connection wait plus injected browser cleanup rejection preserves waiting task/open request; loop regression passes. This is an injected consistency boundary, not proof of real cleanup failure frequency."
+    },
+    {
+      "id": "C07",
+      "title": "Repository-wide review should start as an immutable source manifest mode",
+      "source_ids": [
+        "R01-F06",
+        "R03-F07",
+        "R28-P01"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Future immutable repository manifest and coverage mode; do not broaden host filesystem permission implicitly. Final R28 refinement separates selected inventory, exact retrieved interval union, reviewer-declared inspection and validated findings. Paths are inert labels; equal hashes do not merge authority or producer identity. Runtime remains optional for source review.",
+      "current_behavior": "Repository-wide review should start as an immutable source manifest mode",
+      "intended_outcome": "Future immutable repository manifest and coverage mode; do not broaden host filesystem permission implicitly. Final R28 refinement separates selected inventory, exact retrieved interval union, reviewer-declared inspection and validated findings. Paths are inert labels; equal hashes do not merge authority or producer identity. Runtime remains optional for source review.",
+      "dependencies": [
+        "schema20"
+      ],
+      "decision": "Actual bounded repository folder snapshot pilot replaces selected-file inventory-only scope. Coordinator registers readonly repositorySnapshots and schema24 durable privateimport/sharedpublish capture receipt. Owner folder selection and review precede exact frozen-byte capture; per-directory descriptors and selectedroot identity prevent symlink traversal; Git metadata uses a pinned bounded Python loose-object/index parser; no Git process, config, includes, hooks, fsmonitor or alternates are read/executed. Captured-byte dirty comparison uses observed commit object hashes.",
+      "changed_files": [
+        "packages/coordinator/index.ts",
+        "packages/persistence/index.ts",
+        "packages/repository-snapshot/index.ts",
+        "packages/repository-snapshot/scan.ts",
+        "packages/contracts/repository-snapshot.ts",
+        "tests/improvements/repository-snapshot.test.ts",
+        "tests/improvements/repository-snapshot-review.test.ts",
+        "tests/fleet/lab-mode.test.ts",
+        "tests/fleet/recovery.test.ts",
+        "tests/improvements/workflows.test.ts"
+      ],
+      "verification": [
+        "ELECTRON_RUN_AS_NODE=1 node_modules/.bin/electron --import tsx --test tests/improvements/repository-snapshot.test.ts tests/improvements/repository-snapshot-review.test.ts:4/4pass; .test-data/improvements/repository-snapshot-focused.log",
+        "Independent scanner rejects replaced selected dev/ino and nested symlink outside sentinel;300entries disclose scantruncation with <=16files/32KiBbytes/64KiBserialized evidence",
+        "Actual service dirty/untracked Git; frozen preview afterhostedit; same-service concurrent capture sameprivate/sharedversions; expiry and changed identity/project/archivedagent denied; privatepostcommitfault resumes via durable receipt afterservice restart",
+        "Schema24 legacy migrationfocused18/18pass .test-data/improvements/schema24-fixture-focused.log",
+        "npm run typecheck passed",
+        "Final ELECTRON_RUN_AS_NODE=1 node_modules/.bin/electron --import tsx --test tests/improvements/repository-snapshot.test.ts tests/improvements/repository-snapshot-review.test.ts:9/9passed .test-data/improvements/repository-snapshot-final-review.log",
+        "Independent trailing zlib stream rejected as unknown; valid2MiB compressed-object bomb stays bounded unknown while safe source captured; local malicious core.fsmonitor configuration never executed marker; strict objectpath hex validation, tree/index bounds/checksums and metadata size/mtime reread reviewed",
+        "Main filesIPC finite RepositorySnapshotError allowlist reviewed; unknown SQL/parser errors remain generic",
+        "Latest scanner O_NONBLOCK + source/metadata descriptor regular/nlink1: focused Electron11/11passed .test-data/improvements/repository-snapshot-stable-final.log; npm run typecheck passed",
+        "Instrumented os.open swaps source regularfile toFIFO exactlyafterstat/beforeopen; no writer, scanner completes<=1.5s excludesunsafe. Externalhardlink outside sentinel excluded with no capturedbytes."
+      ],
+      "status": "implemented_verified",
+      "remaining_blocker": null,
+      "verification_limits": [
+        "Manifest covers owner-selected immutable source versions; it grants no host repository traversal or factual certification."
+      ],
+      "limitations": "Pilot16files32KiBsource/64KiBJSON, depth8/256visitedentries; excluded/unvisited content explicitly undisclosed; secret detection heuristic; Git metadata supports bounded looseobjects and indexv2/v3; packedobjects/worktreegitfiles unsupported remainunknown. Git commit observed context, not atomicworktree capture. Capture concurrency serialized in owningservice/ownerfileIPC; crossprocess independent owners not tested. UI nativefolder interaction and rendering verified by root, not these servicetests."
+    },
+    {
+      "id": "C08",
+      "title": "Four valid clarification replies can prevent the next task continuation",
+      "source_ids": [
+        "R06-F01",
+        "R04-F01"
+      ],
+      "kind": "defect",
+      "priority": "P2",
+      "root_note": "Supported command sequence: four valid clarification replies then context_limit before fifth quote/call; preserve accepted owner direction.",
+      "current_behavior": "Four valid clarification replies can prevent the next task continuation",
+      "intended_outcome": "Supported command sequence: four valid clarification replies then context_limit before fifth quote/call; preserve accepted owner direction.",
+      "dependencies": [],
+      "decision": "Remove duplicate response bodies from request catalog while preserving complete accepted reply text in ownerReplies. `packages/agent-loop/index.ts`.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Actual loop five accepted 8KB replies proceeds to six quote/model calls, waiting and no error; chronology tests remain passing. Owner intent is not clipped."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual loop five accepted 8KB replies proceeds to six quote/model calls, waiting and no error; chronology tests remain passing. Owner intent is not clipped."
+    },
+    {
+      "id": "C09",
+      "title": "Expose revision-scoped replan failure and bounded repair using saved explanation",
+      "source_ids": [
+        "R06-F07",
+        "R04-F03"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Specific pre-reservation failures need actionable revision-scoped repair; separate source defect from repair proposal.",
+      "current_behavior": "Expose revision-scoped replan failure and bounded repair using saved explanation",
+      "intended_outcome": "Specific pre-reservation failures need actionable revision-scoped repair; separate source defect from repair proposal.",
+      "dependencies": [],
+      "decision": "Persist authorized revision-scoped replan failure; explicit `live.repairRequest` reuses saved exact reply/job with fresh fencing generation and consumes remaining finite enqueue allowance. `packages/agent-loop/index.ts`, `packages/requests/index.ts`, live contracts/validation and root UI.",
+      "changed_files": [
+        "packages/agent-loop/index.ts",
+        "packages/requests/index.ts"
+      ],
+      "verification": [
+        "Actual pre-reservation failure then explicit saved-revision repair passes; stale revision rejected and no duplicate owner message created. Exhausted requests cannot repair; no automatic retry. Diagnostics use bounded saved history."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual pre-reservation failure then explicit saved-revision repair passes; stale revision rejected and no duplicate owner message created. Exhausted requests cannot repair; no automatic retry. Diagnostics use bounded saved history."
+    },
+    {
+      "id": "C18",
+      "title": "Owner attention needs typed causes and supported next actions",
+      "source_ids": [
+        "R01-F05"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Product/contract proposal supported by current misleading recovery controls. Use a bounded allowlisted cause and supported next actions rather than raw errors. Concrete impossible Resume behavior is separately tracked in C23; generic typed attention is not itself a missing safety boundary.",
+      "current_behavior": "Owner attention needs typed causes and supported next actions",
+      "intended_outcome": "Product/contract proposal supported by current misleading recovery controls. Use a bounded allowlisted cause and supported next actions rather than raw errors. Concrete impossible Resume behavior is separately tracked in C23; generic typed attention is not itself a missing safety boundary.",
+      "dependencies": [],
+      "decision": "Add finite typed attention causes/actions using known task/request/resource states and trusted failure codes. `packages/contracts/live.ts`, `packages/agent-loop/index.ts`, root renderer.",
+      "changed_files": [
+        "packages/contracts/live.ts",
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Compile and actual loop checks pass. Cause/action labels are guidance; source/runtime/accounting uncertainty is not converted into success. Context overflow points to a follow-up and resource review rather than an unavailable task editor."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Compile and actual loop checks pass. Cause/action labels are guidance; source/runtime/accounting uncertainty is not converted into success. Context overflow points to a follow-up and resource review rather than an unavailable task editor."
+    },
+    {
+      "id": "C20",
+      "title": "Make synchronous transaction callback contract harder to misuse",
+      "source_ids": [
+        "R02-F07"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Preventive API improvement: generic transaction callbacks can accept a thenable, but inspected production callers are synchronous. Static restrictions and runtime detection should describe their limits; detecting a thenable cannot cancel already-started external work.",
+      "current_behavior": "Make synchronous transaction callback contract harder to misuse",
+      "intended_outcome": "Preventive API improvement: generic transaction callbacks can accept a thenable, but inspected production callers are synchronous. Static restrictions and runtime detection should describe their limits; detecting a thenable cannot cancel already-started external work.",
+      "dependencies": [],
+      "decision": "All transaction entrypoints reject thenables before commit and roll back synchronous writes. New `transactionSync`/`readTransactionSync` reject statically inferred promises; existing generic wrappers retain compatibility. `packages/persistence/index.ts`, README.",
+      "changed_files": [
+        "packages/persistence/index.ts"
+      ],
+      "verification": [
+        "Both transaction modes rollback under returned Promise test. Detection cannot cancel already-started external work; do not start such work in callbacks."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Both transaction modes rollback under returned Promise test. Detection cannot cancel already-started external work; do not start such work in callbacks."
+    },
+    {
+      "id": "C22",
+      "title": "Fleet item and final completion updates are committed separately from their events",
+      "source_ids": [
+        "R03-F03"
+      ],
+      "kind": "risk",
+      "priority": "P2",
+      "root_note": "Source-traced crash/event-insert risk: item/fleet completion state and its durable event are separate writes. No injected failure was executed for this finding. Commit the conditional state transition and corresponding event together after external work; preserve publication idempotence.",
+      "current_behavior": "Fleet item and final completion updates are committed separately from their events",
+      "intended_outcome": "Source-traced crash/event-insert risk: item/fleet completion state and its durable event are separate writes. No injected failure was executed for this finding. Commit the conditional state transition and corresponding event together after external work; preserve publication idempotence.",
+      "dependencies": [],
+      "decision": "Fleet completion/event atomicity delegated to results/fleet owner.",
+      "changed_files": [],
+      "verification": [
+        "See `results-sources.md`; no coordinator-owned implementation claim."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "See `results-sources.md`; no coordinator-owned implementation claim."
+    },
+    {
+      "id": "C24",
+      "title": "Provide bounded fleet mailbox retrieval and linked questions before richer reviewer rounds",
+      "source_ids": [
+        "R03-F06"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Bounded mailbox/reply-link proposal for longer reviewer dialogues. Current context explicitly omits older messages and owner history remains. Add authorized exact-ID/cursor retrieval before richer autonomous dialogue; receipt or acknowledgment does not mean agreement or authorize a paid wakeup.",
+      "current_behavior": "Provide bounded fleet mailbox retrieval and linked questions before richer reviewer rounds",
+      "intended_outcome": "Bounded mailbox/reply-link proposal for longer reviewer dialogues. Current context explicitly omits older messages and owner history remains. Add authorized exact-ID/cursor retrieval before richer autonomous dialogue; receipt or acknowledgment does not mean agreement or authorize a paid wakeup.",
+      "dependencies": [],
+      "decision": "Strict model schemas expose nullable mailbox cursor/exact message and linked reply ID. `packages/agent-loop/tools.ts`, synthetic fleet adapters updated.",
+      "changed_files": [
+        "packages/agent-loop/tools.ts"
+      ],
+      "verification": [
+        "Actual local fleet loop and imported fleet synthetic fixtures validate protocol. Fleet service/persistence mailbox behavior belongs to results owner."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual local fleet loop and imported fleet synthetic fixtures validate protocol. Fleet service/persistence mailbox behavior belongs to results owner."
+    },
+    {
+      "id": "C25",
+      "title": "Notification failure can replace a completed owner operation result",
+      "source_ids": [
+        "R03-F08",
+        "R13-F01"
+      ],
+      "kind": "defect",
+      "priority": "P2",
+      "root_note": "Actual temporary Coordinator plus source-extracted IPC handler proves a notification-only injected error can report failure after an agent is persisted; explicit retry creates another agent. Isolate observers from committed results and genuine domain failures. This is not an executed Electron transport/mounted UI case, secret leak or universal exactly-once guarantee.",
+      "current_behavior": "Notification failure can replace a completed owner operation result",
+      "intended_outcome": "Actual temporary Coordinator plus source-extracted IPC handler proves a notification-only injected error can report failure after an agent is persisted; explicit retry creates another agent. Isolate observers from committed results and genuine domain failures. This is not an executed Electron transport/mounted UI case, secret leak or universal exactly-once guarantee.",
+      "dependencies": [],
+      "decision": "Catch observer snapshot/watermark/send failure and preserve committed owner result; failed sends keep old watermark for retry. `apps/desktop/main/main.ts`.",
+      "changed_files": [
+        "apps/desktop/main/main.ts"
+      ],
+      "verification": [
+        "Actual Coordinator + source-extracted notifier regression persists one agent after injected send failure and emits only after successful retry. No Electron transport/mounted UI claim."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual Coordinator + source-extracted notifier regression persists one agent after injected send failure and emits only after successful retry. No Electron transport/mounted UI claim."
+    },
+    {
+      "id": "C26",
+      "title": "Detailed Gmail mode receives contradictory body-reading instructions",
+      "source_ids": [
+        "R04-F02",
+        "R14-F05"
+      ],
+      "kind": "defect",
+      "priority": "P2",
+      "root_note": "Two independent actual prompt-composition checks confirm detailed tools and detailed-review instructions conflict with the unconditional no-body instruction. Backend account/tool grants remain enforced. Repair mode-specific wording and version the prompt; live model noncompliance or a measured quality change was not tested.",
+      "current_behavior": "Detailed Gmail mode receives contradictory body-reading instructions",
+      "intended_outcome": "Two independent actual prompt-composition checks confirm detailed tools and detailed-review instructions conflict with the unconditional no-body instruction. Backend account/tool grants remain enforced. Repair mode-specific wording and version the prompt; live model noncompliance or a measured quality change was not tested.",
+      "dependencies": [],
+      "decision": "Remove unconditional full-body prohibition from unread prompt; detailed tools remain explicitly gated and selected. Bump prompt version. `packages/agent-loop/prompts.ts`.",
+      "changed_files": [
+        "packages/agent-loop/prompts.ts"
+      ],
+      "verification": [
+        "Prompt11 and model-schema checks pass; no live Gmail access."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Prompt11 and model-schema checks pass; no live Gmail access."
+    },
+    {
+      "id": "C27",
+      "title": "Replan elapsed time is durable only when finally completes",
+      "source_ids": [
+        "R04-F05"
+      ],
+      "kind": "risk",
+      "priority": "P2",
+      "root_note": "Source-traced crash accounting risk: replans renew leases without incrementally persisting elapsed time until finally, unlike ordinary work. Normal pause/resume persistence works. No process-kill magnitude was measured; bounded incremental charging must avoid both missing and double-counted time.",
+      "current_behavior": "Replan elapsed time is durable only when finally completes",
+      "intended_outcome": "Source-traced crash accounting risk: replans renew leases without incrementally persisting elapsed time until finally, unlike ordinary work. Normal pause/resume persistence works. No process-kill magnitude was measured; bounded incremental charging must avoid both missing and double-counted time.",
+      "dependencies": [],
+      "decision": "Replan heartbeat charges incremental durable active time; finally adds only uncharged tail. `packages/agent-loop/index.ts`.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Held actual-loop replan test verifies >=1000ms persisted before attempt completion and <1000ms tail afterward. No killed-process magnitude measurement."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Held actual-loop replan test verifies >=1000ms persisted before attempt completion and <1000ms tail afterward. No killed-process magnitude measurement."
+    },
+    {
+      "id": "C28",
+      "title": "Allow a useful smaller output request when only the fixed output allowance exceeds remaining budget",
+      "source_ids": [
+        "R04-F06"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Conservative-admission improvement, not overspending: a fixed output allowance can reject a call that a smaller useful output might fit. Preserve the authoritative input reservation, immutable prepared request identity and task/fleet accounting. Refuse safely when no useful output fits.",
+      "current_behavior": "Allow a useful smaller output request when only the fixed output allowance exceeds remaining budget",
+      "intended_outcome": "Conservative-admission improvement, not overspending: a fixed output allowance can reject a call that a smaller useful output might fit. Preserve the authoritative input reservation, immutable prepared request identity and task/fleet accounting. Refuse safely when no useful output fits.",
+      "dependencies": [],
+      "decision": "Before generation admission, at most seven exact immutable smaller output requests are requoted down to64 tokens; original input reservation and task/fleet guards remain authoritative. `packages/agent-loop/index.ts`.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Actual loop20k-input/.01-budget admits a smaller output, keeps exact input hold;30k input alone refuses. Unknown dispatched holds survive restart and block when no useful request fits. Quote endpoint calls may repeat; generation never automatically retries."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual loop20k-input/.01-budget admits a smaller output, keeps exact input hold;30k input alone refuses. Unknown dispatched holds survive restart and block when no useful request fits. Quote endpoint calls may repeat; generation never automatically retries."
+    },
+    {
+      "id": "C29",
+      "title": "Add bounded exact-version ranges for supplied-source review after correctness repairs",
+      "source_ids": [
+        "R04-F07",
+        "R11-P02",
+        "R28-P02"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Useful exact-version range-reading proposal independently supported by artifact reviewers. Current 64 KiB preview truthfully discloses truncation. Bound each range and aggregate retrieval, handle UTF-8 edges and retain whole-version identity; no host paths, implicit grants or claim of completeness from partial reads. R28 adds explicit range contract, cumulative retrieval bounds and interval-union accounting; retrieval does not imply semantic inspection. Preserve prior successful evidence after later read failure and current integrity/descriptor checks.",
+      "current_behavior": "Add bounded exact-version ranges for supplied-source review after correctness repairs",
+      "intended_outcome": "Useful exact-version range-reading proposal independently supported by artifact reviewers. Current 64 KiB preview truthfully discloses truncation. Bound each range and aggregate retrieval, handle UTF-8 edges and retain whole-version identity; no host paths, implicit grants or claim of completeness from partial reads. R28 adds explicit range contract, cumulative retrieval bounds and interval-union accounting; retrieval does not imply semantic inspection. Preserve prior successful evidence after later read failure and current integrity/descriptor checks.",
+      "dependencies": [],
+      "decision": "`read_file_range` pins exact input/output identity, fences before/after read, persists conservative <=1MiB range-read admission and per-version retrieved interval union. Shared provenance is redacted as in read_file. Source receipt allowlists updated. `packages/agent-loop/index.ts`, tools/evidence, `packages/security-review/index.ts`; storage implements verified UTF8 range service.",
+      "changed_files": [
+        "packages/agent-loop/index.ts",
+        "packages/security-review/index.ts"
+      ],
+      "verification": [
+        "Actual-loop overlapping ranges report union15 bytes, not20; scope checks remain. Separate full-preview tool remains bounded64KiB. Range receipt coverage is retrieval, not inspection or factual validation. Repository coverage manifest behavior belongs to results owner."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual-loop overlapping ranges report union15 bytes, not20; scope checks remain. Separate full-preview tool remains bounded64KiB. Range receipt coverage is retrieval, not inspection or factual validation. Repository coverage manifest behavior belongs to results owner."
+    },
+    {
+      "id": "C30",
+      "title": "Release reservations for model attempts proven never dispatched",
+      "source_ids": [
+        "R05-F01"
+      ],
+      "kind": "defect",
+      "priority": "P2",
+      "root_note": "Actual Coordinator/configured-adapter synthetic fixture proves credential-read failure before any fetch holds $0.06656 of a $0.10 budget and blocks repaired explicit resume before transport. R29 independently runs a dispatch matrix: credential-read failure is zero transports, HTTP 401 is one transport, and both use model_credentials. Require trusted adapter-owned dispatch evidence, never code-only release. Preserve uncertain dispatched holds and immutable accounting; no provider financial loss or automatic retry is claimed.",
+      "additional_evidence": [
+        "[R29 actual configured-adapter dispatch matrix](reviewers/R29/repro-dispatch-matrix.ts) and [recorded output](reviewers/R29/repro-dispatch-matrix-output.json): zero-transport credential-read failure and one-transport HTTP 401 share model_credentials; error code alone cannot authorize release."
+      ],
+      "current_behavior": "Release reservations for model attempts proven never dispatched",
+      "intended_outcome": "Actual Coordinator/configured-adapter synthetic fixture proves credential-read failure before any fetch holds $0.06656 of a $0.10 budget and blocks repaired explicit resume before transport. R29 independently runs a dispatch matrix: credential-read failure is zero transports, HTTP 401 is one transport, and both use model_credentials. Require trusted adapter-owned dispatch evidence, never code-only release. Preserve uncertain dispatched holds and immutable accounting; no provider financial loss or automatic retry is claimed.",
+      "dependencies": [],
+      "decision": "Built-in adapters privately record dispatch for exact prepared identity before transport invocation. Only proven unsent errors settle zero usage/release holds; unknown or dispatched failures retain holds. Receipt initialized at prepare, so duplicate complete cannot reset it. `packages/model-adapters/{types,configured,openai}.ts`, loop.",
+      "changed_files": [
+        "packages/model-adapters/{types,configured,openai}.ts"
+      ],
+      "verification": [
+        "Dispatch credential/401/transport matrix, concurrent duplicate receipt and actual Coordinator configured-adapter unsent\u2192explicit repair tests pass. Error code alone grants no release. Zero-usage calls still count attempts; no provider invoice claim."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Dispatch credential/401/transport matrix, concurrent duplicate receipt and actual Coordinator configured-adapter unsent\u2192explicit repair tests pass. Error code alone grants no release. Zero-usage calls still count attempts; no provider invoice claim."
+    },
+    {
+      "id": "C31",
+      "title": "Explain local next-call requirements and held tokens before resuming",
+      "source_ids": [
+        "R05-F02"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Offline task-specific resource-preview proposal. Current settings already explain input reservations; additional held-token and next-call diagnostics would distinguish local byte fit, declared-price reserve and remaining task/fleet headroom. A zero-fee provider can still have token holds. Preview must make no credential or network calls.",
+      "current_behavior": "Explain local next-call requirements and held tokens before resuming",
+      "intended_outcome": "Offline task-specific resource-preview proposal. Current settings already explain input reservations; additional held-token and next-call diagnostics would distinguish local byte fit, declared-price reserve and remaining task/fleet headroom. A zero-fee provider can still have token holds. Preview must make no credential or network calls.",
+      "dependencies": [],
+      "decision": "Owner `live.resources` prepares/discards offline request only; includes complete pinned/task/collaboration metadata, byte fit, held input/output tokens and task cost/token headroom. Configured adapter pure local quote supplies declared reserve; OpenAI-authoritative input count stays unknown. `packages/agent-loop/index.ts`, live contracts, configured adapter, collaboration read-only preview helper, root UI.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Actual-loop preview verifies zero status/quote/generation calls and no credential/network access. Root renderer merges preview only, preserving configured-state flags. Fleet headroom/actual authoritative quote can change before generation; execution rechecks."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual-loop preview verifies zero status/quote/generation calls and no credential/network access. Root renderer merges preview only, preserving configured-state flags. Fleet headroom/actual authoritative quote can change before generation; execution rechecks."
+    },
+    {
+      "id": "C32",
+      "title": "Clarify exhausted request-replan admission and evaluate optional coalescing",
+      "source_ids": [
+        "R06-F02"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "The actual four-reply fixture consumes the three-enqueue cap and cancels all queued replans before any claim. The implementation intentionally counts enqueues, and current historical contracts require bounded replans without promising claim-based accounting. App.tsx labels input.replan_limit as Request review limit reached, so total invisibility is not established. Requests.tsx still broadly says the agent can replan and UserRequest lacks admission/exhaustion state. Final peer challenge therefore treats clearer request-card actionability as a P3 product proposal, not a proven quota invariant violation. Preserve saved owner replies and finite budgets. Coalescing the latest unclaimed reply or changing when quota counts requires an explicit policy decision, not a mandatory correctness rewrite.",
+      "current_behavior": "Clarify exhausted request-replan admission and evaluate optional coalescing",
+      "intended_outcome": "The actual four-reply fixture consumes the three-enqueue cap and cancels all queued replans before any claim. The implementation intentionally counts enqueues, and current historical contracts require bounded replans without promising claim-based accounting. App.tsx labels input.replan_limit as Request review limit reached, so total invisibility is not established. Requests.tsx still broadly says the agent can replan and UserRequest lacks admission/exhaustion state. Final peer challenge therefore treats clearer request-card actionability as a P3 product proposal, not a proven quota invariant violation. Preserve saved owner replies and finite budgets. Coalescing the latest unclaimed reply or changing when quota counts requires an explicit policy decision, not a mandatory correctness rewrite.",
+      "dependencies": [],
+      "decision": "UserRequest exposes finite used/limit/remaining/exhausted replan admission. Policy remains enqueue-counted, no coalescing. `packages/contracts/requests.ts`, `packages/requests/index.ts`, root Requests UI.",
+      "changed_files": [
+        "packages/contracts/requests.ts",
+        "packages/requests/index.ts"
+      ],
+      "verification": [
+        "Existing four-reply cap and repair tests preserve saved owner replies and finite budgets. Coalescing is intentionally not adopted."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Existing four-reply cap and repair tests preserve saved owner replies and finite budgets. Coalescing is intentionally not adopted."
+    },
+    {
+      "id": "C57",
+      "title": "Reserve bounded admission for validated owner stop controls",
+      "source_ids": [
+        "R13-F02"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Synthetic256/5s read stress, not normal UI saturation or security bypass; retain bounded owner-control priority proposal.",
+      "current_behavior": "Reserve bounded admission for validated owner stop controls",
+      "intended_outcome": "Synthetic256/5s read stress, not normal UI saturation or security bypass; retain bounded owner-control priority proposal.",
+      "dependencies": [],
+      "decision": "Central finite IPC admission with separate32/5s reserve for fully validated task/live/code/browser interruption controls after sender/lifecycle checks. `apps/desktop/main/ipc-admission.ts`, main.",
+      "changed_files": [
+        "apps/desktop/main/ipc-admission.ts"
+      ],
+      "verification": [
+        "Read256 burst cannot consume stop32 reserve; malformed control receives no priority; reserve itself exhausts and resets. No normal UI saturation claim. Other owner controls retain ordinary admission."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Read256 burst cannot consume stop32 reserve; malformed control receives no priority; reserve itself exhausts and resets. No normal UI saturation claim. Other owner controls retain ordinary admission."
+    },
+    {
+      "id": "C58",
+      "title": "Make IPC admission and lifecycle exceptions explicit and test registration parity",
+      "source_ids": [
+        "R13-F03"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Static inventory covers29 invoke channels and7 payload-free subscriptions; common trusted sender checks preserved. Refactor only with registration parity tests.",
+      "current_behavior": "Make IPC admission and lifecycle exceptions explicit and test registration parity",
+      "intended_outcome": "Static inventory covers29 invoke channels and7 payload-free subscriptions; common trusted sender checks preserved. Refactor only with registration parity tests.",
+      "dependencies": [],
+      "decision": "Explicit recovery lifecycle exception, duplicate registration rejection, centralized admission.",
+      "changed_files": [],
+      "verification": [
+        "Static source parity test confirms31 preload invoke registrations after history/grants addition and sole untracked recovery exception. All trusted sender guards remain. No Electron lifecycle transport claim."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Static source parity test confirms31 preload invoke registrations after history/grants addition and sole untracked recovery exception. All trusted sender guards remain. No Electron lifecycle transport claim."
+    },
+    {
+      "id": "C59",
+      "title": "Preserve finite reviewed error categories and actionable export guidance across IPC",
+      "source_ids": [
+        "R13-F04",
+        "R22-P01"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Shared public-error policy with distinct boundaries: preload code retention and formatter plain-error mapping in main. R22 adds known formatter-limit guidance pointing to existing exact-original export; this remains source-traced proposal. Do not forward arbitrary Error.message or private filesystem/source canaries.",
+      "current_behavior": "Preserve finite reviewed error categories and actionable export guidance across IPC",
+      "intended_outcome": "Shared public-error policy with distinct boundaries: preload code retention and formatter plain-error mapping in main. R22 adds known formatter-limit guidance pointing to existing exact-original export; this remains source-traced proposal. Do not forward arbitrary Error.message or private filesystem/source canaries.",
+      "dependencies": [],
+      "decision": "Preserve bounded DocumentError/CredentialError coordination errors and safeRecoveryFailure mapping; arbitrary errors still use finite generic fallback. `apps/desktop/main/main.ts`.",
+      "changed_files": [
+        "apps/desktop/main/main.ts"
+      ],
+      "verification": [
+        "Compile and connector/recovery synthetic suites are root/storage-owned. Unknown raw errors never returned."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Compile and connector/recovery synthetic suites are root/storage-owned. Unknown raw errors never returned."
+    },
+    {
+      "id": "C64",
+      "title": "Consider authenticated task scope for temporary Gmail selection provenance",
+      "source_ids": [
+        "R14-F06"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Task-scoped selection provenance proposal, not demonstrated cross-task account authority bypass.",
+      "current_behavior": "Consider authenticated task scope for temporary Gmail selection provenance",
+      "intended_outcome": "Task-scoped selection provenance proposal, not demonstrated cross-task account authority bypass.",
+      "dependencies": [],
+      "decision": "Detailed Gmail requests pass taskId in validated request input; options retain AbortSignal. `packages/agent-loop/index.ts`.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Existing selected Gmail attachment/current-run pin and revoked scope fixtures pass; service cursor/selection task authority belongs to results owner."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Existing selected Gmail attachment/current-run pin and revoked scope fixtures pass; service cursor/selection task authority belongs to results owner."
+    },
+    {
+      "id": "C66",
+      "title": "Show active exact capability grants and allow ending future use",
+      "source_ids": [
+        "R15-P01",
+        "R28-P03"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Optional current-grant visibility, not a demonstrated authority bypass. Final integration review recommends read-only current exact task/version/origin authority first; historical fulfilled requests or plausible receipt JSON do not prove current grants. A later explicit revocation action needs timing semantics for future phases, preserves prior effects/history and unrelated authorized tools, and cannot recall completed uploads or publications. View reads must not write, refresh consent, reactivate grants or call providers/models.",
+      "current_behavior": "Show active exact capability grants and allow ending future use",
+      "intended_outcome": "Optional current-grant visibility, not a demonstrated authority bypass. Final integration review recommends read-only current exact task/version/origin authority first; historical fulfilled requests or plausible receipt JSON do not prove current grants. A later explicit revocation action needs timing semantics for future phases, preserves prior effects/history and unrelated authorized tools, and cannot recall completed uploads or publications. View reads must not write, refresh consent, reactivate grants or call providers/models.",
+      "dependencies": [],
+      "decision": "Owner-only grants list/revoke IPC validates exact fields and applies trusted sender/lifecycle/rate gates. `apps/desktop/main/main.ts`, root contracts/preload/UI; results-owned service.",
+      "changed_files": [
+        "apps/desktop/main/main.ts"
+      ],
+      "verification": [
+        "IPC registration parity passes. Service requires paused/terminal safe revocation and distinguishes historical authority; live upload/publication not executed."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "IPC registration parity passes. Service requires paused/terminal safe revocation and distinguishes historical authority; live upload/publication not executed."
+    },
+    {
+      "id": "C77",
+      "title": "Readiness requirement resolution sits outside the status-port deadline",
+      "source_ids": [
+        "R19-R01"
+      ],
+      "kind": "risk",
+      "priority": "P3",
+      "root_note": "Controlled promise remains pending for 75ms despite a 10ms status timeout, then releases. No real I/O, Keychain or global UI hang proved; whole-operation bound and late-result fencing need design.",
+      "current_behavior": "Readiness requirement resolution sits outside the status-port deadline",
+      "intended_outcome": "Controlled promise remains pending for 75ms despite a 10ms status timeout, then releases. No real I/O, Keychain or global UI hang proved; whole-operation bound and late-result fencing need design.",
+      "dependencies": [],
+      "decision": "Whole readiness deadline includes async requirement resolution; late resolution cannot start status ports. `packages/readiness/index.ts`.",
+      "changed_files": [
+        "packages/readiness/index.ts"
+      ],
+      "verification": [
+        "Controlled pending resolver test rejects under10ms budget then verifies zero downstream model calls after late release; existing readiness14 pass. In-flight port I/O cannot be forcibly cancelled, but late results do not overwrite returned state."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Controlled pending resolver test rejects under10ms budget then verifies zero downstream model calls after late release; existing readiness14 pass. In-flight port I/O cannot be forcibly cancelled, but late results do not overwrite returned state."
+    },
+    {
+      "id": "C78",
+      "title": "Define manual planning behavior when a required runtime is unavailable",
+      "source_ids": [
+        "R19-P01"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Synthetic supported flow starts one planning adapter call despite needs_setup. Current README explicitly gates files, so choose an explicit runtime gate or truthful planning copy; no real spend or unauthorized execution proved.",
+      "current_behavior": "Define manual planning behavior when a required runtime is unavailable",
+      "intended_outcome": "Synthetic supported flow starts one planning adapter call despite needs_setup. Current README explicitly gates files, so choose an explicit runtime gate or truthful planning copy; no real spend or unauthorized execution proved.",
+      "dependencies": [],
+      "decision": "Document explicit manual-planning policy: optional unavailable runtimes do not block paid planning; tool dispatch still gates runtime and required workflow inputs. `packages/agent-loop/README.md`.",
+      "changed_files": [
+        "packages/agent-loop/README.md"
+      ],
+      "verification": [
+        "Existing readiness/loop tests exercise gates. No claim that model planning proves tools ready."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Existing readiness/loop tests exercise gates. No claim that model planning proves tools ready."
+    },
+    {
+      "id": "C88",
+      "title": "Add a typed exact reference for same-task supporting outputs",
+      "source_ids": [
+        "R21-P01"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "Actual supported flow rejects source artifact syntax for appendix output; successful read receipt works. Existing test intentionally restricts sources to selected inputs/receipts, so this is an optional new reference class, not a false-rejection defect.",
+      "current_behavior": "Add a typed exact reference for same-task supporting outputs",
+      "intended_outcome": "Actual supported flow rejects source artifact syntax for appendix output; successful read receipt works. Existing test intentionally restricts sources to selected inputs/receipts, so this is an optional new reference class, not a false-rejection defect.",
+      "dependencies": [],
+      "decision": "Completion prompt describes `output:VERSION` same-task supporting outputs separately from observation receipts. `packages/agent-loop/prompts.ts`; quality logic results-owned.",
+      "changed_files": [
+        "packages/agent-loop/prompts.ts"
+      ],
+      "verification": [
+        "Prompt11 pass; output citation boundary tests belong to results owner."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Prompt11 pass; output citation boundary tests belong to results owner."
+    },
+    {
+      "id": "C91",
+      "title": "Verified extraction output is advertised as readable but lacks current-run binding",
+      "source_ids": [
+        "R22-F01"
+      ],
+      "kind": "defect",
+      "priority": "P2",
+      "root_note": "Actual Coordinator/loop/document/code/artifact services with fake runtime create22166-byte JSON and then reject its advertised exact read as not pinned. Owner can read it; smaller-range extraction remains possible. The deliberately invalid final finish is only fixture termination. Bind only verified same-task output after fresh claim validation; preserve64KiB preview and foreign/stale exclusion.",
+      "current_behavior": "Verified extraction output is advertised as readable but lacks current-run binding",
+      "intended_outcome": "Actual Coordinator/loop/document/code/artifact services with fake runtime create22166-byte JSON and then reject its advertised exact read as not pinned. Owner can read it; smaller-range extraction remains possible. The deliberately invalid final finish is only fixture termination. Bind only verified same-task output after fresh claim validation; preserve64KiB preview and foreign/stale exclusion.",
+      "dependencies": [],
+      "decision": "Fresh claim/owner/project fence then transaction validates producing-task output binding and adds verified extraction output to current run before advertising exact read. `packages/agent-loop/index.ts`.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": [
+        "Actual Coordinator/loop/document/code/artifact services with fake runtime produce22KB extraction and exact read succeeds/binds. Invalid fixture finish is deliberate termination. Real PDF/Docker parsing unexecuted."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Actual Coordinator/loop/document/code/artifact services with fake runtime produce22KB extraction and exact read succeeds/binds. Invalid fixture finish is deliberate termination. Real PDF/Docker parsing unexecuted."
+    },
+    {
+      "id": "C95",
+      "title": "Maintain regressions for confirmed failures across service and UI boundaries",
+      "source_ids": [
+        "R23-P01",
+        "R26-P02"
+      ],
+      "kind": "proposal",
+      "priority": "P2",
+      "root_note": "Cross-cutting test-assurance work, not another product defect. Promote actual-loop authority/recovery, helper coverage, independent semantic export and guarded-copy outcome cases with their fixes. Keep baseline663pass18skip, separate41Phase0 checks, overlapping focused runs and new synthetic probes separate. Preserve historical failed attempts and explicit runtime gates. R26 extends harness design: explicit selected resource root and fresh exclusive evidence output; never overwrite old live-run proof or let intact checkout mask missing copied resources. Existing harness was read, not run.",
+      "current_behavior": "Maintain regressions for confirmed failures across service and UI boundaries",
+      "intended_outcome": "Cross-cutting test-assurance work, not another product defect. Promote actual-loop authority/recovery, helper coverage, independent semantic export and guarded-copy outcome cases with their fixes. Keep baseline663pass18skip, separate41Phase0 checks, overlapping focused runs and new synthetic probes separate. Preserve historical failed attempts and explicit runtime gates. R26 extends harness design: explicit selected resource root and fresh exclusive evidence output; never overwrite old live-run proof or let intact checkout mask missing copied resources. Existing harness was read, not run.",
+      "dependencies": [],
+      "decision": "Promote review-supported actual-loop recovery, long clarifications, dispatch accounting, concurrent receipt, extraction binding, IPC observer/admission/registration, archive and bounded repair/resource/time tests. `tests/improvements/*`, `tests/phase5/loop.test.ts`.",
+      "changed_files": [
+        "tests/phase5/loop.test.ts",
+        "tests/renderer/provenance-fixture.tsx",
+        "tests/renderer/provenance-fixture.html",
+        "tests/renderer/provenance-harness.cjs",
+        "tests/renderer/run-provenance-fixture.mjs",
+        "tests/fleet/lab-mode.test.ts",
+        "tests/fleet/recovery.test.ts",
+        "tests/improvements/workflows.test.ts"
+      ],
+      "verification": [
+        "Final focused run:53/53 pass; overlapping loop13/13 pass incl range. Earlier failures retained in tool/integration logs; corrected fixtures now assert changed bounded policy. Root full final suite is authoritative.",
+        "node tests/renderer/run-provenance-fixture.mjs passed actual mounted ResultsPanel/ExactGrants/CodePanel3scenario groups; syntheticbridge, isolatedcustommain/disposableprofile, no productionmain/preload/accounts/credentials",
+        ".test-data/improvements/provenance-renderer-evidence.json (exactselectedfinal/provenance/supportingoutput failretry, currenthistoricalgrants revocation+failedreadretry+reverseorderedtaskresponses, codeolderfailedreadretry+taskcacheclearing+lateforeignhistoryfence)",
+        "Mounted CodePanel latest task renders within120ms after stale held history resolves following deferred current-read callback fix; no1s periodic polling dependence.",
+        "ELECTRON_RUN_AS_NODE=1 node_modules/.bin/electron --import tsx --test tests/fleet/lab-mode.test.ts tests/fleet/recovery.test.ts tests/improvements/workflows.test.ts tests/phase1/coordinator.test.ts tests/phase1/restart.test.ts:34/34passed; legacy17/16/7fixtures remove posttargetschemafields; no duplicate-column production suppression.",
+        ".test-data/improvements/schema23-fixture-focused-passing.log"
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Final focused run:53/53 pass; overlapping loop13/13 pass incl range. Earlier failures retained in tool/integration logs; corrected fixtures now assert changed bounded policy. Root full final suite is authoritative."
+    },
+    {
+      "id": "C96",
+      "title": "Evaluate owner responsiveness during bounded Office export generation",
+      "source_ids": [
+        "R24-P03"
+      ],
+      "kind": "proposal",
+      "priority": "P3",
+      "root_note": "AppleM4/Node26.7 actual-generator host probe: valid100k-cell shapes p95 177.751\u2013219.346ms over30 samples after5warmups; eight timer observations177.479\u2013220.099ms vs1.156\u20131.227ms control. Source199999\u2013899999B/output7494221\u20138694221B withinlimits. Not Electron UI/IPC, allocation/cancellation or SLO proof. Define response budget before selecting workers; keep synchronous option and all commit/cleanup/integrity bounds.",
+      "current_behavior": "Evaluate owner responsiveness during bounded Office export generation",
+      "intended_outcome": "AppleM4/Node26.7 actual-generator host probe: valid100k-cell shapes p95 177.751\u2013219.346ms over30 samples after5warmups; eight timer observations177.479\u2013220.099ms vs1.156\u20131.227ms control. Source199999\u2013899999B/output7494221\u20138694221B withinlimits. Not Electron UI/IPC, allocation/cancellation or SLO proof. Define response budget before selecting workers; keep synchronous option and all commit/cleanup/integrity bounds.",
+      "dependencies": [],
+      "decision": "Wire root-owned Office worker formatter through main ReportExportController. `apps/desktop/main/main.ts`.",
+      "changed_files": [
+        "apps/desktop/main/main.ts"
+      ],
+      "verification": [
+        "Root owns worker, formatter, benchmark, cancellation/packaging verification. Independent source review: only checksum-proven bounded source crosses worker boundary; finite timeout and cleanup preserve original source."
+      ],
+      "status": "implemented",
+      "remaining_blocker": null,
+      "limitations": "Root owns worker, formatter, benchmark, cancellation/packaging verification. Independent source review: only checksum-proven bounded source crosses worker boundary; finite timeout and cleanup preserve original source."
+    }
+  ],
+  "verification_logs": [
+    ".test-data/improvements/coordinator-focused-final.log",
+    ".test-data/improvements/snapshot-performance.json",
+    ".test-data/improvements/provenance-renderer-evidence.json",
+    ".test-data/improvements/electron-final-failed-schema23.log",
+    ".test-data/improvements/schema23-fixture-focused.log",
+    ".test-data/improvements/schema23-fixture-focused-passing.log",
+    ".test-data/improvements/repository-snapshot-focused.log",
+    ".test-data/improvements/schema24-fixture-focused.log",
+    ".test-data/improvements/repository-snapshot-parser-review.log",
+    ".test-data/improvements/repository-snapshot-parser-review-passing.log",
+    ".test-data/improvements/repository-snapshot-final-review.log",
+    ".test-data/improvements/repository-snapshot-fifo-review.log",
+    ".test-data/improvements/repository-snapshot-fifo-review-passing.log",
+    ".test-data/improvements/repository-snapshot-stable-final.log"
+  ],
+  "independent_review": [
+    "AgentRun resource preview does not call refresh in finally; preserves credential status.",
+    "Routines mutations reload current unreadOnly filter; cursor pages de-duplicate and use sequence fence."
+  ]
+}

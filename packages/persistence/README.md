@@ -30,3 +30,5 @@ No credential is stored here. Browser session rows start `not_provisioned` and
 have no profile path. Phase 2's coordinator-owned artifact service implements
 file-byte commit/reconciliation through the operation journal. Backup/restore,
 retention and encrypted data storage remain later work.
+
+New direct callers should use `transactionSync` or `readTransactionSync` to reject statically inferred Promise return values. All transaction entrypoints reject returned thenables before commit and roll back synchronous database changes. This detects a misuse but cannot cancel external work already started inside the callback; do not perform asynchronous or external work in a transaction callback.

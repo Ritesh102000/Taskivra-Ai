@@ -1,0 +1,17 @@
+const {app,BrowserWindow}=require('electron'),{writeFileSync}=require('node:fs'),{join}=require('node:path'),assert=require('node:assert/strict');const profile=process.env.IMPROVEMENT_RENDERER_PROFILE;app.setPath('userData',profile);app.setPath('sessionData',join(profile,'session'));const delay=ms=>new Promise(r=>setTimeout(r,ms));
+app.whenReady().then(async()=>{
+ const win=new BrowserWindow({show:false,width:1280,height:1000,webPreferences:{contextIsolation:true,nodeIntegration:false,sandbox:true}});const js=s=>win.webContents.executeJavaScript(s,true),text=()=>js('document.body.innerText');
+ const click=async label=>{await js('(()=>{const b=[...document.querySelectorAll("button")].find(b=>b.textContent.trim()==='+JSON.stringify(label)+');if(!b||b.disabled)throw Error("Missing enabled button");b.click();})()');await delay(80);};
+ await win.loadFile(join(__dirname,'repository-fixture.html'));await js('fixture.show()');await delay(80);await js('document.querySelector("details").open=true');assert((await text()).includes('Could not read current project agents'));
+ await click('Retry project agent inspection');assert(!(await text()).includes('Could not read current'));
+ await js('fixture.empty()');await delay(80);assert((await text()).includes('Create an active agent'));
+ await js('fixture.retryProject();fixture.hold()');await delay(80);await click('Choose folder and review snapshot');assert.equal(await js('[...document.querySelectorAll("button")].find(b=>b.textContent==="Working…").disabled'),true);assert(!(await text()).includes('captured source'));
+ await js('fixture.resolve()');await delay(80);assert((await text()).includes('secret path'));assert((await text()).includes('symbolic link'));assert((await text()).includes('Differs from commit'));assert.equal(await js('document.querySelectorAll("img").length'),0);
+ await js('[...document.querySelectorAll("details")].find(d=>d.querySelector("summary")?.textContent==="Read captured content before saving").open=true');assert((await text()).includes('captured source'));
+ writeFileSync(join(process.cwd(),'.test-data/improvements/repository-reviewed.png'),(await win.webContents.capturePage()).toPNG());
+ await js('fixture.fail("repository.capture")');await click('Capture reviewed snapshot');assert((await text()).includes('Synthetic repository.capture failure'));assert((await text()).includes('captured source'));
+ await click('Capture reviewed snapshot');assert((await text()).includes('Exact snapshot saved'));assert(!(await text()).includes('failure'));assert(!(await js('fixture.calls()')).some(c=>c.type==='fleet.start'||c.folderPath));
+ await js('fixture.hold()');await click('Choose folder and review snapshot');await js('fixture.switch();fixture.resolve()');await delay(80);assert(!(await text()).includes('Captured files'));
+ const evidence={boundary:'Mounted RepositorySnapshotPilot with synthetic bridge and disposable custom Electron main; native folder seam/service separately tested, no paid calls or personal directories',passed:['failed agent read retry','loaded empty','pending preview','exclusions before capture','inert path','capture failure retry','no model start','stale project preview fenced'],calls:await js('fixture.calls()')};
+ writeFileSync(join(process.cwd(),'.test-data/improvements/repository-renderer-evidence.json'),JSON.stringify(evidence,null,2)+'\n');process.stdout.write(JSON.stringify(evidence.passed)+'\n');win.destroy();app.quit();
+}).catch(error=>{process.stderr.write(error.stack+'\n');app.exit(1);});

@@ -1,0 +1,387 @@
+{
+  "items": [
+    {
+      "id": "C07",
+      "status": "implemented_verified",
+      "decision": "Owner-reviewed immutable repository snapshot pilot supplements selected-source manifests. Native owner folder selection previews at most16files/32KiBsourcebytes/64KiBJSON, exclusions and inert exact path/hash/text entries, observed commit and dirty/untracked metadata. Cached bytes capture private then publish only within reviewed current project and agent. Receipt replay after private/shared commit interruptions survives restart and avoids duplication. No automatic broader repository assessment or 30-role orchestration; full large-repository program remains outside disclosed bounded pilot.",
+      "changed_files": [
+        "packages/fleet/index.ts",
+        "packages/persistence/index.ts",
+        "packages/contracts/fleet.ts",
+        "tests/fleet/service.test.ts",
+        "packages/repository-snapshot/index.ts",
+        "packages/repository-snapshot/scan.ts",
+        "packages/contracts/repository-snapshot.ts",
+        "tests/improvements/repository-snapshot.test.ts"
+      ],
+      "verification": "Repository snapshot actual service tests5/5: dirty/untracked hash comparison; deterministic identity; samehash differentpath; hostlateredit immutable; secret/symlink/binary/large/filecount/totalbyte exclusions; TTL staleprojectagent denial; concurrent reorderedpropertycapture oneprivate/shared; postprivate/postsharedcommit failure recovery across service restart; selectedchild does not discover parent Git; malformedcommit tree traversal rejected before descriptorread. TypeScript clean. Root owns native controller and mounted renderer checks.",
+      "remaining_blocker": "Disclosedpilot\u226416files32KiB; unsupported packed Git objects/worktrees/index metadata unknown. Larger repository/tree assessment and 30roles are not implemented. Real account/paid model and signed packaged runtime remain unexecuted.",
+      "dependencies": [
+        "schema20"
+      ]
+    },
+    {
+      "id": "C17",
+      "status": "implemented_verified",
+      "decision": "Fleet task state uses TaskState.",
+      "changed_files": [
+        "packages/contracts/fleet.ts",
+        "packages/fleet/index.ts"
+      ],
+      "verification": "contracts/fleet.ts; typecheck",
+      "remaining_blocker": "Root owns other state contracts/UI.",
+      "dependencies": []
+    },
+    {
+      "id": "C19",
+      "status": "implemented_verified",
+      "decision": "Owner creates fresh paused follow-up with explicit reviewed objective and fresh limits; persist immutable source fleet/revision/final-version lineage, no grants or plan claims cloned.",
+      "changed_files": [
+        "packages/fleet/index.ts",
+        "packages/persistence/index.ts",
+        "packages/contracts/fleet.ts",
+        "tests/fleet/service.test.ts"
+      ],
+      "verification": "fleet/index.ts, schema19, fleet service test; mounted Fleets exact mailbox older failure/retry, linked question, stale response ignored, fresh followup selected draft no start.",
+      "remaining_blocker": null,
+      "dependencies": [
+        "schema19"
+      ]
+    },
+    {
+      "id": "C21",
+      "status": "implemented_verified",
+      "decision": "Apply project scope before finite source bounds; prioritize up to8 exact selected source IDs within that project.",
+      "changed_files": [
+        "packages/fleet/index.ts",
+        "packages/contracts/fleet.ts",
+        "tests/fleet/service.test.ts"
+      ],
+      "verification": "fleet.state projectId/sourceVersionIds; fleet service controls",
+      "remaining_blocker": "Focused >200 scoped service regression passes with synthetic metadata plus actual original managed source.",
+      "dependencies": []
+    },
+    {
+      "id": "C22",
+      "status": "implemented_verified",
+      "decision": "Worker completion and leader completion metadata/event writes share transactions. Published output survives event failure and exact retry reuses it. UI callback failures cannot overwrite committed fleet outcomes.",
+      "changed_files": [
+        "packages/fleet/index.ts",
+        "tests/fleet/service.test.ts"
+      ],
+      "verification": "fleet/index.ts; faulting database trigger test passes",
+      "remaining_blocker": "No automatic replay of unknown effects added.",
+      "dependencies": []
+    },
+    {
+      "id": "C24",
+      "status": "implemented_verified",
+      "decision": "Bounded recipient-visible mailbox20 records with stable row cursor and exact IDs; linked replies refer to messages visible to sender, persisted separately. Receipt/acknowledgment is not agreement.",
+      "changed_files": [
+        "packages/fleet/index.ts",
+        "packages/contracts/fleet.ts",
+        "packages/persistence/index.ts",
+        "tests/fleet/service.test.ts"
+      ],
+      "verification": "fleet/index.ts, contracts/fleet.ts, schema19; linked mailbox test; mounted Fleets exact mailbox older failure/retry, linked question, stale response ignored, fresh followup selected draft no start.",
+      "remaining_blocker": null,
+      "dependencies": [
+        "schema19"
+      ]
+    },
+    {
+      "id": "C26",
+      "status": "integrated_other_owner",
+      "decision": "Coordinator agent owns mode-specific Gmail wording/version.",
+      "changed_files": [
+        "packages/agent-loop/prompts.ts"
+      ],
+      "verification": "agent-loop/prompts.ts",
+      "remaining_blocker": "Live model quality unmeasured.",
+      "dependencies": []
+    },
+    {
+      "id": "C29",
+      "status": "integrated_other_owner",
+      "decision": "Storage agent implemented exact-version UTF8 range with whole-version descriptor/hash checks. Coordinator integrates separate range tool, aggregate1MiB budget and interval union evidence; fleet allows it under same selected-source policy.",
+      "changed_files": [
+        "packages/artifacts/index.ts",
+        "packages/agent-loop/index.ts",
+        "packages/agent-loop/tools.ts",
+        "packages/fleet/index.ts",
+        "packages/results/index.ts"
+      ],
+      "verification": "artifacts/index.ts, agent-loop, fleet scope, results evidence",
+      "remaining_blocker": "Need focused range regression and owner UI where applicable; range retrieved bytes do not certify inspection.",
+      "dependencies": []
+    },
+    {
+      "id": "C33",
+      "status": "implemented_verified",
+      "decision": "Fulfillment cancels pending optional validation jobs/candidates and clears optional checking slots.",
+      "changed_files": [
+        "packages/requests/index.ts",
+        "tests/phase5/requests.test.ts"
+      ],
+      "verification": "requests/index.ts; focused actual-service regression",
+      "remaining_blocker": "No endless checking state after fulfillment.",
+      "dependencies": []
+    },
+    {
+      "id": "C60",
+      "status": "implemented_verified",
+      "decision": "Capacity accommodates all <=128 MIME parts from one valid returned thread (256 cached selections), retaining first and last from101-ref fixture.",
+      "changed_files": [
+        "packages/gmail/review.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "gmail/review.ts; combined synthetic network regression",
+      "remaining_blocker": "TTL/reconnect/capacity eviction remain explicit selection expiration; live account unexecuted.",
+      "dependencies": []
+    },
+    {
+      "id": "C61",
+      "status": "implemented_verified",
+      "decision": "Consume opaque cursor only after full successful page construction, preserving retries after network failure.",
+      "changed_files": [
+        "packages/gmail/review.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "gmail/review.ts; fail then retry regression",
+      "remaining_blocker": "Provider page mutation is not an atomic snapshot.",
+      "dependencies": []
+    },
+    {
+      "id": "C62",
+      "status": "implemented_verified",
+      "decision": "Codepoint-safe field clipping with initial metadata truncation flags, also in unread mode.",
+      "changed_files": [
+        "packages/gmail/index.ts",
+        "packages/gmail/review.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "gmail/index.ts, review.ts; Unicode + clipping regression",
+      "remaining_blocker": "Live account unexecuted.",
+      "dependencies": []
+    },
+    {
+      "id": "C63",
+      "status": "implemented_verified",
+      "decision": "Inventory named safe body.data attachments, retain exact cached bytes with scoped opaque selection IDs and validate on import.",
+      "changed_files": [
+        "packages/gmail/review.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "gmail/review.ts;101 inline attachment regression",
+      "remaining_blocker": "HTML/remote images remain omitted; live account unexecuted.",
+      "dependencies": []
+    },
+    {
+      "id": "C64",
+      "status": "implemented_verified",
+      "decision": "Authenticated callers bind cursor/thread/attachment temporary selection keys to task identity. Legacy direct-call scope is compatibility only; application controller/model callers pass taskId.",
+      "changed_files": [
+        "packages/gmail/review.ts",
+        "apps/desktop/main/gmail-review-controller.ts",
+        "packages/agent-loop/index.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "gmail/review.ts, gmail-review-controller.ts, agent-loop; cross-task negative regression",
+      "remaining_blocker": "Live account unexecuted.",
+      "dependencies": []
+    },
+    {
+      "id": "C66",
+      "status": "implemented_verified",
+      "decision": "Owner exact-grant read model exposes current authority and reason. Future-use revocation requires no active claim and stopped/terminal task; historical records persist. Current authority also checks exact attached ready versions/project access and exact upload-origin policy.",
+      "changed_files": [
+        "packages/requests/index.ts",
+        "packages/contracts/requests.ts",
+        "tests/phase5/requests.test.ts"
+      ],
+      "verification": "requests/index.ts, contracts/requests.ts; stopped-claim/replay test",
+      "remaining_blocker": "Root UI integration; revocation cannot undo committed publication/upload.",
+      "dependencies": []
+    },
+    {
+      "id": "C72",
+      "status": "implemented_verified",
+      "decision": "Owner selected-recipient collaboration reads scope before mailbox/publication bounds. Preserve owner-wide view and model authority checks separately.",
+      "changed_files": [
+        "packages/collaboration/index.ts",
+        "packages/collaboration/validation.ts",
+        "packages/contracts/collaboration.ts",
+        "tests/phase6/collaboration.test.ts"
+      ],
+      "verification": "collaboration/index.ts, validation.ts, contracts",
+      "remaining_blocker": "Focused >500 publication recipient-scope and exact acknowledgment regression passes; mounted owner workflow remains root gate.",
+      "dependencies": []
+    },
+    {
+      "id": "C82",
+      "status": "implemented_verified",
+      "decision": "Effective reduced-scope procedure is snapshotted into routine definitions by storage agent; inherited format/sections removed, replacement completion criteria remain authoritative.",
+      "changed_files": [
+        "packages/workflows/effective.ts",
+        "packages/routines/index.ts",
+        "tests/phase7/routines.test.ts"
+      ],
+      "verification": "workflows/effective.ts, routines; independent scheduled child regression16-suite pass",
+      "remaining_blocker": "Regression creates fulfilled amendment metadata as fixture, scheduler/child/artifacts/checker actual; does not claim paid execution.",
+      "dependencies": [
+        "C85"
+      ]
+    },
+    {
+      "id": "C85",
+      "status": "implemented_verified",
+      "decision": "Revisions copy effective immutable workflow requirements and named version roles into new task before staging. Fresh limits, restrictions and blocking preparation preserved, no grants copied.",
+      "changed_files": [
+        "packages/workflows/effective.ts",
+        "packages/workflows/index.ts",
+        "packages/contracts/workflows.ts",
+        "packages/results/index.ts",
+        "tests/phase7/results.test.ts"
+      ],
+      "verification": "results/index.ts, workflows/effective.ts; result suite10 pass incl restart role/heading regression",
+      "remaining_blocker": "Full paid workflow unexecuted.",
+      "dependencies": [
+        "effectiveWorkflow"
+      ]
+    },
+    {
+      "id": "C86",
+      "status": "implemented_verified",
+      "decision": "Check every allowed required heading; remove silent24 cap.",
+      "changed_files": [
+        "packages/results/quality.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "results/quality.ts;25-heading failure regression",
+      "remaining_blocker": "Finite parser coverage still warns when incomplete.",
+      "dependencies": []
+    },
+    {
+      "id": "C87",
+      "status": "implemented_verified",
+      "decision": "Shared Markdown parser matches backtick/tilde fence type and minimum marker length, prevents fenced headings satisfying structure.",
+      "changed_files": [
+        "packages/results/preview.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "results/preview.ts; tilde/mixed/short-close regression",
+      "remaining_blocker": "Checker/renderer/export share parser.",
+      "dependencies": []
+    },
+    {
+      "id": "C88",
+      "status": "implemented_verified",
+      "decision": "`output:VERSION_ID` is separate typed namespace restricted to same-task ready output versions. ResultDetail returns same-task supporting outputs for navigation. Selected-input artifact/version syntax stays restricted.",
+      "changed_files": [
+        "packages/results/quality.ts",
+        "packages/results/index.ts",
+        "packages/contracts/results.ts",
+        "tests/improvements/results-sources.test.ts"
+      ],
+      "verification": "quality.ts, results/index.ts, contracts/results.ts; positive/foreign/source-namespace tests",
+      "remaining_blocker": "Root supporting-output preview UI and mounted validation.",
+      "dependencies": [
+        "C90"
+      ]
+    },
+    {
+      "id": "C89",
+      "status": "implemented_verified",
+      "decision": "Bounded stable keyset result pages; exact task inspection derives persisted final version if omitted, avoiding first-output guessing.",
+      "changed_files": [
+        "packages/results/index.ts",
+        "packages/contracts/results.ts",
+        "tests/phase7/results.test.ts"
+      ],
+      "verification": "results/index.ts, contracts/results.ts",
+      "remaining_blocker": "Actual bounded201-result service page/exact-final lookup regression passes; mounted UI remains root gate.",
+      "dependencies": [
+        "renderer"
+      ]
+    },
+    {
+      "id": "C90",
+      "status": "implemented_verified",
+      "decision": "Result provenance exposes exact input roles, routine/occurrence identity, assessment checker/source/hash/time and current owner acceptance separately. Unknown legacy roles remain empty; provider observation is not continuing freshness.",
+      "changed_files": [
+        "packages/results/index.ts",
+        "packages/contracts/results.ts"
+      ],
+      "verification": "results/index.ts, contracts/results.ts",
+      "remaining_blocker": "Root provenance UI; source content/receipt pair trust not inferred from filenames.",
+      "dependencies": []
+    },
+    {
+      "id": "C91",
+      "status": "integrated_other_owner",
+      "decision": "Coordinator agent binds verified same-task extraction outputs after fresh claim guard.",
+      "changed_files": [
+        "packages/agent-loop/index.ts"
+      ],
+      "verification": "agent-loop/index.ts",
+      "remaining_blocker": "Coordinator agent regression owns stale/foreign boundary.",
+      "dependencies": []
+    },
+    {
+      "id": "C92",
+      "status": "implemented_verified",
+      "decision": "Propagate clipped cached formula represented values into aggregate valuesTruncated/completeSheet disclosure.",
+      "changed_files": [
+        "packages/documents/source.ts",
+        "tests/improvements/document-coverage.py"
+      ],
+      "verification": "documents/source.ts; python3 tests/improvements/document-coverage.py passes",
+      "remaining_blocker": "Synthetic workbook-reader seam only; Docker real XLSX test skipped without gate.",
+      "dependencies": []
+    },
+    {
+      "id": "C93",
+      "status": "implemented_verified",
+      "decision": "Preserve supplied ordered list markers in shared parser, preview, DOCX/HTML export.",
+      "changed_files": [
+        "packages/results/preview.ts",
+        "packages/report-export/index.ts",
+        "tests/phase8/exports.test.ts"
+      ],
+      "verification": "results/preview.ts, report-export/index.ts, root preview; parser + export tests",
+      "remaining_blocker": "Native Office/PDF visual gate unexecuted.",
+      "dependencies": []
+    },
+    {
+      "id": "C94",
+      "status": "implemented_verified",
+      "decision": "Serialize literal CSV cell CR using XML numeric entity, avoiding XML newline normalization.",
+      "changed_files": [
+        "packages/report-export/index.ts",
+        "tests/phase8/exports.test.ts"
+      ],
+      "verification": "report-export/index.ts; independent Python XML read of generated XLSX passes",
+      "remaining_blocker": "Independent openpyxl/native spreadsheet visual gate unexecuted.",
+      "dependencies": []
+    },
+    {
+      "id": "C04",
+      "status": "implemented_verified",
+      "decision": "Reversible terminal resolved fleet archive frees coupled lifetime fleet/task/agent capacity; restore all caps and owner-message occupancy without dispatch. Project scoped history20 with exact inspection.",
+      "changed_files": [
+        "packages/fleet/index.ts",
+        "packages/contracts/fleet.ts",
+        "tests/fleet/service.test.ts",
+        "tests/renderer/features-fixture.tsx",
+        "tests/renderer/features-harness.cjs",
+        "tests/renderer/run-features-fixture.mjs"
+      ],
+      "verification": "Fleet suite21/21; current schema23 focused archive3/3; mounted production workflows5/5 synthetic bridge; TypeScript clean.",
+      "remaining_blocker": null,
+      "dependencies": [
+        "coordinator schema22 archives",
+        "root archive UI"
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import { CommandValidationError } from '../../../packages/contracts/validation';
 
 export interface FileDialogs {
   pick(target: ImportTarget, singleFile: boolean): Promise<string[]>;
+  pickFolder?():Promise<string|null>;
   save(displayName: string): Promise<string | null>;
 }
 const OWNER = { kind: 'owner' } as const;
@@ -32,6 +33,14 @@ export class FileController {
     const command = parseFileCommand(raw);
     return this.exclusive(async () => {
       switch (command.type) {
+        case 'repository.preview': {
+          if(!this.dialogs.pickFolder)throw new CommandValidationError('Repository folder selection is unavailable.');
+          const folderPath=await this.dialogs.pickFolder();if(!folderPath)return {snapshot:this.coordinator.snapshot(),cancelled:true};
+          const repositoryPreview=await this.coordinator.repositorySnapshots.preview({projectId:command.projectId,agentId:command.agentId,folderPath});return {snapshot:this.coordinator.snapshot(),repositoryPreview};
+        }
+        case 'repository.capture': {
+          const result=await this.coordinator.repositorySnapshots.capture(command);return {snapshot:this.coordinator.snapshot(),versionIds:[result.versionId]};
+        }
         case 'files.pick': {
           this.assertTarget(command.target);
           const paths = await this.dialogs.pick(command.target, Boolean(command.artifactId));
@@ -46,6 +55,14 @@ export class FileController {
         case 'artifacts.use': {
           const result=await this.coordinator.artifacts.useInTask({ principal: OWNER, taskId: command.taskId, versionId: command.versionId });
           return { snapshot: this.coordinator.snapshot(), versionIds: [command.versionId], ...(result?.deliveryDeferred ? { warnings: ['File selection saved; task delivery waits for the active code execution.'] } : {}) };
+        }
+        case 'artifacts.repair': {
+          const version = this.coordinator.snapshot().artifacts.find(item => item.id === command.versionId);
+          if (!version || version.status === 'ready') throw new CommandValidationError('Select an exact quarantined version.');
+          const paths = await this.dialogs.pick({scope:'private',agentId:version.ownerAgentId,taskId:null}, true);
+          if (!paths.length) return {snapshot:this.coordinator.snapshot(),cancelled:true};
+          await this.coordinator.artifacts.repairVersion({principal:OWNER,versionId:version.id,sourcePath:paths[0]});
+          return {snapshot:this.coordinator.snapshot(),versionIds:[version.id]};
         }
         case 'artifacts.export': {
           const version = this.coordinator.snapshot().artifacts.find(item => item.id === command.versionId);

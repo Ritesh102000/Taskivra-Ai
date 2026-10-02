@@ -245,7 +245,7 @@ export function BrowserPanel({ bridge, snapshot, task, onFiles }: { bridge: AppB
   const showFiles = () => { setExpanded(false); onFiles(); };
 
   const content = <div className="browser-panel" ref={inputExitTarget} tabIndex={-1}>
-    <div className="browser-panel-heading"><div><h2>{agent?.name || 'Agent'}’s browser</h2><p>{native ? 'Desktop Chrome · Dedicated profile' : localLab ? 'Local lab Electron · Temporary session' : 'Docker Chromium · Isolated session'} · Up to 6 tabs</p></div>{ready ? <span className="browser-live"><span /> LIVE</span> : <BrowserGlyph name="browser" />}</div>
+    <div className="browser-panel-heading"><div><h2>{agent?.name || 'Agent'}’s browser</h2><p>{!backend ? 'Checking browser backend' : native ? 'Desktop Chrome · Dedicated profile' : localLab ? 'Local lab Electron · Temporary session' : 'Docker Chromium · Isolated session'} · Up to 6 tabs</p></div>{ready ? <span className="browser-live"><span /> LIVE</span> : <BrowserGlyph name="browser" />}</div>
     {!localLab && <BrowserSetupCard controller={setup} agentId={task.agentId} sessionOpen={Boolean(state && ['ready', 'starting', 'closing'].includes(state.lifecycle))} human={human} agentWorking={snapshot.tasks.some(item => item.agentId === task.agentId && ['running', 'pausing', 'recovering'].includes(item.state))} />}
     {(error || state?.error) && <div className="browser-error" role="alert"><p>{error || state?.error}</p>{message && <p>{message}</p>}{freshRequired && ready && !(actualWindow && human) && <button className="button small" disabled={busyControls} onClick={() => void refresh()}>Get a fresh view</button>}</div>}
     {!error && message && <div className="browser-status-message" role="status">{message}</div>}

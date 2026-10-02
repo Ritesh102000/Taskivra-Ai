@@ -51,3 +51,8 @@ docs/phase8/evidence/
 .vercel/
 .playwright-mcp/
 /tmp/pdfs/
+
+# Disposable implementation verification output.
+/.testdata/
+/tests/renderer/*-fixture.js
+/tests/renderer/*-fixture.css

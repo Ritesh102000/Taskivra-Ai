@@ -29,10 +29,14 @@ export function parseFileCommand(raw: unknown): FileCommand {
   try { bytes = Buffer.byteLength(JSON.stringify(value)); } catch { return fail(); }
   if (bytes > 16384) fail('The file command is too large.');
   switch (value.type) {
+    case 'repository.preview':
+      fields(value,['type','projectId','agentId']);return {type:value.type,projectId:artifactId(value.projectId),agentId:artifactId(value.agentId)};
+    case 'repository.capture':
+      fields(value,['type','projectId','agentId','previewId','identity']);if(typeof value.identity!=='string'||!/^[a-f0-9]{64}$/.test(value.identity))fail('Review the exact snapshot identity.');return {type:value.type,projectId:artifactId(value.projectId),agentId:artifactId(value.agentId),previewId:artifactId(value.previewId),identity:value.identity};
     case 'files.pick':
       fields(value, ['type', 'target'], ['artifactId']);
       return { type: value.type, target: parseImportTarget(value.target), ...(Object.hasOwn(value, 'artifactId') ? { artifactId: artifactId(value.artifactId) } : {}) };
-    case 'artifacts.publish': case 'artifacts.export':
+    case 'artifacts.publish': case 'artifacts.export': case 'artifacts.repair':
       fields(value, ['type', 'versionId']); return { type: value.type, versionId: artifactId(value.versionId) };
     case 'artifacts.use':
       fields(value, ['type', 'versionId', 'taskId']); return { type: value.type, versionId: artifactId(value.versionId), taskId: artifactId(value.taskId) };

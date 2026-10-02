@@ -48,6 +48,7 @@ export class DockerBrowserRuntimeFactory implements RuntimeFactory {
   private launching = new Set<string>();
   private launchTasks = new Set<Promise<BrowserHandle>>();
   private closing = false;
+  private cleanupDebt = new Set<string>();
   private fixture?: { journal: Journal; network: string; ip: string };
   private fixturePromise?: Promise<{ journal: Journal; network: string; ip: string }>;
   constructor(options: FactoryOptions) {
@@ -137,7 +138,8 @@ export class DockerBrowserRuntimeFactory implements RuntimeFactory {
         await this.docker([entry.kind, 'rm', ...(entry.kind === 'container' ? ['-f'] : []), data.Id], 15_000);
       } catch { failures.push(entry.kind); }
     }
-    if (failures.length) throw new Error('browser_cleanup_incomplete');
+    if (failures.length) {this.cleanupDebt.add(journal.run);throw new Error('browser_cleanup_incomplete');}
+    this.cleanupDebt.delete(journal.run);
     activeRuns.delete(journal.run); await rm(this.journalPath(journal), { force: true });
   }
   private async testSite(image: string): Promise<{ journal: Journal; network: string; ip: string }> {
@@ -162,7 +164,7 @@ export class DockerBrowserRuntimeFactory implements RuntimeFactory {
     identifier(options.sessionId); identifier(options.agentId);
     if (!Number.isSafeInteger(options.initialGeneration) || options.initialGeneration < 1) throw new Error('browser_generation_invalid');
     if (this.closing || this.handles.has(options.agentId) || this.launching.has(options.agentId)) throw new Error('browser_session_busy');
-    if (this.handles.size + this.launching.size >= 2) throw new Error('browser_capacity_full');
+    if (this.handles.size + this.launching.size + this.cleanupDebt.size >= 2) throw new Error('browser_capacity_full');
     this.launching.add(options.agentId);
     let journal: Journal | undefined, transport: BrowserTransport | undefined, stopOwned: (() => Promise<void>) | undefined;
     try {
@@ -188,7 +190,7 @@ export class DockerBrowserRuntimeFactory implements RuntimeFactory {
       const stop = (): Promise<void> => {
         if (stopPromise) return stopPromise;
         stopping = true;
-        stopPromise = (async () => { transport?.dispose(); await this.cleanup(journal!); this.handles.delete(options.agentId); })();
+        stopPromise = (async () => { transport?.dispose(); await this.cleanup(journal!); this.handles.delete(options.agentId); })().catch(error => { stopPromise = undefined; throw error; });
         return stopPromise;
       };
       stopOwned = stop;
@@ -216,8 +218,9 @@ export class DockerBrowserRuntimeFactory implements RuntimeFactory {
               const result = await broker('session.close', {}) as { profile?: { files?: unknown } };
               savedAt = await this.profiles.save(options.agentId, result.profile?.files, broker);
             }
-            return { saved: savedAt !== undefined, ...(savedAt !== undefined ? { savedAt } : {}) };
-          } finally { await stop(); }
+            } catch(error) {await stop().catch(()=>{});throw error;}
+          let cleanupPending=false;try{await stop();}catch{cleanupPending=true;}
+          return { saved: savedAt !== undefined, ...(savedAt !== undefined ? { savedAt } : {}),cleanupPending };
         }, stop,
       };
       this.handles.set(options.agentId, handle); return handle;

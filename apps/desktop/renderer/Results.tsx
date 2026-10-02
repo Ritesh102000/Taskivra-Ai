@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { AppBridge, ArtifactPreview, Snapshot } from '../../../packages/contracts/index';
-import type { ReportExportBridge, ReportExportFormat, ResultDetail, ResultsBridge, ResultsCommand, ResultsState } from '../../../packages/contracts/results';
+import type { ReportExportBridge, ReportExportFormat, ResultItem, ResultDetail, ResultsBridge, ResultsCommand, ResultsState } from '../../../packages/contracts/results';
 import { compareResultText } from '../../../packages/results/preview';
+import {useFilePreview} from './Files';
 import { SafeResultPreview } from './SafeResultPreview';
 import './results.css';
 
@@ -11,22 +12,26 @@ export function ResultsPanel({ bridge, snapshot, onSnapshot, onOpenTask, selecte
   bridge: AppBridge & ResultsBridge & ReportExportBridge; snapshot: Snapshot; onSnapshot?: (snapshot: Snapshot) => void;
   onOpenTask?: (taskId: string) => void; selectedTaskId?: string;
 }) {
+  const previewSupporting=useFilePreview();
   const [state, setState] = useState<ResultsState | null>(null), [selected, setSelected] = useState(selectedTaskId || '');
   const [detail, setDetail] = useState<ResultDetail | null>(null), [comparison, setComparison] = useState<ArtifactPreview | null>(null);
   const [busy, setBusy] = useState(false), [loading, setLoading] = useState(false), [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState(''), [revisionForm, setRevisionForm] = useState(false), [maxCost, setMaxCost] = useState(1);
+  const [exactSelection,setExactSelection] = useState<ResultItem|null>(null);
   const [inspectionRevision, setInspectionRevision] = useState(0);
   const [exportMessage, setExportMessage] = useState('');
-  const alive = useRef(true), lock = useRef(false), generation = useRef(0), readGeneration = useRef(0);
+  const alive = useRef(true), lock = useRef(false), generation = useRef(0), readGeneration = useRef(0), exactGeneration = useRef(0);
   const refresh = useCallback(async () => {
     if (lock.current) return;
     const ticket = ++generation.current;
     try { const next = await bridge.results({ type: 'results.state' }); if (alive.current && ticket === generation.current) setState(next); }
     catch (cause) { if (alive.current && ticket === generation.current) setError(cause instanceof Error ? cause.message : 'Results could not be read.'); }
   }, [bridge]);
-  useEffect(() => { alive.current = true; void refresh(); const off = bridge.onChanged(() => void refresh()); return () => { alive.current = false; generation.current++; readGeneration.current++; off(); }; }, [bridge, refresh]);
+  useEffect(() => { alive.current = true; void refresh(); const off = bridge.onChanged(() => void refresh()); return () => { alive.current = false; generation.current++; readGeneration.current++; exactGeneration.current++; off(); }; }, [bridge, refresh]);
   useEffect(() => { if (selectedTaskId) setSelected(selectedTaskId); }, [selectedTaskId]);
-  const item = state?.results.find(r => r.taskId === selected) || state?.results[0];
+  const item = selected ? state?.results.find(r => r.taskId === selected) || (exactSelection?.taskId === selected ? exactSelection : undefined) : state?.results[0];
+  useEffect(() => { if (!selected || state?.results.some(r=>r.taskId===selected)) return; const ticket=++exactGeneration.current; void bridge.results({type:'results.inspect',taskId:selected}).then(next=>{if(alive.current&&ticket===exactGeneration.current)setExactSelection(next.detail?.result||null);},()=>{if(alive.current&&ticket===exactGeneration.current)setError('This exact result could not be read.');}); },[selected,state,snapshot,bridge]);
+  async function older(){const cursor=state?.results.at(-1)?.taskId;if(!cursor||busy)return;setBusy(true);try{const next=await bridge.results({type:'results.state',beforeTaskId:cursor});setState(prev=>prev?{...next,results:[...prev.results,...next.results.filter(r=>!prev.results.some(p=>p.taskId===r.taskId))]}:next);}catch(e){setError(e instanceof Error?e.message:'Older results could not be read.');}finally{setBusy(false);}}
   useEffect(() => {
     const ticket = ++readGeneration.current; setDetail(null); setComparison(null); setFeedback(''); setRevisionForm(false); setExportMessage('');
     if (!item) { setLoading(false); return; }
@@ -77,7 +82,7 @@ export function ResultsPanel({ bridge, snapshot, onSnapshot, onOpenTask, selecte
     {!state ? <p role="status">Loading saved results…</p> : !state.results.length ? <section className="results-empty"><h2>Your first result will appear here.</h2><p>Complete a live task to review its output. Simulations and unfinished work are not presented as finished results.</p></section> : <div className="results-layout">
       <aside className="results-list" aria-label="Completed task results">{state.results.map(result => <button key={result.taskId} className={'result-list-item' + (result.taskId === item?.taskId ? ' selected' : '')} aria-pressed={result.taskId === item?.taskId} disabled={busy} onClick={() => setSelected(result.taskId)}>
         <span className={'result-review-status ' + result.review.state}>{label[result.review.state]}</span><strong>{result.version.displayName}</strong><span>{snapshot.agents.find(a => a.id === result.agentId)?.name || 'Agent'} · {new Date(result.version.createdAt).toLocaleDateString()}</span><small>{result.objective}</small>
-      </button>)}</aside>
+      </button>)}<button className="button" disabled={busy || !state.results.length} onClick={()=>void older()}>Load older results</button></aside>
       <main className="result-detail" aria-label="Selected result">
         {item && <><header className="result-detail-heading"><div><span className={'result-review-status ' + item.review.state}>{label[item.review.state]}</span><h2>{item.version.displayName}</h2><p>Version {item.version.version} · {money(item.costUsd)} estimated model cost</p></div><div className="result-actions"><button className="button small" disabled={busy || !detail} onClick={() => void exportExact()}>Export exact file</button>{onOpenTask && <button className="button small" disabled={busy} onClick={() => onOpenTask(item.taskId)}>Open task</button>}</div></header>
           {loading && <p role="status">Checking the saved file and reading its bounded preview…</p>}
@@ -92,7 +97,7 @@ export function ResultsPanel({ bridge, snapshot, onSnapshot, onOpenTask, selecte
               {item.review.feedback && <p className="result-owner-feedback"><strong>Your latest request</strong><br />{item.review.feedback}</p>}
               {revisionForm && detail.canRequestChanges !== false && <form className="result-revision-form" onSubmit={event => { event.preventDefault(); void perform({ type: 'results.requestChanges', taskId: item.taskId, versionId: item.version.id, revision: item.review.revision, feedback, limits: { ...item.limits, maxCostUsd: maxCost }, idempotencyKey: crypto.randomUUID() }); }}><label>What should change?<textarea value={feedback} maxLength={4000} rows={4} required disabled={busy} onChange={event => setFeedback(event.target.value)} placeholder="Name the missing detail, incorrect conclusion or change you need." /></label><label>Maximum spend for the new task (USD)<input type="number" required min={0.01} max={10} step={0.01} value={maxCost} disabled={busy} onChange={event => setMaxCost(Number(event.target.value))} /></label><p className="result-note">Model: {item.model}. Other limits: {item.limits.maxModelCalls} calls, {item.limits.maxToolSteps} steps, {item.limits.maxTokens.toLocaleString()} tokens, {item.limits.maxActiveSeconds} active seconds. The same agent and base website/account policy are retained. Exact original output and input versions are attached; prior capability grants are not copied. No model runs until you start the new task.</p><button className="button primary" disabled={busy || !feedback.trim()}>Prepare revision task</button></form>}
             </section>
-            <details className="result-evidence"><summary>Sources and technical receipts</summary><h3>Selected input files</h3>{detail.inputs.length ? <ul>{detail.inputs.map(input => <li key={input.id}>{input.displayName} · version {input.version} · <code>{input.id}</code></li>)}</ul> : <p>No input files were attached. Sources may be browser or mail observations listed by the agent in the report.</p>}<h3>Successful tool calls</h3><p className="result-note">Receipts establish that calls completed. They do not independently validate the report’s conclusions.</p><ul>{detail.evidence.map(receipt => <li key={receipt.id}>{receipt.label} · {new Date(receipt.createdAt).toLocaleString()}<br /><code>{receipt.id}</code></li>)}</ul>{detail.evidenceTruncated && <p>Showing the latest {detail.evidence.length} of {detail.totalEvidence} receipts.</p>}<p>Output version: <code>{item.version.id}</code></p><p>SHA-256: <code>{item.version.sha256}</code></p></details>
+            <details className="result-evidence"><summary>Sources and technical receipts</summary>{detail.provenance && <section aria-label="Exact result provenance"><h3>Exact provenance</h3><pre>{JSON.stringify(detail.provenance,null,2)}</pre><p className="result-note">Source roles, execution receipts, structural assessment and owner acceptance are separate records. A technical receipt is not a factual quality score.</p></section>}<h3>Selected input files</h3>{detail.inputs.length ? <ul>{detail.inputs.map(input => <li key={input.id}>{input.displayName} · version {input.version} · <code>{input.id}</code></li>)}</ul> : <p>No input files were attached. Sources may be browser or mail observations listed by the agent in the report.</p>}{!!detail.supportingOutputs?.length&&<section><h3>Same-task supporting outputs</h3><p>Derived outputs help inspect this task’s work. They are not independent source evidence.</p>{detail.supportingOutputs.map(v=><button className="button small" key={v.id} onClick={()=>previewSupporting(v.id)}>{v.displayName} · output:{v.id}</button>)}</section>}<h3>Successful tool calls</h3><p className="result-note">Receipts establish that calls completed. They do not independently validate the report’s conclusions.</p><ul>{detail.evidence.map(receipt => <li key={receipt.id}>{receipt.label} · {new Date(receipt.createdAt).toLocaleString()}<br /><code>{receipt.id}</code></li>)}</ul>{detail.evidenceTruncated && <p>Showing the latest {detail.evidence.length} of {detail.totalEvidence} receipts.</p>}<p>Output version: <code>{item.version.id}</code></p><p>SHA-256: <code>{item.version.sha256}</code></p></details>
           </>}
           {pending.length > 0 && <section className="result-revision-jobs"><h3>Revision tasks</h3>{pending.map(job => <div className="result-revision-job" key={job.id}><p><strong>{job.state === 'ready' ? 'Prepared · not started automatically' : job.state === 'preparing' ? 'Preparing exact inputs' : 'Input preparation needs attention'}</strong></p>{job.error && <p>{job.error}</p>}<div className="result-actions">{job.state !== 'ready' && <button className="button small" disabled={busy} onClick={() => void perform({ type: 'results.retryPreparation', revisionId: job.id })}>Retry preparation</button>}{onOpenTask && <button className="button small" disabled={busy} onClick={() => onOpenTask(job.taskId)}>Open revision task</button>}</div></div>)}</section>}
         </>}

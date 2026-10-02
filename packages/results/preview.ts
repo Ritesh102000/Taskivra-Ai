@@ -29,7 +29,7 @@ export function parseCsvPreview(input: string, sourceTruncated = false): CsvPrev
   return { rows, truncated: truncated || clippedCell, omittedColumns, error: null };
 }
 
-export type MarkdownBlock = { kind: 'heading'; level: number; text: string } | { kind: 'text' | 'code' | 'item' | 'quote'; text: string } | { kind: 'table'; rows: string[][] };
+export type MarkdownBlock = { kind: 'heading'; level: number; text: string } | { kind: 'text' | 'code' | 'item' | 'quote'; text: string; marker?: string } | { kind: 'table'; rows: string[][] };
 function allCells(line: string): string[] { return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|'); }
 function cells(line: string): string[] { return allCells(line).slice(0, 20).map(c => c.trim()); }
 export function parseMarkdownPreview(input: string): { blocks: MarkdownBlock[]; truncated: boolean } {
@@ -38,9 +38,11 @@ export function parseMarkdownPreview(input: string): { blocks: MarkdownBlock[]; 
   while (i < lines.length && blocks.length < 1000) {
     const line = lines[i];
     if (!line.trim()) { i++; continue; }
-    if (/^\s*```/.test(line)) {
+    const fence = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (fence && !(fence[1][0] === '`' && fence[2].includes('`'))) {
       const code: string[] = []; i++;
-      while (i < lines.length && !/^\s*```/.test(lines[i])) code.push(lines[i++]);
+      const closing = new RegExp('^ {0,3}' + fence[1][0] + '{' + fence[1].length + ',}\\s*$');
+      while (i < lines.length && !closing.test(lines[i])) code.push(lines[i++]);
       if (i < lines.length) i++;
       blocks.push({ kind: 'code', text: code.join('\n') }); continue;
     }
@@ -57,8 +59,8 @@ export function parseMarkdownPreview(input: string): { blocks: MarkdownBlock[]; 
       }
       blocks.push({ kind: 'table', rows }); continue;
     }
-    const item = /^\s*(?:[-*+]\s+|\d+[.)]\s+)(.+)$/.exec(line);
-    if (item) blocks.push({ kind: 'item', text: item[1] });
+    const item = /^\s*([-*+]|\d+[.)])\s+(.+)$/.exec(line);
+    if (item) blocks.push({ kind: 'item', text: item[2], ...(/^\d/.test(item[1]) ? { marker: item[1] } : {}) });
     else if (/^>\s?/.test(line)) blocks.push({ kind: 'quote', text: line.replace(/^>\s?/, '') });
     else blocks.push({ kind: 'text', text: line });
     i++;

@@ -47,8 +47,9 @@ async function semanticTargets(page,id,revision){
     while(node&&visited++<10000&&found.length<150){
       if(node.matches('a[href],button,input,textarea,select,[role="button"],[role="link"],[contenteditable="true"]')&&(node.getClientRects().length||node.matches('input[type="file"]')))found.push(node);
       node=walker.nextNode();
-    }return found;
+    }found.sourceLimits={targetLimit:150,traversalLimit:10000,targetLimitReached:found.length===150,traversalLimitReached:!!node&&visited>=10000};return found;
   });
+  const sourceLimits=await group.evaluate(found=>found.sourceLimits);
   const map=new Map(),result=[];
   try{for(const [key,value]of await group.getProperties()){
     if(!/^\d+$/.test(key)){await value.dispose();continue;}const handle=value.asElement();if(!handle){await value.dispose();continue;}
@@ -59,7 +60,7 @@ async function semanticTargets(page,id,revision){
     });
     const ref=randomUUID();map.set(ref,{handle,kind:metadata.kind,revision});result.push({ref,...metadata});
   }}finally{await group.dispose();}
-  targets.set(id,map);return result;
+  targets.set(id,map);return{targets:result,sourceLimits};
 }
 async function observe(id,actor,includeScreenshot=true){
   active();id=id||selectedTabId;if(!id)fail('unknown_tab');const page=getPage(id);selectedTabId=id;
@@ -68,8 +69,9 @@ async function observe(id,actor,includeScreenshot=true){
     await delay(attempt?75:25);const before=revisions.get(id),url=page.url();
     try{
       await page.waitForLoadState('domcontentloaded',{timeout:Math.max(1,Math.min(2000,deadline-Date.now()))});
+      const sensitive=await page.evaluate(()=>!!document.querySelector('input[type="password"],input[autocomplete="current-password"],input[autocomplete="new-password"],input[autocomplete="one-time-code"]'));
       const domBefore=await readDOM(id),title=(await page.title()).slice(0,200),text=await page.evaluate(()=>document.body?.innerText?.slice(0,16000)||'');
-      invalidate(id);const revision=revisions.get(id),refs=await semanticTargets(page,id,revision);let frame=null;
+      invalidate(id);const revision=revisions.get(id),selected=await semanticTargets(page,id,revision),refs=selected.targets;let frame=null;
       if(includeScreenshot&&actor!=='agent'){
         // Hiding the caret writes temporary inline styles to editable elements, which
         // would invalidate this freshly returned observation through our DOM fence.
@@ -78,7 +80,7 @@ async function observe(id,actor,includeScreenshot=true){
       }
       if(page.url()!==url||revisions.get(id)!==revision||revision!==before+1||await readDOM(id)!==domBefore)continue;
       domFences.get(id).observed=domBefore;
-      return{tabs:await tabs(),selectedTabId:id,tab:id,url:url.slice(0,4096),title,text,revision,targets:refs,frame,permissions:[...permissions]};
+      return{tabs:await tabs(),selectedTabId:id,tab:id,url:url.slice(0,4096),title:sensitive&&actor==='agent'?'Login requires owner control':title,text:sensitive&&actor==='agent'?'':text,sensitive,limits:selected.sourceLimits,revision,targets:sensitive&&actor==='agent'?[]:refs,frame:sensitive&&actor==='agent'?null:frame,permissions:[...permissions]};
     }catch(error){if(page.isClosed())fail('unknown_tab');if(error instanceof ProtocolError&&error.code==='frame_too_large')throw error;}
   }fail('observation_unavailable');
 }
@@ -155,7 +157,7 @@ async function execute(req){
     case 'session.launch':try{return await launch();}catch{phase='failed';await context?.close().catch(()=>{});fail('browser_startup_or_sandbox_failed');}case 'session.status':return{phase,tabs:phase==='running'?await tabs():[],downloads:transfers.list()};case 'session.close':return closeSession(p);
     case 'profile.restore.begin':return profile.begin(p);case 'profile.restore.file':return profile.add(p);case 'profile.restore.chunk':return profile.chunk(p);case 'profile.restore.finish':return profile.finish();case 'profile.read':if(phase!=='closed')fail('profile_not_closed');return profile.read(p);
     case 'tabs.list':active();return tabs();
-    case 'tabs.open':{active();if(pages.size>=MAX_TABS)fail('tab_limit');const url=permittedTabURL(p.url),page=await context.newPage(),id=register(page);if(url!=='about:blank')try{await page.goto(url,{waitUntil:'domcontentloaded',timeout:12000});}catch{if(page.isClosed())fail('unknown_tab');}return observe(id,req.actor);}
+    case 'tabs.open':{active();if(pages.size>=MAX_TABS)fail('tab_limit');const url=permittedTabURL(p.url),page=await context.newPage(),id=register(page);if(url!=='about:blank')try{await page.goto(url,{waitUntil:'domcontentloaded',timeout:12000});}catch{if(page.isClosed())fail('unknown_tab');fail('navigation_failed');}return observe(id,req.actor);}
     case 'tabs.close':current(p,false);await getPage(p.tab).close();if(!pages.size)register(await context.newPage());return{tabs:await tabs(),selectedTabId};
     case 'page.navigate':{const page=current(p,false);await page.goto(permittedURL(p.url),{waitUntil:'domcontentloaded',timeout:12000});return observe(p.tab,req.actor);}
     case 'page.observe':return observe(p.tab,req.actor,p.screenshot!==false);

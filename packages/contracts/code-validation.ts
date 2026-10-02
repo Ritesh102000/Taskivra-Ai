@@ -23,6 +23,7 @@ export function parseCodeCommand(raw: unknown): CodeCommand {
   const taskId = id(v.taskId);
   switch (v.type) {
     case 'code.state': keys([]); return { type: v.type, taskId };
+    case 'code.history': {if(Object.keys(v).some(k=>!['type','taskId','beforeExecutionId','executionId'].includes(k))||v.beforeExecutionId!==undefined&&v.executionId!==undefined)fail();return{type:v.type,taskId,...(v.beforeExecutionId!==undefined?{beforeExecutionId:id(v.beforeExecutionId)}:{}),...(v.executionId!==undefined?{executionId:id(v.executionId)}:{})};}
     case 'code.execute': {
       keys(['runtime', 'source', 'timeoutSeconds', 'inputVersionIds']);
       if (!['python', 'node', 'shell'].includes(v.runtime as string)) fail('Select Python, Node, or shell inside the isolated container.');

@@ -1,0 +1,10 @@
+{
+  "version": "0.9.9",
+  "baselineRef": "834001d85bbf57ef64e82c7263714b4f9ecfc824",
+  "files": {
+    "index.html": "8b6d4c16dd7ad8f64a43f625d94ba0542122bc34cfd6e8a7ad54eba2369c57d2",
+    "styles.css": "1ed680b6d57d37f8659a33f83567fb2a07459bc24304af2e3a157166cacef8cc",
+    "guide.js": "d3f225d15f048fab8cc7a8cafd39afdaa8b45238f817e281ca50ef6bbae1c9ea",
+    "Taskivra-AI-Guide.pdf": "ed2ebcaef90b71a8b16d3d9e191a3f1906817f6260cc41d771a0b84291696894"
+  }
+}

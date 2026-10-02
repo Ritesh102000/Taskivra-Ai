@@ -27,6 +27,7 @@ test('schema 16 upgrade preserves legacy review records and task budgets while a
  const f=await fixture();try{
   f.db.exec("INSERT INTO security_review_teams VALUES('old','Previous review','Saved scope','personal-workspace','[]',1,'old-key','old-hash'); INSERT INTO security_review_members VALUES('old',0,'code_review','a','t','gpt-fixture','{}','[]','ready',NULL);");
   const before={task:f.db.prepare('SELECT * FROM tasks').all(),budget:f.db.prepare('SELECT * FROM live_task_config').all(),team:f.db.prepare('SELECT * FROM security_review_teams').all(),member:f.db.prepare('SELECT * FROM security_review_members').all()};
+  f.db.exec('ALTER TABLE code_executions DROP COLUMN cleanup_state; DROP TABLE repository_snapshot_receipts; DROP TABLE fleet_archives; DROP TABLE agent_archives; DROP TABLE task_archives; DROP TABLE fleet_source_manifests; DROP TABLE fleet_message_links; DROP TABLE fleet_followups');
   for(const table of ['fleet_messages','fleet_plan_revisions','fleet_tasks','fleet_items','fleet_members','fleet_runs'])f.db.exec(`DROP TABLE ${table}`);
   f.db.exec('DELETE FROM schema_migrations WHERE version>=17; PRAGMA user_version=16');f.p.close();
   const upgraded=new Persistence(join(f.root,'data'),Date.now());try{

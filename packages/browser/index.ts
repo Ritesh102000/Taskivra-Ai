@@ -14,7 +14,7 @@ import { unavailableRuntime, type BrowserHandle, type BrowserRuntime } from './r
 type Row = Record<string, string | number | null>;
 type Observation = { tabs: BrowserTab[]; selectedTabId: string | null; targets?: BrowserState['targets']; text?: string; permissions?:{permission:string}[]; frame?: {jpegBase64:string;width:number;height:number;revision:number;tabId:string}|null };
 type Download = {id:string;name:string;bytes:number;completed:boolean;status:string;sha256?:string;tabId:string;origin:string};
-type Entry = {state:BrowserState;handle?:BrowserHandle;wireGeneration:number;tail:Promise<unknown>;closing?:Promise<void>;launchToken?:string};
+type Entry = {state:BrowserState;handle?:BrowserHandle;wireGeneration:number;tail:Promise<unknown>;pending?:number;closing?:Promise<void>;launchToken?:string};
 export class BrowserError extends Error { constructor(readonly code:string, message:string, options?:ErrorOptions) { super(message,options); } }
 function fail(code='stale_browser', message='The browser changed. Refresh its view before continuing.'):never { throw new BrowserError(code,message); }
 const workerErrorMessages:Readonly<Record<string,string>>={
@@ -23,6 +23,7 @@ const workerErrorMessages:Readonly<Record<string,string>>={
   native_transfer_unsupported:'Managed file transfers are available in the container browser. Close this session and choose that browser type to use them.',
   auth_page:'This page requires human login. Take control and sign in directly in the dedicated Chrome window.',
   stale_observation:'The page changed after this view was captured. Refresh the view before entering more input.',
+  navigation_failed:'Navigation did not complete within the browser deadline. Refresh the page and check its current state before continuing.',
   stale_generation:'Browser control changed before the action completed. Refresh the view and check who has control.',
   fresh_observation_required:'A fresh page observation is required before another action. Refresh the browser view.',
   unknown_tab:'This tab is no longer available in the current session. Refresh the view or select another tab.',
@@ -132,7 +133,7 @@ export class BrowserService {
     const tab=entry.state.tabs.find(t=>t.id===command.tabId);if(!tab)fail('unknown_tab','That tab does not belong to this browser.');
     if(command.revision!==undefined&&(entry.state.activeTabId!==command.tabId||tab.revision!==command.revision))fail('stale_observation','The page changed. Refresh its view before acting.');
   }
-  private queue<T>(entry:Entry,work:()=>Promise<T>):Promise<T>{const result=entry.tail.then(work);entry.tail=result.catch(()=>{});return result;}
+  private queue<T>(entry:Entry,work:()=>Promise<T>):Promise<T>{if((entry.pending||0)>=32)return Promise.reject(new BrowserError('browser_busy','The browser has too many pending actions. Wait for the current actions to finish.'));entry.pending=(entry.pending||0)+1;const result=entry.tail.then(work).finally(()=>{entry.pending!--;});entry.tail=result.catch(()=>{});return result;}
   private observation(entry:Entry,raw:unknown,persist=false){
     const v=raw as Observation;
     if(!v||!Array.isArray(v.tabs)||v.tabs.length>6||v.tabs.some(t=>!safeId(t.id)||typeof t.url!=='string'||t.url.length>4096||typeof t.title!=='string'||t.title.length>200||!Number.isSafeInteger(t.revision)))fail('invalid_observation','The browser returned an invalid view.');
@@ -383,7 +384,7 @@ export class BrowserService {
     return this.queue(entry,async()=>{
       guard();beforeDispatch?.();const id=randomUUID();this.write("INSERT INTO browser_tool_calls(id,session_id,task_id,run_id,generation,method,state,created_at) VALUES (?,?,?,?,?,?,'dispatched',?)",id,sessionId,claim.taskId,claim.runId,generation,method,this.now());
       try{const result=await this.request(entry,method,params,'agent');guard();if(method!=='tabs.list'&&method!=='page.gmailUnread')this.observation(entry,result.result,true);this.write("UPDATE browser_tool_calls SET state='succeeded',finished_at=? WHERE id=? AND state='dispatched'",this.now(),id);return result.result;}
-      catch(error){if(!this.stopped)this.write("UPDATE browser_tool_calls SET state='outcome_unknown',finished_at=? WHERE id=? AND state='dispatched'",this.now(),id);throw error;}
+      catch(error){const refused=error instanceof BrowserError&&['stale_observation','invalid_target','permission_denied','human_login_required'].includes(error.code);if(!this.stopped)this.write("UPDATE browser_tool_calls SET state=?,finished_at=? WHERE id=? AND state='dispatched'",refused?'failed':'outcome_unknown',this.now(),id);throw error;}
     });
   }
   diagnostics():{taskId:string;code:'google_browser_rejected'}[]{return [...this.entries.values()].filter(e=>e.state.taskId&&e.state.tabs.some(t=>googleBrowserRejected(t.url))).map(e=>({taskId:e.state.taskId!,code:'google_browser_rejected'}));}
@@ -400,7 +401,7 @@ export class BrowserService {
           if(item.completed&&item.status!=='failed')await this.saveDownload(entry,item.id);
           else {if(!item.completed)await this.request(entry,'download.cancel',{id:item.id});await this.request(entry,'download.ack',{id:item.id});}
         }
-        const profile=await handle.close({saveProfile:true});entry.state.profile={mode:'remember',saved:profile.saved,savedAt:profile.savedAt||entry.state.profile.savedAt};entry.state.error=null;
+        const profile=await handle.close({saveProfile:true});entry.state.profile={mode:'remember',saved:profile.saved,savedAt:profile.savedAt||entry.state.profile.savedAt};entry.state.error=profile.cleanupPending?'The latest profile was saved. Browser cleanup still needs attention; refresh runtime setup before starting another session.':null;
       }catch{await handle.stop().catch(()=>{});entry.state.error='The browser stopped before its latest profile or downloads could be saved. Its last saved profile is preserved.';}
       finally{entry.handle=undefined;entry.state.lifecycle=entry.state.error?'disconnected':'idle';entry.state.controller='none';entry.state.tabs=[];entry.state.activeTabId=null;entry.state.frame=null;entry.state.targets=[];this.changed(entry,'browser.closed');}
     });entry.closing=work.finally(()=>{entry.closing=undefined;});return entry.closing;

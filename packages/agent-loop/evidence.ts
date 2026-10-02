@@ -1,7 +1,7 @@
 import type { Persistence } from '../persistence';
 import { identity, liveFail, number } from '../contracts/live-validation';
 
-export const SOURCE_TOOLS = ['gmail_unread', 'gmail_search', 'gmail_thread', 'browser_open', 'browser_navigate', 'browser_observe', 'browser_tab_open', 'browser_tab_observe', 'read_file', 'extract_file', 'code_execute', 'lab_open', 'lab_observe', 'lab_action', 'lab_command'] as const;
+export const SOURCE_TOOLS = ['gmail_unread', 'gmail_search', 'gmail_thread', 'browser_open', 'browser_navigate', 'browser_observe', 'browser_tab_open', 'browser_tab_observe', 'read_file', 'read_file_range', 'extract_file', 'code_execute', 'lab_open', 'lab_observe', 'lab_action', 'lab_command'] as const;
 /** Effective single-call payload limits leave room for JSON escaping and IDs. */
 export const REPORT_CONTENT_BYTES = 10 * 1024;
 export const CODE_SOURCE_BYTES = 10 * 1024;

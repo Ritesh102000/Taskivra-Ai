@@ -32,9 +32,12 @@ export function cleanBrowserObservation(raw: unknown, policy: LivePolicy, localO
  let text = received.slice(0, textLimitChars); if (/[\uD800-\uDBFF]$/.test(text)) text = text.slice(0, -1);
  const safeTargets = targets.map(t => { const v = t as Record<string, unknown>; return { ref: v.ref as string, kind: v.kind as string, label: v.label as string }; });
  while (bytes(safeTargets) > 6500) safeTargets.pop();
+ const limits=r.limits&&typeof r.limits==='object'?r.limits as Record<string,unknown>:{};
+ const targetLimit=Number.isSafeInteger(limits.targetLimit)&&Number(limits.targetLimit)>0&&Number(limits.targetLimit)<=10000?Number(limits.targetLimit):null;
+ const traversalLimit=Number.isSafeInteger(limits.traversalLimit)&&Number(limits.traversalLimit)>0&&Number(limits.traversalLimit)<=100000?Number(limits.traversalLimit):null;
  const result: Record<string, unknown> = { tabId: r.tab, url: url.href, title: r.title, text, revision: r.revision, targets: safeTargets,
   textTruncated: received.length > text.length || r.textTruncated === true || r.truncated === true ? true : null,
-  textLimitReached: received.length >= textLimitChars, returnedTextChars: text.length, textLimitChars, targetsTruncated: safeTargets.length < targets.length, returnedTargetCount: safeTargets.length,
+  textLimitReached: received.length >= textLimitChars, returnedTextChars: text.length, textLimitChars, targetsTruncated: safeTargets.length < targets.length || limits.targetLimitReached===true || limits.traversalLimitReached===true, targetLimit, traversalLimit, targetLimitReached:typeof limits.targetLimitReached==='boolean'?limits.targetLimitReached:null, traversalLimitReached:typeof limits.traversalLimitReached==='boolean'?limits.traversalLimitReached:null, returnedTargetCount: safeTargets.length,
   fullPageVerified: false, coverage: 'Bounded main-document text and targets; frames and unloaded content may be absent. Upstream total length is unknown. Refreshing repeats a current snapshot, not pagination through omitted text.' };
  if (bytes(result) > MAX_OBSERVATION_BYTES) {
   result.textTruncated = true;

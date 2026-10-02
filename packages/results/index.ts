@@ -7,7 +7,7 @@ import type { ResultDetail, ResultItem, ResultQuality, ResultReview, ResultRevis
 import { identity, number, parseLimits, parsePolicy, record, string } from '../contracts/live-validation';
 import { modelChoice } from '../model-adapters/pricing';
 import { checkResultQuality } from './quality';
-import { readProcedure } from '../workflows/procedures';
+import { effectiveProcedure, copyEffectiveWorkflow } from '../workflows/effective';
 
 type Row = Record<string, string | number | null>;
 type CreateTask = (command: Extract<LiveCommand, { type: 'live.createTask' }>, onCreated?: (taskId: string) => void) => string;
@@ -49,8 +49,8 @@ export class ResultService {
     return { id: String(r.id), sourceTaskId: String(r.source_task_id), sourceVersionId: String(r.source_version_id), taskId: String(r.task_id),
       state: r.state as ResultRevisionJob['state'], error: r.error === null ? null : String(r.error), inputVersionIds: JSON.parse(String(r.input_version_ids)), createdAt: Number(r.created_at) };
   }
-  state(): ResultsState {
-    const results = this.rows("SELECT t.id,l.result_version_id FROM tasks t JOIN live_task_config l ON l.task_id=t.id WHERE t.state='succeeded' AND l.result_version_id IS NOT NULL ORDER BY t.updated_at DESC,t.id LIMIT 200")
+  state(beforeTaskId?:string): ResultsState {
+    const results = this.rows("SELECT t.id,l.result_version_id FROM tasks t JOIN live_task_config l ON l.task_id=t.id WHERE t.state='succeeded' AND l.result_version_id IS NOT NULL AND (? IS NULL OR (t.updated_at<(SELECT updated_at FROM tasks WHERE id=?) OR (t.updated_at=(SELECT updated_at FROM tasks WHERE id=?) AND t.id>?))) ORDER BY t.updated_at DESC,t.id LIMIT 200",beforeTaskId||null,beforeTaskId||null,beforeTaskId||null,beforeTaskId||null)
       .flatMap(r => { try { return [this.result(String(r.id), String(r.result_version_id))]; } catch { return []; } });
     return { results, revisionJobs: this.rows('SELECT * FROM result_revision_jobs ORDER BY created_at DESC,id LIMIT 200').map(r => this.job(r)) };
   }
@@ -70,7 +70,9 @@ export class ResultService {
     const evidence = this.rows("SELECT id,tool_name,created_at FROM live_tool_receipts WHERE task_id=? AND state='succeeded' ORDER BY created_at DESC,id LIMIT 40", taskId)
       .map(r => ({ id: String(r.id), tool: String(r.tool_name), label: String(r.tool_name).replaceAll('_', ' ') + ' · completed tool call', createdAt: Number(r.created_at) }));
     const quality = await this.checkQuality(taskId, versionId);
-    return { result: fresh, preview, inputs, evidence, totalEvidence, evidenceTruncated: totalEvidence > evidence.length, integrity: 'verified', quality, canRequestChanges: this.options.canReviseSource?.(taskId) ?? true,
+    const routine=this.row('SELECT routine_id,id AS occurrence_key FROM routine_occurrences WHERE task_id=?',taskId);
+    const roles=this.rows('SELECT slot_key,version_id FROM workflow_input_assignments WHERE task_id=? ORDER BY slot_key',taskId).map(row=>({slotKey:String(row.slot_key),versionId:row.version_id===null?null:String(row.version_id)}));
+    return { provenance:{inputRoles:roles,routine:routine?{routineId:String(routine.routine_id),occurrenceKey:String(routine.occurrence_key)}:null,assessment:{checkerVersion:quality.checkerVersion,sourceVersionId:quality.sourceVersionId,sourceSha256:quality.sourceSha256,checkedAt:quality.checkedAt},acceptance:fresh.review},result: fresh, preview, inputs, supportingOutputs:this.rows("SELECT b.version_id FROM task_artifacts b JOIN artifact_versions v ON v.id=b.version_id JOIN artifacts a ON a.id=v.artifact_id WHERE b.task_id=? AND b.role='output' AND a.producer_task_id=? AND v.status='ready' AND v.id<>?",taskId,taskId,versionId).map(row=>this.options.artifacts.getForAgent(fresh.agentId,String(row.version_id))), evidence, totalEvidence, evidenceTruncated: totalEvidence > evidence.length, integrity: 'verified', quality, canRequestChanges: this.options.canReviseSource?.(taskId) ?? true,
       criteriaStatus: fresh.review.state === 'accepted' ? 'accepted_by_owner' : fresh.review.state === 'changes_requested' ? 'changes_requested' : 'needs_owner_review' };
   }
   /** Used by both owner inspection and the live finish gate. The file is reread
@@ -87,16 +89,13 @@ export class ResultService {
     const includeText = ['md', 'markdown', 'txt', 'text', 'csv', 'json'].includes(version.format) && version.bytes <= 1024 * 1024;
     const verified = await this.options.artifacts.readForValidation(String(task.agent_id), versionId, includeText);
     const inputVersionIds = this.rows("SELECT version_id FROM task_artifacts WHERE task_id=? AND role='input'", taskId).map(row => String(row.version_id));
-    const evidenceIds = this.rows("SELECT id,result_json FROM live_tool_receipts WHERE task_id=? AND state='succeeded' AND tool_name IN ('gmail_unread','gmail_search','gmail_thread','browser_open','browser_navigate','browser_observe','browser_tab_open','browser_tab_observe','read_file','extract_file','code_execute','lab_open','lab_observe','lab_action','lab_command')", taskId).filter(row => {
+    const evidenceIds = this.rows("SELECT id,result_json FROM live_tool_receipts WHERE task_id=? AND state='succeeded' AND tool_name IN ('gmail_unread','gmail_search','gmail_thread','browser_open','browser_navigate','browser_observe','browser_tab_open','browser_tab_observe','read_file','read_file_range','extract_file','code_execute','lab_open','lab_observe','lab_action','lab_command')", taskId).filter(row => {
       try { const result = JSON.parse(String(row.result_json)); return !result.waiting && result.accountVerified !== false && result.loginOrRedirect !== true && result.humanLoginRequired !== true && result.nativeHumanControl !== true; } catch { return false; }
     }).map(row => String(row.id));
     let reportEvidenceIds: string[] | undefined;
     try { const provenance = JSON.parse(String(task.provenance)); if (provenance?.agentReport?.taskId === taskId && Array.isArray(provenance.agentReport.evidenceIds)) reportEvidenceIds = provenance.agentReport.evidenceIds; } catch { /* Other provenance types do not assert report references. */ }
-    const origin = this.row('SELECT definition_json FROM workflow_task_origins WHERE task_id=?', taskId);
-    // An explicitly accepted smaller scope replaces old completion requirements.
-    const reduced = this.row("SELECT 1 FROM input_requests r JOIN request_details d ON d.request_id=r.id WHERE r.task_id=? AND d.kind='reduced_scope' AND r.state='fulfilled'", taskId);
-    const procedure = !reduced && origin?.definition_json ? readProcedure(String(origin.definition_json)) : null;
-    return checkResultQuality({ version: verified.version, text: verified.text, complete: includeText, completionCriteria: String(task.completion_criteria), inputVersionIds, evidenceIds, reportEvidenceIds,
+    const procedure = effectiveProcedure(this.db, taskId);
+    return checkResultQuality({ version: verified.version, text: verified.text, complete: includeText, completionCriteria: String(task.completion_criteria), inputVersionIds, supportingOutputVersionIds: this.rows("SELECT b.version_id FROM task_artifacts b JOIN artifact_versions v ON v.id=b.version_id JOIN artifacts a ON a.id=v.artifact_id WHERE b.task_id=? AND b.role='output' AND a.producer_task_id=? AND v.status='ready'",taskId,taskId).map(row=>String(row.version_id)), evidenceIds, reportEvidenceIds,
       ...(procedure ? { requiredSections: procedure.output.sections, requiredFormat: procedure.output.format } : {}), now: this.now() });
   }
   handle(raw: unknown): Promise<ResultsState> {
@@ -121,15 +120,16 @@ export class ResultService {
   }
   private async execute(raw: unknown): Promise<ResultsState> {
     await this.options.artifacts.ready;
-    const top = record(raw, ['type', 'taskId', 'versionId', 'revision', 'feedback', 'limits', 'idempotencyKey', 'revisionId']);
+    const top = record(raw, ['type', 'taskId', 'versionId', 'revision', 'feedback', 'limits', 'idempotencyKey', 'revisionId','beforeTaskId']);
     if (JSON.stringify(top).length > 18000) fail('invalid_command', 'This result action is too large.');
-    if (top.type === 'results.state') { record(top, ['type']); return this.state(); }
+    if (top.type === 'results.state') { record(top, ['type','beforeTaskId']); return this.state(top.beforeTaskId===undefined?undefined:identity(top.beforeTaskId)); }
     if (top.type === 'results.inspect') {
       record(top, ['type', 'taskId', 'versionId']);
-      return { ...this.state(), detail: await this.inspect(identity(top.taskId), identity(top.versionId)) };
+      const taskId=identity(top.taskId),saved=this.row('SELECT result_version_id FROM live_task_config WHERE task_id=?',taskId);const versionId=top.versionId===undefined?(saved?.result_version_id?String(saved.result_version_id):fail('not_found','The exact task has no saved final result.')):identity(top.versionId);
+      return { ...this.state(), detail: await this.inspect(taskId, versionId) };
     }
     if (top.type === 'results.retryPreparation') {
-      record(top, ['type', 'revisionId']); const id = identity(top.revisionId);
+      record(top, ['type', 'revisionId','beforeTaskId']); const id = identity(top.revisionId);
       await this.prepareRevision(id); return this.state();
     }
     if (top.type !== 'results.accept' && top.type !== 'results.requestChanges') return fail('invalid_command', 'This result action is not supported.');
@@ -171,6 +171,7 @@ export class ResultService {
     };
     const createdTaskId = this.options.createTask(command, newTaskId => {
       this.checkRevision(taskId, versionId, revision);
+      copyEffectiveWorkflow(this.db, taskId, newTaskId, now);
       this.saveReview(taskId, versionId, revision, 'changes_requested', feedback);
       this.write("INSERT INTO result_revision_jobs VALUES (?,?,?,?,?,'preparing',NULL,?,?)", jobId, taskId, versionId, newTaskId, JSON.stringify(inputVersionIds), now, now);
       this.write('INSERT INTO result_actions VALUES (?,?,?,?,?,?)', key, requestHash, taskId, versionId, jobId, now);

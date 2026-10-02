@@ -71,17 +71,22 @@ export class CollaborationService {
   if(row.recipient!==agentId||row.source_task_id===null||!this.visible(String(row.source_task_id),agentId))return false;
   return (JSON.parse(String(row.task_refs)) as string[]).every(taskId=>this.visible(taskId,agentId))&&(JSON.parse(String(row.artifact_refs)) as string[]).every(versionId=>this.projects.canReadVersion(agentId,versionId));
  }
- private inbox(agentId?:string):AgentInboxMessage[]{
+ private inbox(agentId?:string,ownerScope=false):AgentInboxMessage[]{
   const rows=this.rows("SELECT * FROM agent_messages WHERE source_task_id IS NOT NULL"+(agentId?' AND recipient=?':'')+' ORDER BY (read_at IS NULL) DESC,created_at DESC,rowid DESC',...(agentId?[agentId]:[]));
-  return rows.filter(row=>!agentId||this.messageVisible(row,agentId)).slice(0,agentId?COLLABORATION_LIMITS.inbox:COLLABORATION_LIMITS.messages).map(row=>this.message(row));
+  return rows.filter(row=>ownerScope||!agentId||this.messageVisible(row,agentId)).slice(0,agentId?COLLABORATION_LIMITS.inbox:COLLABORATION_LIMITS.messages).map(row=>this.message(row));
  }
- private publications(agentId?:string):PublicationNotice[]{
-  return this.rows("SELECT p.* FROM collaboration_publications p JOIN artifact_versions v ON v.id=p.version_id JOIN artifacts a ON a.id=v.artifact_id WHERE v.status='ready' AND a.visibility='shared'"+(agentId?' AND p.recipient_agent_id=?':'')+' ORDER BY (p.read_at IS NULL) DESC,p.created_at DESC,p.id DESC LIMIT ?',...(agentId?[agentId]:[]),agentId?COLLABORATION_LIMITS.publications:500).map(row=>({id:String(row.id),eventId:Number(row.event_id),recipientAgentId:String(row.recipient_agent_id),versionId:String(row.version_id),artifact:this.shared(String(row.version_id),agentId),createdAt:Number(row.created_at),readAt:row.read_at===null?null:Number(row.read_at)}));
+ private publications(agentId?:string,ownerScope=false):PublicationNotice[]{
+  return this.rows("SELECT p.* FROM collaboration_publications p JOIN artifact_versions v ON v.id=p.version_id JOIN artifacts a ON a.id=v.artifact_id WHERE v.status='ready' AND a.visibility='shared'"+(agentId?' AND p.recipient_agent_id=?':'')+' ORDER BY (p.read_at IS NULL) DESC,p.created_at DESC,p.id DESC LIMIT ?',...(agentId?[agentId]:[]),agentId?COLLABORATION_LIMITS.publications:500).map(row=>({id:String(row.id),eventId:Number(row.event_id),recipientAgentId:String(row.recipient_agent_id),versionId:String(row.version_id),artifact:this.shared(String(row.version_id),ownerScope?undefined:agentId),createdAt:Number(row.created_at),readAt:row.read_at===null?null:Number(row.read_at)}));
  }
- state():CollaborationState{this.open();return{policies:this.rows('SELECT id FROM tasks ORDER BY created_at,id').map(t=>this.policy(String(t.id))),board:this.board(),inbox:this.inbox(),publications:this.publications(),dependencies:this.dependencies(),sharedArtifacts:this.sharedList(undefined,FILE_LIMITS.versions)};}
+ state(agentId?:string):CollaborationState{this.open();if(agentId)this.agent(agentId);return{policies:this.rows('SELECT id FROM tasks ORDER BY created_at,id').map(t=>this.policy(String(t.id))),board:this.board(agentId),inbox:this.inbox(agentId,true),publications:this.publications(agentId,true),dependencies:this.dependencies(),sharedArtifacts:this.sharedList(undefined,FILE_LIMITS.versions)};}
  context(claim:RunClaim):AgentCollaborationContext{
   this.check(claim);this.reconcile();this.check(claim);
   return{policies:[this.policy(claim.taskId)],board:this.board(claim.agentId),inbox:this.inbox(claim.agentId),publications:this.publications(claim.agentId),dependencies:this.dependencies(claim.taskId).filter(d=>this.visible(d.dependsOnTaskId,claim.agentId)),sharedArtifacts:this.sharedList(claim.agentId),limits:{board:COLLABORATION_LIMITS.board,inbox:COLLABORATION_LIMITS.inbox,publications:COLLABORATION_LIMITS.publications,artifacts:COLLABORATION_LIMITS.artifacts}};
+ }
+ /** Owner-local read used for offline admission diagnostics; no lease or reconciliation mutation. */
+ previewContext(taskId:string):AgentCollaborationContext{
+  const task=this.task(taskId),agentId=String(task.agent_id);
+  return{policies:[this.policy(taskId)],board:this.board(agentId),inbox:this.inbox(agentId),publications:this.publications(agentId),dependencies:this.dependencies(taskId).filter(d=>this.visible(d.dependsOnTaskId,agentId)),sharedArtifacts:this.sharedList(agentId),limits:{board:COLLABORATION_LIMITS.board,inbox:COLLABORATION_LIMITS.inbox,publications:COLLABORATION_LIMITS.publications,artifacts:COLLABORATION_LIMITS.artifacts}};
  }
  discover(claim:RunClaim):SharedArtifact[]{this.check(claim);return this.sharedList(claim.agentId);}
  private setPolicy(command:Extract<ReturnType<typeof parseCollaborationCommand>,{type:'collaboration.policy'}>){
@@ -216,7 +221,7 @@ export class CollaborationService {
    else if(command.type==='collaboration.send')this.sendLocked(command.taskId,messageInput({recipientAgentId:command.recipientAgentId,kind:command.kind,taskIds:command.taskIds,versionIds:command.versionIds,idempotencyKey:command.idempotencyKey}),'owner',command.body);
    else if(command.type==='collaboration.ack')this.ackLocked(command.agentId,command.messageIds,command.publicationIds||[]);
   });
-  this.reconcile();if(command.type!=='collaboration.state')this.changed();return this.state();
+  this.reconcile();if(command.type!=='collaboration.state')this.changed();return this.state(command.type==='collaboration.state'?command.agentId:undefined);
  }
  async shutdown(){this.closed=true;await Promise.allSettled([...this.pending]);}
  close(){this.closed=true;}

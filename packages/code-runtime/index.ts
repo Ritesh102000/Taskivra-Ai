@@ -218,7 +218,7 @@ export class DockerCodeRuntimeFactory implements CodeRuntime {
       // Retain the intent and capacity fence for startup reconciliation in that case.
       const uncertain = Boolean(journal && createAttempted && !journal.id);
       this.uncertainCreation = uncertain;
-      if (journal) { try { await this.cleanup(journal, uncertain); } finally { active.delete(journal.run); } }
+      if (journal) { try { await this.cleanup(journal, uncertain); } catch (cleanupError) { this.uncertainCreation = true; throw cleanupError; } finally { active.delete(journal.run); } }
       this.busy = false; throw error;
     }
   }
@@ -234,7 +234,7 @@ export class DockerCodeRuntimeFactory implements CodeRuntime {
       let journal: Journal;
       try { const bytes = Buffer.alloc(8193); const read = await file.read(bytes); if (read.bytesRead > 8192) throw new Error('code_journal_invalid'); journal = JSON.parse(bytes.subarray(0, read.bytesRead).toString()); } finally { await file.close(); }
       if (journal.version !== 4 || journal.owner !== this.owner || name !== `${journal.run}.json` || !/^[a-f0-9-]{36}$/.test(journal.run) || !Number.isSafeInteger(journal.pid) || journal.pid < 1 || journal.name !== `awp4-${this.owner.slice(0, 10)}-${journal.run.slice(0, 8)}` || (journal.id !== null && !/^[a-f0-9]{64}$/.test(journal.id))) throw new Error('code_journal_invalid');
-      if (active.has(journal.run) || (journal.pid !== process.pid && alive(journal.pid))) continue;
+      if (active.has(journal.run) || (journal.pid !== process.pid && alive(journal.pid))) throw new Error('code_cleanup_incomplete');
       await this.cleanup(journal);
     }
     if (!this.handles.size && !this.pending.size) { this.uncertainCreation = false; this.busy = false; }

@@ -19,7 +19,7 @@ export function messageInput(value:unknown):AgentMessageInput{
 export function parseCollaborationCommand(value:unknown):CollaborationCommand{
  if(!value||typeof value!=='object'||Array.isArray(value))fail();
  const type=Object.getOwnPropertyDescriptor(value,'type')?.value;
- if(type==='collaboration.state'){record(value,['type']);return{type};}
+ if(type==='collaboration.state'){const v=record(value,['type','agentId'],['agentId']);return{type,...(v.agentId===undefined?{}:{agentId:id(v.agentId)})};}
  if(type==='collaboration.policy'){
   const v=record(value,['type','taskId','revision','visibility','summary','peerAgentIds']);
   if(v.visibility!=='private'&&v.visibility!=='shared')fail();const summary=text(v.summary,240).trim();if(v.visibility==='shared'&&!summary)fail();

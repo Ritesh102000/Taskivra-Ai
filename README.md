@@ -1,5 +1,7 @@
 # Taskivra AI
 
+Current entrypoints and review implementation: [capabilities and verification](docs/improvements/CURRENT-CAPABILITIES.md), [102-item implementation ledger](docs/improvements/ledger.json). Historical planning and review records remain dated reference material.
+
 **One objective. Your agents, working together.**
 
 Taskivra AI is a Mac-first desktop workspace for running and supervising AI agents. Agents have private files and their own browser sessions. They can request missing information, wait for your response, resume saved work, publish exact file versions, and collaborate through shared tasks and messages. You remain in control of their access, budgets, browser handoffs, and execution.
@@ -8,7 +10,7 @@ The separate **Fleets** feature turns one objective into a bounded team: a lead 
 
 This repository contains the implemented application, runtime workers, tests, a synthetic local training website, and the planning and research records behind the product.
 
-> **Status: local pre-release, version 0.9.9.** The application and package still display **Agent Workspaces**, and retain that name for existing storage and internal identifiers. Taskivra AI is the repository/product name; a complete application rebrand has not been applied. Apple Silicon Mac is the validated development platform. Windows, Linux, Intel Mac, clean-machine installation, public signing, notarization, and automatic updates are not validated release targets.
+> **Status: local pre-release, version 0.10.0.** The application and package still display **Agent Workspaces**, and retain that name for existing storage and internal identifiers. Taskivra AI is the repository/product name; a complete application rebrand has not been applied. Apple Silicon Mac is the validated development platform. Windows, Linux, Intel Mac, clean-machine installation, public signing, notarization, and automatic updates are not validated release targets.
 
 ## Contents
 
@@ -35,7 +37,7 @@ This repository contains the implemented application, runtime workers, tests, a 
 
 New to the project? Start with the **[complete beginner guide](https://taskivra-ai-guide.vercel.app)** or **[open/download the linked PDF](https://taskivra-ai-guide.vercel.app/Taskivra-AI-Guide.pdf)**. The guide assumes no prior knowledge of this application: it explains the terminology and screens, Mac setup, model connections, creating an agent, giving it a task, supplying files, answering requests, browser control, results, collaboration, and Fleets.
 
-The 57-page edition for version 0.9.9 includes 24 chapters, a clickable contents page and PDF bookmarks, plus eight step-by-step examples: competitor research, CSV analysis, a read-only Gmail brief, supplied-code review, website usability review, decision research, a fleet reviewing published files, and the fictional local website lab. Each example includes agent instructions, task inputs, what a useful result should contain, numbered steps, review questions, and limitations. Examples are instructional; they do not claim completed live runs.
+The version 0.10.0 edition includes 25 chapters, a clickable contents page and PDF bookmarks, plus eight step-by-step examples: competitor research, CSV analysis, a read-only Gmail brief, supplied-code review, website usability review, decision research, a fleet reviewing published files, and the fictional local website lab. Each example includes agent instructions, task inputs, what a useful result should contain, numbered steps, review questions, and limitations. Examples are instructional; they do not claim completed live runs.
 
 The website hosts documentation and the PDF. The application runs locally on your Mac. A repository copy of the PDF is in [output/pdf/Taskivra-AI-Guide.pdf](output/pdf/Taskivra-AI-Guide.pdf); [guide sources and regeneration instructions](docs/guide/README.md) keep the web and PDF editions together.
 
@@ -436,7 +438,7 @@ npm run package:mac
 The default output is:
 
 ```text
-dist/packages/Agent-Workspaces-0.9.9-arm64-local/
+dist/packages/Agent-Workspaces-0.10.0-arm64-local/
   Agent Workspaces.app
   package-manifest.json
 ```
@@ -511,3 +513,7 @@ For an issue or proposed change, describe the task, exact observed behavior, exp
 No license has been selected for the original project code. Public repository access does not grant an additional license to that code. Third-party notices and applicable upstream terms are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); third-party materials retain their own licenses.
 
 Do not commit API keys, OAuth client downloads, tokens, personal browser profiles, application databases, private backups, recordings, generated helpers, build output, or dependency directories. The committed TLS fixture keys are deliberately public synthetic test materials and must never be used for a real service.
+
+## Published versions and rollback
+
+Every published source version has an annotated Git tag and GitHub release. Start with [the changelog](CHANGELOG.md) and [version/rollback instructions](docs/releases/VERSIONING.md). The [guide versions page](https://taskivra-ai-guide.vercel.app/versions/) retains matching guide/PDF editions. Source rollback requires compatible saved data; an older app cannot open a newer database schema.

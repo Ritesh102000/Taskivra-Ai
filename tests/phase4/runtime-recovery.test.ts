@@ -36,8 +36,8 @@ test('live second factory does not steal active resources; missing destination e
   const root = await realpath(await mkdtemp(join(tmpdir(), 'aw-p4-live-'))), first = new DockerCodeRuntimeFactory({ dataRoot: root }), second = new DockerCodeRuntimeFactory({ dataRoot: root });
   try {
     const handle = await first.launch({ executionId: 'live', taskId: 'task', agentId: 'agent', files: [], signal: new AbortController().signal, limits });
-    await second.reconcile(); assert.equal(JSON.parse((await execute('docker', ['inspect', handle.info.containerId])).stdout)[0].State.Running, true);
+    await assert.rejects(second.reconcile(), /code_cleanup_incomplete/); assert.equal((await readdir(join(root, 'control/code-runtime'))).filter(n => n.endsWith('.json')).length, 1); assert.equal(JSON.parse((await execute('docker', ['inspect', handle.info.containerId])).stdout)[0].State.Running, true);
     assert.equal((await handle.run({ argv: ['python3', '-I', '-c', "print('finished')"], cwd: '/workspace', signal: new AbortController().signal, onLog() {} })).exitCode, 0);
-    await assert.rejects(handle.export({ destination: join(root, 'missing'), signal: new AbortController().signal })); await handle.close();
+    await assert.rejects(handle.export({ destination: join(root, 'missing'), signal: new AbortController().signal })); await handle.close(); await second.reconcile(); assert.equal((await readdir(join(root, 'control/code-runtime'))).filter(n => n.endsWith('.json')).length, 0);
   } finally { await first.close(); await second.close(); await rm(root, { recursive: true, force: true }); }
 });

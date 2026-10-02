@@ -119,6 +119,8 @@ export function parseConfiguredResponse(raw: unknown, profile: ModelProviderProf
 /** Uses declared full input ceilings for reservations; never guesses tokenization or silently retries. */
 export class ConfiguredModelAdapter implements ModelAdapter {
   readonly profile: Readonly<ModelProviderProfile>; readonly limits: Readonly<{ maxInputTokens: number; maxOutputTokens: number }>; private entries = new Map<string, Entry>(); private used = new WeakSet<PreparedTurn>(); private transport: typeof globalThis.fetch; private timeout: number;
+  private generationDispatch = new WeakMap<PreparedTurn, boolean>();
+  generationWasNotDispatched(prepared:PreparedTurn):boolean{return this.generationDispatch.get(prepared)===false;}
   constructor(private options: ConfiguredAdapterOptions) {
     const { id, revision, selectionId, createdAt, ...input } = options.profile; validateProviderInput(input);
     this.profile = Object.freeze(structuredClone(options.profile)); this.limits = Object.freeze({ maxInputTokens: this.profile.maxInputTokens, maxOutputTokens: this.profile.maxOutputTokens, requestInputBytes:this.profile.maxInputTokens }); this.transport = options.fetch ?? globalThis.fetch; this.timeout = options.timeoutMs ?? 45_000;
@@ -134,10 +136,11 @@ export class ConfiguredModelAdapter implements ModelAdapter {
       // A byte ceiling is a deliberately loose input guard, not a provider token count. The full configured input ceiling is reserved below.
       if (Buffer.byteLength(JSON.stringify({ instructions: request.instructions, input: request.input, tools: request.tools })) > this.profile.maxInputTokens) throw new ModelAdapterError('model_request_limit');
       const prepared = Object.freeze({ id: randomUUID(), model: this.profile.selectionId, requestHash: createHash('sha256').update(body).digest('hex'), requestBytes: Buffer.byteLength(body), maxOutputTokens: request.maxOutputTokens });
-      this.entries.set(prepared.id, { public: prepared, body, tools: toolList, createdAt: Date.now(), quote: null }); return prepared;
+      this.entries.set(prepared.id, { public: prepared, body, tools: toolList, createdAt: Date.now(), quote: null }); this.generationDispatch.set(prepared,false); return prepared;
     } catch (e) { if (e instanceof ModelAdapterError) throw e; throw new ModelAdapterError('model_request_invalid'); }
   }
   private entry(prepared: PreparedTurn) { if (this.used.has(prepared)) throw new ModelAdapterError('model_already_used'); const e = this.entries.get(prepared.id); if (!e || e.public !== prepared || Date.now() - e.createdAt > 300_000) throw new ModelAdapterError('model_request_invalid'); return e; }
+  localQuote(prepared:PreparedTurn):ModelQuote{this.entry(prepared);return{inputTokens:this.profile.maxInputTokens,outputTokens:prepared.maxOutputTokens,maxCostMicrousd:configuredCostMicrousd(this.profile,this.profile.maxInputTokens,prepared.maxOutputTokens)};}
   async quote(prepared: PreparedTurn, { signal }: { signal: AbortSignal }): Promise<ModelQuote> {
     check(signal); const e = this.entry(prepared); e.quote ??= Object.freeze({ inputTokens: this.profile.maxInputTokens, outputTokens: prepared.maxOutputTokens, maxCostMicrousd: configuredCostMicrousd(this.profile, this.profile.maxInputTokens, prepared.maxOutputTokens) }); return { ...e.quote };
   }
@@ -153,6 +156,7 @@ export class ConfiguredModelAdapter implements ModelAdapter {
         headers[this.profile.kind === 'anthropic' ? 'x-api-key' : 'Authorization'] = this.profile.kind === 'anthropic' ? key : 'Bearer ' + key;
       }
       check(combined); const suffix = this.profile.kind === 'openai' ? '/responses' : this.profile.kind === 'anthropic' ? '/messages' : this.profile.kind === 'ollama' ? '/api/chat' : '/chat/completions';
+      this.generationDispatch.set(prepared,true);
       const fetching = this.transport(this.profile.baseUrl + suffix, { method: 'POST', redirect: 'error', headers, body: e.body, signal: combined });
       void fetching.then(r => { if (combined.aborted) void r.body?.cancel().catch(() => {}); }, () => {});
       const response = await abortable(fetching, combined); key = ''; check(combined);

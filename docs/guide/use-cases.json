@@ -513,7 +513,7 @@
       },
       {
         "title": "Use owner controls when needed",
-        "text": "Answer clarification in the relevant task’s request card. In the lab browser, Take control in local window gives you exclusive control; Return to agent gives it back. Use Pause fleet to retain task progress and close lab browsers, or Stop fleet to end execution. Closing a lab browser clears its cookies and storage, so a paused or resumed task may need to sign in again with its synthetic account."
+        "text": "Answer clarification in the relevant task’s request card. In the lab browser, Take control in local window gives you exclusive control; Return to agent gives it back. Use Pause fleet to retain task progress and close lab browsers, or Stop fleet to end execution. Closing a lab browser clears its cookies and storage, so reopening starts a new visitor session. Register a fresh synthetic account; the lab has no returning-account sign-in route."
       },
       {
         "title": "Review only demonstrated outcomes",

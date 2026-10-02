@@ -26,7 +26,7 @@ function VersionIcon({ version }: { version: ArtifactVersion }) {
 }
 function Scope({ version, snapshot }: { version: ArtifactVersion; snapshot: Snapshot }) {
   const owner = snapshot.agents.find(agent => agent.id === version.ownerAgentId);
-  return <span className={'scope-label' + (version.visibility === 'shared' ? ' shared' : '')}><FileGlyph type={version.visibility === 'shared' ? 'shared' : 'shield'} size={11} />{version.visibility === 'shared' ? 'All agents' : 'Private · ' + (owner?.name || 'Owner')}</span>;
+  return <span className={'scope-label' + (version.visibility === 'shared' ? ' shared' : '')}><FileGlyph type={version.visibility === 'shared' ? 'shared' : 'shield'} size={11} />{version.visibility === 'shared' ? 'Project agents' : 'Private · ' + (owner?.name || 'Owner')}</span>;
 }
 type FileContextValue = {
   snapshot: Snapshot; busy: boolean;
@@ -68,6 +68,7 @@ function Notice({ modal = false }: { modal?: boolean }) {
 }
 
 export function FilesProvider({ bridge, snapshot, onSnapshot, children }: { bridge: AppBridge; snapshot: Snapshot; onSnapshot: (snapshot: Snapshot) => void; children: ReactNode }) {
+  const [projectScope,setProjectScope] = useState<import('../../../packages/contracts/projects').ProjectsState|null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<FileContextValue['notice']>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -79,6 +80,9 @@ export function FilesProvider({ bridge, snapshot, onSnapshot, children }: { brid
   const [chooseTaskId, setChooseTaskId] = useState('');
   const previewGeneration = useRef(0);
   const operationLock = useRef(false);
+  useEffect(() => {let alive=true; const refresh=()=>void bridge.projects({type:'projects.state'}).then(next=>{if(alive)setProjectScope(next);},()=>{if(alive)setProjectScope(null);});refresh();const off=bridge.onChanged(refresh);return()=>{alive=false;off();};},[bridge]);
+  const projectForArtifact=(artifactId:string)=>projectScope?.projects.find(p=>p.artifactIds.includes(artifactId))?.id;
+  const projectForTask=(taskId:string)=>projectScope?.projects.find(p=>p.taskIds.includes(taskId))?.id;
   const version = snapshot.artifacts.find(item => item.id === selectedId) || (preview?.version.id === selectedId ? preview.version : null);
   useEffect(() => {
     const preventNavigation = (event: globalThis.DragEvent) => event.preventDefault();
@@ -99,7 +103,7 @@ export function FilesProvider({ bridge, snapshot, onSnapshot, children }: { brid
       return null;
     } finally { operationLock.current = false; setBusy(false); }
   };
-  const run = (command: FileCommand) => operation(() => bridge.files(command), result => command.type === 'artifacts.publish' ? 'Published to the shared library. All agents can use this version.' : command.type === 'artifacts.use' ? 'The selected version is now pinned to the task.' : command.type === 'artifacts.export' ? result.exported ? 'File exported.' : 'Export finished.' : command.type === 'storage.updateBudget' ? 'Storage budget updated.' : ((result.versionIds?.length || 0) + ' file(s) imported.'));
+  const run = (command: FileCommand) => operation(() => bridge.files(command), result => command.type === 'artifacts.publish' ? 'Published to the shared library in this file’s project.' : command.type === 'artifacts.use' ? 'The selected version is now pinned to the task.' : command.type === 'artifacts.repair' ? 'Exact saved version repaired and integrity verified.' : command.type === 'artifacts.export' ? result.exported ? 'File exported.' : 'Export finished.' : command.type === 'storage.updateBudget' ? 'Storage budget updated.' : ((result.versionIds?.length || 0) + ' file(s) imported.'));
   const pick = (target: ImportTarget, artifactId?: string) => operation(() => bridge.files({ type: 'files.pick', target, ...(artifactId ? { artifactId } : {}) }), result => (result.versionIds?.length || 0) + (artifactId ? ' new version imported.' : ' file(s) imported · ' + (target.scope === 'shared' ? 'Shared inside its project.' : 'Private to ' + (snapshot.agents.find(item => item.id === target.agentId)?.name || 'this agent') + '.')));
   const drop = (target: ImportTarget, files: File[]) => operation(() => bridge.importDroppedFiles(target, files), result => (result.versionIds?.length || 0) + ' file(s) imported · Private to ' + (snapshot.agents.find(item => item.id === target.agentId)?.name || 'this agent') + '.');
   const close = () => { if (operationLock.current) return; previewGeneration.current += 1; setSelectedId(null); setPreview(null); setPreviewLoading(false); setPreviewFailed(false); setChooseTaskId(''); setMode('detail'); };
@@ -110,22 +114,23 @@ export function FilesProvider({ bridge, snapshot, onSnapshot, children }: { brid
   };
   const chooseShared = (taskId: string) => { setChooseTaskId(taskId); setSelectedId(null); setMode('choose'); setNotice(null); };
   const context = { snapshot, busy, notice, dismissNotice: () => setNotice(null), open, pick, drop, run, chooseShared };
-  const shared = snapshot.artifacts.filter(item => item.visibility === 'shared' && item.status === 'ready').sort((a, b) => b.createdAt - a.createdAt);
+  const shared = snapshot.artifacts.filter(item => item.visibility === 'shared' && item.status === 'ready' && (mode !== 'choose' || !!projectScope && projectForArtifact(item.artifactId) === projectForTask(chooseTaskId))).sort((a, b) => b.createdAt - a.createdAt);
   const owner = snapshot.agents.find(item => item.id === version?.ownerAgentId);
   const task = snapshot.tasks.find(item => item.id === version?.producerTaskId);
   const latestVersion = version ? Math.max(...snapshot.artifacts.filter(item => item.artifactId === version.artifactId).map(item => item.version)) : 0;
   const versions = version ? snapshot.artifacts.filter(item => item.artifactId === version.artifactId).sort((a, b) => b.version - a.version) : [];
-  const eligibleTasks = snapshot.tasks.filter(item => !version || version.visibility === 'shared' || item.agentId === version.ownerAgentId);
+  const eligibleTasks = snapshot.tasks.filter(item => !version || item.agentId === version.ownerAgentId || version.visibility === 'shared' && !!projectScope && projectForArtifact(version.artifactId) === projectForTask(item.id));
   const source = snapshot.artifacts.find(item => item.id === version?.sourceVersionId);
   const dialogOpen = selectedId !== null || mode === 'choose';
 
   return <FileContext.Provider value={context}>{children}
-    {dialogOpen && <FileDialog title={mode === 'publish' ? 'Publish to the shared library' : mode === 'use' ? 'Use this version in a task' : mode === 'choose' ? 'Choose a shared version' : version?.displayName || 'File details'} close={close} busy={busy}>
+    {dialogOpen && <FileDialog title={mode === 'publish' ? 'Publish to the shared library' : mode === 'use' ? 'Use this version in a task (project access checked)' : mode === 'choose' ? 'Choose a shared version (project access checked)' : version?.displayName || 'File details'} close={close} busy={busy}>
       <Notice modal />
       {mode === 'choose' ? <>
         <p className="modal-description">Choose the exact version to add to <strong>{snapshot.tasks.find(item => item.id === chooseTaskId)?.objective || 'this task'}</strong>. New publications will not replace it.</p>
         {shared.length ? <div className="file-use-list">{shared.map(item => <button className="file-use-choice" key={item.id} disabled={busy} onClick={async () => { const result = await run({ type: 'artifacts.use', versionId: item.id, taskId: chooseTaskId }); if (result) close(); }}><VersionIcon version={item} /><div><strong>{item.displayName} <span className="version-label">v{item.version}</span></strong><span>{formatBytes(item.bytes)} · {snapshot.agents.find(agent => agent.id === item.ownerAgentId)?.name || 'Shared by you'}</span></div></button>)}</div> : <p className="file-panel-empty">There are no ready shared versions yet. Publish a file or add one to the shared library first.</p>}
       </> : version ? <>
+        {version.status !== 'ready' && <section><p>Repair restores only these exact original bytes after SHA-256 verification. It preserves the version identity and prior history.</p><button className="button" disabled={busy} onClick={() => void run({type:'artifacts.repair',versionId:version.id})}>Select exact replacement bytes</button></section>}
         <div className="file-detail-heading"><VersionIcon version={version} /><div><strong>{version.displayName}</strong><p>{version.format.toUpperCase()} · {formatBytes(version.bytes)} · Version {version.version}</p><div className="file-detail-badges"><Scope version={version} snapshot={snapshot} />{version.status !== 'ready' && <span className="scope-label">{version.status === 'missing' ? 'File missing' : 'Integrity issue'}</span>}{version.version < latestVersion && <span className="scope-label">A newer version is available</span>}</div></div></div>
         {mode === 'publish' ? <form className="file-action-form" onSubmit={async event => { event.preventDefault(); const result = await run({ type: 'artifacts.publish', versionId: version.id }); if (result && !result.cancelled) { const published = result.versionIds?.[0]; if (published) open(published); else setMode('detail'); } }}>
           <div className="file-decision-box"><h3>Available to agents in this project</h3><p>Publish <strong>{version.displayName} · v{version.version}</strong>, currently private to <strong>{owner?.name || 'its owner'}</strong>, as an immutable shared version.</p></div><p className="modal-description">This is an explicit sharing action. Agents in this file’s project can discover and use the published version. Other projects stay separate.</p><div className="modal-actions"><button className="button" type="button" disabled={busy} onClick={() => setMode('detail')}>Back</button><button className="button primary" type="submit" disabled={busy || version.status !== 'ready'}><FileGlyph type="shared" size={15} />Publish within project</button></div>
@@ -137,7 +142,7 @@ export function FilesProvider({ bridge, snapshot, onSnapshot, children }: { brid
           <div className="file-preview-heading"><h3>Preview</h3><span>{previewLoading ? 'Reading safely…' : previewFailed ? 'Could not load' : preview?.truncated ? 'Excerpt · truncated' : preview?.text !== null && preview ? 'Plain text' : 'Metadata only'}</span></div>
           {previewLoading ? <div className="file-metadata-only" role="status">Loading a bounded preview…</div> : previewFailed ? <div className="file-metadata-only"><strong>Preview could not be loaded</strong><p>Check the error above before trying again.</p><button className="button small" disabled={busy} onClick={() => open(version.id)}>Retry preview</button></div> : preview?.text !== null && preview ? <pre className="file-preview">{preview.text.length ? preview.text : '(Empty file)'}</pre> : <div className="file-metadata-only"><strong>{version.status === 'ready' ? 'Content preview is not available for this format' : 'This version is not ready to use'}</strong>{preview?.note || (version.status === 'ready' ? 'Complex documents and images show metadata here. Content processing is deferred to the isolated execution service.' : 'Check the file status before exporting or using this version.')}</div>}
           {preview?.text !== null && preview?.note && <p className="phase-note" style={{ marginTop: 9 }}>{preview.note}</p>}
-          <dl className="file-details-grid"><dt>File type</dt><dd>{version.mime}</dd><dt>Visibility</dt><dd>{version.visibility === 'shared' ? 'All agents' : 'Private to ' + (owner?.name || 'its owner')}</dd><dt>Owner</dt><dd>{owner?.name || 'You'}</dd><dt>Source task</dt><dd>{task?.objective || 'Owner import'}</dd><dt>Created</dt><dd>{new Date(version.createdAt).toLocaleString()}</dd><dt>Integrity</dt><dd>{version.status === 'ready' ? 'Ready · checksum recorded' : version.status}</dd><dt>SHA-256</dt><dd><code>{version.sha256}</code></dd><dt>Version ID</dt><dd><code>{version.id}</code></dd></dl>
+          <dl className="file-details-grid"><dt>File type</dt><dd>{version.mime}</dd><dt>Visibility</dt><dd>{version.visibility === 'shared' ? 'Project agents' : 'Private to ' + (owner?.name || 'its owner')}</dd><dt>Owner</dt><dd>{owner?.name || 'You'}</dd><dt>Source task</dt><dd>{task?.objective || 'Owner import'}</dd><dt>Created</dt><dd>{new Date(version.createdAt).toLocaleString()}</dd><dt>Integrity</dt><dd>{version.status === 'ready' ? 'Ready · checksum recorded' : version.status}</dd><dt>SHA-256</dt><dd><code>{version.sha256}</code></dd><dt>Version ID</dt><dd><code>{version.id}</code></dd></dl>
           <section className="file-provenance"><h3>Provenance</h3><p>{version.codeSource ? `Created by code execution ${version.codeSource.executionId}. The following exact inputs were supplied to that run.` : version.browserSource ? `Downloaded from ${version.browserSource.origin} and saved privately for this task.` : version.sourceVersionId ? 'Derived from the following exact version:' : 'Imported as an immutable original. No earlier source version is recorded.'}</p>{version.codeSource && <ul>{version.codeSource.inputVersionIds.map(id => { const input = snapshot.artifacts.find(item => item.id === id); return <li key={id}>{input ? `${input.displayName} · v${input.version}` : 'Input version'}<br /><code>{id}</code></li>; })}</ul>}{version.sourceVersionId && <ul><li>{source ? source.displayName + ' · v' + source.version : 'Source version'}<br /><code>{version.sourceVersionId}</code></li></ul>}</section>
         </>}
       </> : <div className="file-metadata-only">This version is no longer available in the current workspace.</div>}

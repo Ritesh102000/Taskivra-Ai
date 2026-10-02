@@ -34,6 +34,12 @@ const EXCLUSIONS = ['Browser profiles and cookies', 'Keychain credentials and ac
 export class RecoveryError extends Error {
   constructor(public readonly code: string, message: string) { super(message); this.name = 'RecoveryError'; }
 }
+/** Only reviewed categories cross IPC; arbitrary filesystem messages stay private. */
+export function safeRecoveryFailure(cause:unknown):{code:string;message:string} {
+ const actions:Record<string,string>={busy:'Finish pending work and cleanup, then create the backup again.',not_quiesced:'Pause work and resolve pending file or execution operations before backup.',incomplete_source:'Repair the exact missing or corrupt saved files before creating a complete backup.',incomplete_backup:'Choose a completed backup directory; an interrupted backup cannot be restored.',integrity_error:'Choose a complete verified backup. A stored file differs from its recorded bytes.',invalid_manifest:'Choose a complete supported backup with valid metadata.',schema_mismatch:'Use a compatible application version to verify this backup.',size_limit:'Choose a smaller supported backup or free storage before retrying.',destination_exists:'Choose a new empty destination; existing files were preserved.',unsafe_destination:'Choose a real writable directory outside the current app data.',unsafe_file:'Choose a backup containing only ordinary files; links and special files are rejected.',unsafe_path:'Choose a real directory without linked parents.'};
+ if(cause instanceof RecoveryError&&Object.hasOwn(actions,cause.code))return{code:cause.code,message:actions[cause.code]};
+ return{code:'recovery_failed',message:'Recovery could not finish. Check free space and choose a complete backup or writable destination. Existing files were preserved.'};
+}
 function fail(code: string, message: string): never { throw new RecoveryError(code, message); }
 function count(value: unknown): number {
   if (!Number.isSafeInteger(value) || Number(value) < 0) fail('invalid_manifest', 'Invalid file size in backup metadata.');
@@ -73,7 +79,7 @@ async function managed(root: string, path: string, createParents = false): Promi
   return join(root, rel);
 }
 async function transfer(root: string, entry: Pick<RecoveryEntry, 'path' | 'kind'> & Partial<RecoveryEntry>, limits: RecoveryLimits, destination?: string): Promise<RecoveryEntry> {
-  const source = await managed(root, entry.path), handle = await open(source, constants.O_RDONLY | constants.O_NOFOLLOW);
+  const source = await managed(root, entry.path), handle = await open(source, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
   let output: Awaited<ReturnType<typeof open>> | undefined;
   try {
     const before = await handle.stat(), max = entry.kind === 'database' ? limits.databaseBytes : entry.kind === 'configuration' ? Math.min(limits.fileBytes,2*1024*1024) : limits.fileBytes;
@@ -182,7 +188,7 @@ function expectedFiles(db: DatabaseSync, limits: RecoveryLimits): Expected[] {
 async function checkProviderConfiguration(root:string,db:DatabaseSync,listed:boolean):Promise<string|null>{
   const selections=db.prepare("SELECT model FROM live_task_config WHERE model LIKE 'profile:%' UNION SELECT model FROM security_review_members WHERE model LIKE 'profile:%' UNION SELECT model FROM fleet_members WHERE model LIKE 'profile:%' UNION SELECT planner_model AS model FROM fleet_runs WHERE planner_model LIKE 'profile:%' UNION SELECT worker_model AS model FROM fleet_runs WHERE worker_model LIKE 'profile:%'").all().map(row=>String(row.model));
   if(!listed){if(selections.length)fail('incomplete_backup','Saved tasks reference model connections missing from this backup.');return null;}
-  const handle=await open(await managed(root,PROVIDERS),constants.O_RDONLY|constants.O_NOFOLLOW);
+  const handle=await open(await managed(root,PROVIDERS),constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);
   try{
     const info=await handle.stat();if(!info.isFile()||info.nlink!==1||info.size>2*1024*1024)fail('invalid_manifest','The saved model configuration is unsafe.');
     const content=await handle.readFile('utf8');let value;try{value=validateProviderRegistry(JSON.parse(content));}catch{fail('invalid_manifest','The model connection file must contain only valid nonsecret configuration.');}
@@ -253,7 +259,7 @@ export class RecoveryService {
   async verifyBackup(sourceDirectory: string): Promise<RecoveryBackupResult> {
     const directory = await safeRoot(sourceDirectory);
     if (await exists(join(directory, INCOMPLETE))) fail('incomplete_backup', 'This backup did not finish.');
-    const manifestHandle = await open(join(directory, MANIFEST), constants.O_RDONLY | constants.O_NOFOLLOW);
+    const manifestHandle = await open(join(directory, MANIFEST), constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
     let manifest: RecoveryManifest;
     try {
       const st = await manifestHandle.stat();

@@ -88,7 +88,7 @@ def xlsx_extract(path, options):
                 elif cell.data_type == 'e': value = {'type': 'error', 'value': str(cell.value)}
                 address = openpyxl.utils.get_column_letter(column) + str(index)
                 cells.append({'address': address, 'numberFormat': str(cell.number_format), **value})
-                truncated = truncated or bool(value.get('truncated'))
+                truncated = truncated or bool(value.get('truncated')) or bool(value.get('cached', {}).get('truncated'))
             candidate = {'row': index, 'cells': cells}
             # Leave headroom for metadata. Complete earlier rows remain an explicit partial result.
             if len(json.dumps(rows + [candidate], ensure_ascii=False).encode('utf8')) > MAX_BYTES - 8192:

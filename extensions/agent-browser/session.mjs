@@ -14,20 +14,20 @@ export class NativeSession {
   }
  }
  register(tab){if(this.control.closed)fail('session_not_running');if(!Number.isInteger(tab.id))fail('unknown_tab');for(const record of this.tabs.values())if(record.chromeId===tab.id)return record;const record={id:crypto.randomUUID(),chromeId:tab.id,revision:1,url:tab.url||'about:blank',title:(tab.title||'').slice(0,200),documentId:null,domRevision:null,targets:[]};this.tabs.set(record.id,record);this.selected??=record.id;return record;}
- async settle(record,guard){const deadline=Date.now()+5000;while(Date.now()<deadline){guard();const tab=await this.api.tabs.get(record.chromeId);if(tab.status!=='loading'&&!tab.pendingUrl)return;await new Promise(resolve=>setTimeout(resolve,75));}guard();}
+ async settle(record,guard){const deadline=Date.now()+5000;while(Date.now()<deadline){guard();const tab=await this.api.tabs.get(record.chromeId);if(tab.status!=='loading'&&!tab.pendingUrl)return;await new Promise(resolve=>setTimeout(resolve,75));}guard();fail('navigation_failed');}
  async newTab(url){if(this.control.closed)fail('session_not_running');validURL(url,{blank:true});if(this.tabs.size>=6)fail('tab_limit');const existing=await this.api.tabs.query({});if(this.control.closed)fail('session_not_running');const normal=existing.find(t=>typeof t.windowId==='number');let tab;if(normal)tab=await this.api.tabs.create({windowId:normal.windowId,url,active:false});else{const window=await this.api.windows.create({url,focused:false,type:'normal'});tab=window.tabs?.[0];}if(!tab)fail('unknown_tab');if(this.control.closed){await this.api.tabs.remove(tab.id).catch(()=>{});fail('session_not_running');}return this.register(tab);}
  created(tab){if(this.control.closed||this.control.controller!=='agent')return;try{validURL(tab.url||'about:blank',{blank:true});if(this.tabs.size>=6)throw Error();this.register(tab);}catch{void this.api.tabs.remove(tab.id).catch(()=>{});}}
  record(id){const record=this.tabs.get(id||this.selected);if(!record)fail('unknown_tab');return record;}
  invalidate(record){record.revision++;record.targets=[];record.documentId=null;record.domRevision=null;}
  updated(chromeId,change){const record=[...this.tabs.values()].find(t=>t.chromeId===chromeId);if(!record)return;if(change.status==='loading'||change.url)this.invalidate(record);if(this.control.controller==='human')return;if(change.url){try{record.url=validURL(change.url,{blank:true});}catch{void this.api.tabs.remove(chromeId).catch(()=>{});}}if(change.title)record.title=String(change.title).slice(0,200);}
  removed(chromeId){for(const [id,record]of this.tabs)if(record.chromeId===chromeId){this.tabs.delete(id);if(this.selected===id)this.selected=this.tabs.keys().next().value||null;}}
- summaries(){return [...this.tabs.values()].map(r=>({id:r.id,url:r.url,title:r.title,revision:r.revision}));}
+ summaries(){return [...this.tabs.values()].map(r=>({id:r.id,url:r.sensitive||sensitiveURL(r.url)?new URL(r.url).origin:r.url,title:r.sensitive||sensitiveURL(r.url)?'Login requires owner control':r.title,revision:r.revision}));}
  redacted(){return{tabs:[...this.tabs.values()].map(r=>({id:r.id,url:'about:blank',title:'Open in Chrome',revision:r.revision})),selectedTabId:this.selected,targets:[],text:'',frame:null,nativeHumanControl:true};}
  async content(record,command){const results=await this.api.scripting.executeScript({target:{tabId:record.chromeId,frameIds:[0]},world:'ISOLATED',func:pageCommand,args:[command]});const result=results?.[0]?.result;if(!result)fail('observation_unavailable');if(result.error)fail(result.error);return result;}
  async inspect(record,{peek=false,guard=()=>{}}={}){
   guard();const tab=await this.api.tabs.get(record.chromeId);guard();record.url=validURL(tab.url,{blank:true});record.title=(tab.title||'').slice(0,200);
   if(record.url==='about:blank')return{documentId:'blank',revision:1,sensitive:false,text:'',targets:[],width:1120,height:760};
-  const read=await this.content(record,{type:peek?'peek':'inspect'});guard();
+  const read=await this.content(record,{type:peek?'peek':'inspect'});guard();record.sensitive=read.sensitive;
   if(read.documentId!==record.documentId||read.revision!==record.domRevision){record.revision++;record.targets=[];}
   if(!peek){record.documentId=read.documentId;record.domRevision=read.revision;record.targets=read.targets||[];}
   return read;
@@ -43,7 +43,7 @@ export class NativeSession {
    }catch(error){guard();/* Unsupported screenshots leave a real DOM observation, never an invented frame. */}
    finally{await this.detach(record.chromeId);}
   }
-  return{tabs:this.summaries(),selectedTabId:record.id,tab:record.id,url:record.url,title:read.sensitive?'Login requires owner control':read.title||record.title,text:peek?'':read.text||'',revision:record.revision,targets:peek?record.targets:read.targets||[],frame,permissions:[],...(read.sensitive?{humanLoginRequired:true}:{} )};
+  return{tabs:this.summaries(),selectedTabId:record.id,tab:record.id,url:read.sensitive?new URL(record.url).origin:record.url,title:read.sensitive?'Login requires owner control':read.title||record.title,text:peek?'':read.text||'',revision:record.revision,limits:read.limits,targets:peek?record.targets:read.targets||[],frame,permissions:[],...(read.sensitive?{humanLoginRequired:true}:{} )};
  }
  async detach(tabId){if(!this.attached.has(tabId))return;try{await this.api.debugger.detach({tabId});}catch{}const targets=await this.api.debugger.getTargets();if(targets.some(target=>target.tabId===tabId&&target.attached))fail('debugger_detach_failed');this.attached.delete(tabId);}
  async clear(){for(const record of this.tabs.values()){this.invalidate(record);try{if(record.url!=='about:blank')await this.content(record,{type:'clear'});}catch{}}await Promise.all([...this.attached].map(id=>this.detach(id)));const owned=new Set([...this.tabs.values()].map(record=>record.chromeId));const targets=await this.api.debugger.getTargets();if(targets.some(target=>owned.has(target.tabId)&&target.attached))fail('debugger_detach_failed');}

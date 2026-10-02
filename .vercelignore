@@ -12,6 +12,8 @@
 .gitignore
 .vercelignore
 README.md
+CHANGELOG.md
+.testdata/
 THIRD_PARTY_NOTICES.md
 architecture.md
 design.md

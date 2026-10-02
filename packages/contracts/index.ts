@@ -1,3 +1,4 @@
+import type {RepositorySnapshotCommand,RepositorySnapshotPreview} from './repository-snapshot';
 import type {FleetCommand,FleetState} from './fleet';
 import type {SecurityReviewCommand,SecurityReviewState} from './security-review';
 import type {ModelProviderCommand,ModelProviderState} from './model-providers';
@@ -33,10 +34,12 @@ export const COLLABORATION_CHANNEL='agent-workspaces:collaboration';
 export type TaskState = 'queued' | 'running' | 'waiting' | 'pausing' | 'paused' | 'recovering' | 'succeeded' | 'failed' | 'cancelled';
 export type Scenario = 'clarification' | 'complete' | 'failure';
 export interface Agent {
+  archived?:boolean;
   id: string; name: string; instructions: string; workspaceId: string;
   enabled: boolean; createdAt: number;
 }
 export interface Task {
+  archived?:boolean;
   executionMode: 'simulation'|'live';
   id: string; agentId: string; objective: string; completionCriteria: string;
   state: TaskState; revision: number; waitingReason: string | null;
@@ -50,7 +53,8 @@ export interface TaskMessage {
   deliveryState?: 'pending' | 'incorporated'; incorporatedAt?: number;
 }
 export interface InputRequest {
-  id: string; taskId: string; agentId: string; type: 'clarification' | 'browser_handoff' | 'permission_change';
+  legacy?: boolean;
+  id: string; taskId: string; agentId: string; type: 'files' | 'clarification' | 'browser_handoff' | 'permission_change';
   title: string; reason: string; state: 'open' | 'partial' | 'checking' | 'needs_correction' | 'fulfilled' | 'cancelled' | 'superseded';
   revision: number; response: string | null; createdAt: number;
 }
@@ -85,14 +89,15 @@ export interface TaskArtifact { taskId: string; versionId: string; role: 'input'
 export interface WorkspaceSnapshot { id: string; taskId: string; revision: number; bytes: number; fileCount: number; createdAt: number }
 export interface ImportTarget { scope: 'private' | 'shared'; agentId: string | null; taskId: string | null }
 export type FileCommand =
+  | RepositorySnapshotCommand
   | { type: 'files.pick'; target: ImportTarget; artifactId?: string }
   | { type: 'artifacts.publish'; versionId: string }
   | { type: 'artifacts.use'; versionId: string; taskId: string }
-  | { type: 'artifacts.export'; versionId: string }
+  | { type: 'artifacts.export' | 'artifacts.repair'; versionId: string }
   | { type: 'storage.updateBudget'; budgetBytes: number };
 export interface FileActionResult {
   snapshot: Snapshot; versionIds?: string[]; exported?: boolean; cancelled?: boolean;
-  warnings?: string[];
+  warnings?: string[]; repositoryPreview?:RepositorySnapshotPreview;
 }
 export interface ArtifactPreview {
   version: ArtifactVersion; text: string | null; truncated: boolean; note: string;
@@ -106,7 +111,11 @@ export type Command =
   | { type: 'requests.respond'; requestId: string; revision: number; response: string }
   | { type: 'settings.update'; settings: Partial<Settings> }
   | { type: 'simulation.step' };
+export const GRANTS_CHANNEL = 'agent-workspaces:grants';
+export type GrantsCommand = {type:'grants.list';taskId:string|null} | {type:'grants.revoke';requestId:string};
 export interface AppBridge {
+  taskHistory?(command:import('./history').TaskHistoryCommand):Promise<import('./history').TaskHistoryState>;
+  grants?(command: GrantsCommand): Promise<import('./requests').ExactCapabilityGrant[]>;
   fleet(command:FleetCommand):Promise<FleetState>;
   securityReview(command:SecurityReviewCommand):Promise<SecurityReviewState>;
   modelProviders(command:ModelProviderCommand):Promise<ModelProviderState>;
@@ -154,3 +163,6 @@ export const CHANGED_CHANNEL = 'agent-workspaces:changed';
 export const FILES_CHANNEL = 'agent-workspaces:files';
 export const DROP_CHANNEL = 'agent-workspaces:drop-files';
 export const PREVIEW_CHANNEL = 'agent-workspaces:preview';
+
+export {HISTORY_CHANNEL} from './history';
+export type {TaskHistoryCommand,TaskHistoryState} from './history';

@@ -1,3 +1,6 @@
+import appPackage from '../../package.json';
+import {RepositorySnapshotService} from '../repository-snapshot';
+import {record,identity} from '../contracts/live-validation';
 import type {LocalLabPort} from '../local-lab';
 import {FleetService,FleetError} from '../fleet';
 import {SecurityReviewService,SecurityReviewError} from '../security-review';
@@ -49,6 +52,7 @@ export class Coordinator {
   readonly dataRoot: string;
   readonly databasePath: string;
   readonly artifacts: ArtifactService;
+  readonly repositorySnapshots: RepositorySnapshotService;
   readonly browser: BrowserService;
   readonly code: CodeService;
   readonly requests: RequestService;
@@ -87,11 +91,12 @@ export class Coordinator {
     for (const agent of this.rows('SELECT id FROM agents')) this.agentDirectory(String(agent.id));
     for (const task of this.rows('SELECT id,agent_id FROM tasks')) this.taskDirectory(String(task.agent_id), String(task.id));
     this.artifacts = new ArtifactService({ persistence: this.persistence, now, fault: artifactFault });
+    this.repositorySnapshots = new RepositorySnapshotService({persistence:this.persistence,artifacts:this.artifacts,now});
     this.securityReviews=new SecurityReviewService({persistence:this.persistence,artifacts:this.artifacts,createTask:(command,callback)=>this.createLiveTask(command,callback),validateModel:selection=>this.live.validateModel(selection),now});
     this.fleets=new FleetService({persistence:this.persistence,artifacts:this.artifacts,
       createTask:(command,callback)=>this.createLiveTask(command,callback),
       createAgent:(projectId,name,instructions)=>{
-        if(Number(this.row('SELECT COUNT(*) AS count FROM agents')!.count)>=CAPACITY.agents)throw new CoordinatorError('capacity_limit','The saved agent limit is reached.');
+        if(Number(this.row('SELECT COUNT(*) AS count FROM agents WHERE NOT EXISTS(SELECT 1 FROM agent_archives aa WHERE aa.agent_id=agents.id)')!.count)>=CAPACITY.agents)throw new CoordinatorError('capacity_limit','The saved agent limit is reached.');
         const id=randomUUID();this.agentDirectory(id);
         this.write('INSERT INTO agents(id,name,instructions,workspace_id,created_at) VALUES (?,?,?,?,?)',id,name,instructions,randomUUID(),this.now());
         this.write('INSERT INTO browser_sessions(id,agent_id) VALUES (?,?)',randomUUID(),id);
@@ -120,10 +125,10 @@ export class Coordinator {
     this.browserActions=new BrowserActionService({persistence:this.persistence,browser:this.browser,authorize:claim=>this.authorizeRun(claim),now,onDecision:taskId=>{this.transact(()=>{const task=this.requiredTask(taskId),reason=this.blockingReason(taskId);if(task.state==='waiting'&&!reason)this.transition(taskId,'queued');});this.live.tick();},onChanged:onBrowserChanged});
     this.routines=new RoutineService({persistence:this.persistence,artifacts:this.artifacts,assertReuseSource:taskId=>this.assertReviewSource(taskId),now,createTask:(command,callback)=>this.createLiveTask(command,callback),preflight:async id=>{await this.workflows.assertInputsReady(id);const check=await this.readiness.handle({type:'readiness.check',target:{kind:'task',taskId:id}});if(check.status==='needs_attention')throw new CoordinatorError('missing_input','Review setup before running.');},start:id=>this.live.handle({type:'live.start',taskId:id})});
     this.projects=new ProjectsService({persistence:this.persistence,now,verifiedGmailAccount:()=>this.verifiedProjectGmail,verifiedGoogleWorkspaceAccount:()=>this.verifiedProjectGoogle,createAgent:input=>{
-      if(Number(this.row('SELECT COUNT(*) AS count FROM agents')!.count)>=CAPACITY.agents)throw new CoordinatorError('capacity_limit','The saved agent limit is reached.');
+      if(Number(this.row('SELECT COUNT(*) AS count FROM agents WHERE NOT EXISTS(SELECT 1 FROM agent_archives aa WHERE aa.agent_id=agents.id)')!.count)>=CAPACITY.agents)throw new CoordinatorError('capacity_limit','The saved agent limit is reached.');
       const id=randomUUID();this.agentDirectory(id);this.write('INSERT INTO agents(id,name,instructions,workspace_id,created_at) VALUES (?,?,?,?,?)',id,input.name,input.instructions,randomUUID(),this.now());this.write('INSERT INTO browser_sessions(id,agent_id) VALUES (?,?)',randomUUID(),id);this.event('agent.created',id,1,{name:input.name});return id;
     }});
-    this.recovery=new RecoveryService({persistence:this.persistence,appVersion:'0.9.9',withQuiesced:work=>this.withQuiesced(work)});
+    this.recovery=new RecoveryService({persistence:this.persistence,appVersion:appPackage.version,withQuiesced:work=>this.withQuiesced(work)});
 
   }
 
@@ -157,7 +162,7 @@ export class Coordinator {
   }
   private message(taskId: string, role: TaskMessage['role'], content: string, deliveryState?: TaskMessage['deliveryState']): void {
     if (role === 'owner') {
-      const counts = this.row("SELECT COUNT(*) AS count, COALESCE(SUM(length(CAST(content AS BLOB))),0) AS bytes FROM task_messages WHERE role='owner'")!;
+      const counts = this.row("SELECT COUNT(*) AS count, COALESCE(SUM(length(CAST(content AS BLOB))),0) AS bytes FROM task_messages WHERE role='owner' AND NOT EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=task_messages.task_id)")!;
       const taskCount = this.row("SELECT COUNT(*) AS count FROM task_messages WHERE role='owner' AND task_id=?", taskId)!;
       if (Number(counts.count) >= CAPACITY.messages || Number(taskCount.count) >= CAPACITY.ownerMessagesPerTask || Number(counts.bytes) + Buffer.byteLength(content) > CAPACITY.ownerMessageBytes) {
         throw new CoordinatorError('capacity_limit', 'The Phase 1 conversation limit was reached. Existing tasks can still be paused or cancelled.');
@@ -210,7 +215,7 @@ export class Coordinator {
     this.transact(() => {
       switch (command.type) {
         case 'agents.create': {
-          if (Number(this.row('SELECT COUNT(*) AS count FROM agents')!.count) >= CAPACITY.agents) throw new CoordinatorError('capacity_limit', 'Phase 1 supports up to 100 saved agents.');
+          if (Number(this.row('SELECT COUNT(*) AS count FROM agents WHERE NOT EXISTS(SELECT 1 FROM agent_archives aa WHERE aa.agent_id=agents.id)')!.count) >= CAPACITY.agents) throw new CoordinatorError('capacity_limit', 'Phase 1 supports up to 100 saved agents.');
           const id = randomUUID(), workspaceId = randomUUID();
           this.agentDirectory(id);
           this.write('INSERT INTO agents(id,name,instructions,workspace_id,created_at) VALUES (?,?,?,?,?)', id, command.name, command.instructions, workspaceId, this.now());
@@ -219,8 +224,8 @@ export class Coordinator {
           break;
         }
         case 'tasks.create': {
-          if (!this.row('SELECT id FROM agents WHERE id=? AND enabled=1', command.agentId)) throw new CoordinatorError('not_found', 'Select an enabled agent.');
-          if (Number(this.row('SELECT COUNT(*) AS count FROM tasks')!.count) >= CAPACITY.tasks) throw new CoordinatorError('capacity_limit', 'Phase 1 supports up to 250 saved tasks.');
+          if (!this.row('SELECT id FROM agents WHERE id=? AND enabled=1 AND NOT EXISTS(SELECT 1 FROM agent_archives a WHERE a.agent_id=agents.id)', command.agentId)) throw new CoordinatorError('not_found', 'Select an enabled agent.');
+          if (Number(this.row('SELECT COUNT(*) AS count FROM tasks WHERE NOT EXISTS(SELECT 1 FROM task_archives ta WHERE ta.task_id=tasks.id)')!.count) >= CAPACITY.tasks) throw new CoordinatorError('capacity_limit', 'Phase 1 supports up to 250 saved tasks.');
           const id = randomUUID();
           this.taskDirectory(command.agentId, id);
           this.write("INSERT INTO tasks(id,agent_id,objective,state,completion_criteria,scenario,created_at,updated_at) VALUES (?,?,?,'queued',?,?,?,?)", id, command.agentId, command.objective, command.completionCriteria, command.scenario, this.now(), this.now());
@@ -266,8 +271,8 @@ export class Coordinator {
   /** Internal creation path used only after strict live-command validation. */
   createLiveTask(command:Extract<LiveCommand,{type:'live.createTask'}>,onCreated?:(taskId:string)=>void):string {
     return this.transact(()=>{
-      if(!this.row('SELECT id FROM agents WHERE id=? AND enabled=1',command.agentId))throw new CoordinatorError('not_found','Select an enabled agent.');
-      if(Number(this.row('SELECT COUNT(*) AS count FROM tasks')!.count)>=CAPACITY.tasks)throw new CoordinatorError('capacity_limit','The saved task limit was reached.');
+      if(!this.row('SELECT id FROM agents WHERE id=? AND enabled=1 AND NOT EXISTS(SELECT 1 FROM agent_archives a WHERE a.agent_id=agents.id)',command.agentId))throw new CoordinatorError('not_found','Select an enabled agent.');
+      if(Number(this.row('SELECT COUNT(*) AS count FROM tasks WHERE NOT EXISTS(SELECT 1 FROM task_archives ta WHERE ta.task_id=tasks.id)')!.count)>=CAPACITY.tasks)throw new CoordinatorError('capacity_limit','The saved task limit was reached.');
       const taskId=randomUUID();this.taskDirectory(command.agentId,taskId);
       this.write("INSERT INTO tasks(id,agent_id,objective,state,completion_criteria,scenario,execution_mode,created_at,updated_at) VALUES (?,?,?,'paused',?,'complete','live',?,?)",taskId,command.agentId,command.objective,command.completionCriteria,this.now(),this.now());
       this.event('task.created',taskId,1,{agentId:command.agentId,simulation:false});this.message(taskId,'owner',command.objective);this.message(taskId,'system','Live task prepared. Start explicitly to use the selected model connection, tools and task budget.');
@@ -461,8 +466,8 @@ export class Coordinator {
       if (terminal.has(run.task_state as TaskState)) continue;
       this.transition(taskId, 'recovering', null, true);
       const preparation = this.fleets?.blockingReason(taskId)||this.securityReviews?.blockingReason(taskId)||this.results?.blockingReason(taskId)||this.routines?.blockingReason(taskId);
-    if(preparation)throw new CoordinatorError('invalid_state',preparation);
-    const reason = this.blockingReason(taskId);
+      // Preparation blockers belong to this task; they must not roll back unrelated recovery.
+      const reason = preparation || this.blockingReason(taskId);
       this.transition(taskId, paused ? 'paused' : reason ? 'waiting' : 'queued', reason);
       this.event('run.recovered', String(run.id), Number(this.requiredTask(taskId).generation), { taskId, cause: ownWorker ? 'coordinator_closed' : 'lease_expired', checkpoint: this.requiredTask(taskId).checkpoint });
     }
@@ -493,15 +498,29 @@ export class Coordinator {
   }
   tick(): void { if(this.maintenance)return;this.advance(false);this.fleets.tick();this.live.tick(); }
 
+  taskHistory(raw:unknown):import('../contracts/history').TaskHistoryState{
+    this.ensureOpen();const command=record(raw,['type','scope','agentId','cursor','taskId','archived']);
+    const display=(row:Row):Task=>({id:String(row.id),executionMode:row.execution_mode as 'simulation'|'live',agentId:String(row.agent_id),objective:String(row.objective),completionCriteria:String(row.completion_criteria),state:row.state as TaskState,revision:Number(row.revision),waitingReason:row.waiting_reason===null?null:String(row.waiting_reason),scenario:row.scenario as Task['scenario'],checkpoint:Number(row.checkpoint),generation:Number(row.generation),createdAt:Number(row.created_at),updatedAt:Number(row.updated_at)});
+    const sequence=(cursor:unknown)=>{if(cursor===null)return 0;if(typeof cursor!=='string'||!/^\d{1,15}$/.test(cursor))throw new CoordinatorError('invalid_command','Choose a valid history cursor.');return Number(cursor);};
+    if(command.type==='agents.history'){record(raw,['type','scope','cursor']);if(!['active','archived'].includes(String(command.scope)))throw new CoordinatorError('invalid_command','Choose active or archived agents.');const cursor=sequence(command.cursor),archived=command.scope==='archived';const rows=this.rows(`SELECT agents.rowid AS sequence,agents.* FROM agents WHERE rowid>? AND ${archived?'':'NOT '}EXISTS(SELECT 1 FROM agent_archives a WHERE a.agent_id=agents.id) ORDER BY rowid LIMIT 26`,cursor),page=rows.slice(0,25);return{agents:page.map(row=>({id:String(row.id),name:String(row.name),instructions:String(row.instructions),workspaceId:String(row.workspace_id),enabled:Boolean(row.enabled),createdAt:Number(row.created_at),archived})),nextAgentCursor:rows.length>25?String(page.at(-1)!.sequence):null,tasks:[],nextCursor:null,scope:archived?'archived':'active',archiveFreesCapacity:true};}
+    if(command.type==='agents.archive'){record(raw,['type','agentId','archived']);const agentId=identity(command.agentId);if(typeof command.archived!=='boolean')throw new CoordinatorError('invalid_command','Choose archive or restore.');this.transact(()=>{if(!this.row('SELECT 1 FROM agents WHERE id=?',agentId))throw new CoordinatorError('not_found','Choose an existing agent.');if(command.archived){if(this.row('SELECT 1 FROM tasks WHERE agent_id=? AND NOT EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=tasks.id)',agentId)||this.row("SELECT 1 FROM browser_sessions WHERE agent_id=? AND (lifecycle IN ('starting','ready','closing') OR owner_instance IS NOT NULL)",agentId))throw new CoordinatorError('task_busy','Archive finished task history and close the browser before archiving this agent.');this.write('INSERT OR IGNORE INTO agent_archives(agent_id,archived_at) VALUES (?,?)',agentId,this.now());}else{if(this.row('SELECT 1 FROM agent_archives WHERE agent_id=?',agentId)&&Number(this.row('SELECT COUNT(*) AS count FROM agents WHERE NOT EXISTS(SELECT 1 FROM agent_archives a WHERE a.agent_id=agents.id)')!.count)>=CAPACITY.agents)throw new CoordinatorError('capacity_limit','Archive another agent before restoring this history.');this.write('DELETE FROM agent_archives WHERE agent_id=?',agentId);}this.event(command.archived?'agent.archived':'agent.unarchived',agentId,1,{});});return{tasks:[],scope:'exact',nextCursor:null,archiveFreesCapacity:true};}
+    if(command.type==='tasks.archive'){record(raw,['type','taskId','archived']);const taskId=identity(command.taskId);if(typeof command.archived!=='boolean')throw new CoordinatorError('invalid_command','Choose archive or restore.');this.transact(()=>{const task=this.requiredTask(taskId);if(command.archived){if(!terminal.has(task.state as TaskState)||this.row("SELECT 1 FROM live_model_calls WHERE task_id=? AND state IN ('reserved','uncertain')",taskId)||this.row("SELECT 1 FROM live_tool_receipts WHERE task_id=? AND state IN ('dispatched','outcome_unknown')",taskId)||this.row("SELECT 1 FROM runs WHERE task_id=? AND state='running'",taskId)||this.row("SELECT 1 FROM code_executions WHERE task_id=? AND (lifecycle IN ('preparing','running','exporting','stopping') OR cleanup_state='pending')",taskId)||this.row("SELECT 1 FROM code_workspace_leases WHERE task_id=?",taskId)||this.row("SELECT 1 FROM browser_sessions WHERE task_id=? AND (lifecycle IN ('starting','ready','closing') OR owner_instance IS NOT NULL)",taskId)||this.row("SELECT 1 FROM browser_action_proposals WHERE task_id=? AND state IN ('pending','dispatching','outcome_unknown') AND resolution_json IS NULL",taskId)||this.row("SELECT 1 FROM tool_calls tc JOIN runs r ON r.id=tc.run_id WHERE r.task_id=? AND tc.state IN ('planned','dispatched','outcome_unknown')",taskId))throw new CoordinatorError('task_busy','Only finished tasks with resolved operation accounting can be archived.');this.write('INSERT OR IGNORE INTO task_archives(task_id,archived_at) VALUES (?,?)',taskId,this.now());}else {if(this.row('SELECT 1 FROM task_archives WHERE task_id=?',taskId)&&Number(this.row('SELECT COUNT(*) AS count FROM tasks WHERE NOT EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=tasks.id)')!.count)>=CAPACITY.tasks)throw new CoordinatorError('capacity_limit','Archive another task before restoring this history.');if(this.row('SELECT 1 FROM task_archives WHERE task_id=?',taskId)){if(this.row('SELECT 1 FROM agent_archives WHERE agent_id=?',task.agent_id))throw new CoordinatorError('invalid_state','Restore this task’s agent first.');const active=this.row("SELECT COUNT(*) AS n,COALESCE(SUM(length(CAST(content AS BLOB))),0) AS bytes FROM task_messages WHERE role='owner' AND NOT EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=task_messages.task_id)")!,saved=this.row("SELECT COUNT(*) AS n,COALESCE(SUM(length(CAST(content AS BLOB))),0) AS bytes FROM task_messages WHERE role='owner' AND task_id=?",taskId)!;if(Number(active.n)+Number(saved.n)>CAPACITY.messages||Number(active.bytes)+Number(saved.bytes)>CAPACITY.ownerMessageBytes)throw new CoordinatorError('capacity_limit','Archive other task history before restoring its owner messages.');}this.write('DELETE FROM task_archives WHERE task_id=?',taskId);}this.event(command.archived?'task.archived':'task.unarchived',taskId,Number(task.revision),{});});return{tasks:[display(this.requiredTask(taskId))],scope:'exact',nextCursor:null,archiveFreesCapacity:true};}
+    if(command.type==='tasks.inspect'){record(raw,['type','taskId','cursor']);const taskId=identity(command.taskId),task=this.requiredTask(taskId),cursor=sequence(command.cursor);const rows=this.rows('SELECT rowid AS sequence,* FROM task_messages WHERE task_id=? AND rowid>? ORDER BY rowid LIMIT 101',taskId,cursor),page=rows.slice(0,100);const config=this.row('SELECT * FROM live_task_config WHERE task_id=?',taskId);return{tasks:[display(task)],scope:'exact',nextCursor:null,messages:page.map(row=>({id:String(row.id),taskId,role:row.role as TaskMessage['role'],content:String(row.content),createdAt:Number(row.created_at),...(row.delivery_state?{deliveryState:row.delivery_state as TaskMessage['deliveryState']}:{} )})),messageNextCursor:rows.length>100?String(page.at(-1)!.sequence):null,requests:this.requests.list(taskId),versionIds:this.rows('SELECT version_id FROM task_artifacts WHERE task_id=? ORDER BY rowid',taskId).map(row=>String(row.version_id)),...(config?{accounting:{reservedMicrousd:Number(config.reserved_microusd),heldInputTokens:Number(config.reserved_input_tokens),heldOutputTokens:Number(config.reserved_output_tokens),uncertainCalls:Number(this.row("SELECT COUNT(*) AS n FROM live_model_calls WHERE task_id=? AND state='uncertain'",taskId)!.n)}}:{}),archiveFreesCapacity:true};}
+    if(command.type!=='tasks.history')throw new CoordinatorError('invalid_command','Choose a supported history action.');record(raw,['type','scope','agentId','cursor']);if(!['active','archived'].includes(String(command.scope)))throw new CoordinatorError('invalid_command','Choose active or archived tasks.');const agentId=command.agentId===null?null:identity(command.agentId);if(agentId&&!this.row('SELECT id FROM agents WHERE id=?',agentId))throw new CoordinatorError('not_found','Choose an existing agent.');const cursor=sequence(command.cursor),archived=command.scope==='archived';const rows=this.rows(`SELECT t.rowid AS sequence,t.* FROM tasks t WHERE t.rowid>? AND (? IS NULL OR t.agent_id=?) AND ${archived?'':'NOT '}EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=t.id) ORDER BY t.rowid LIMIT 26`,cursor,agentId,agentId),page=rows.slice(0,25);return{tasks:page.map(display),scope:archived?'archived':'active',nextCursor:rows.length>25?String(page.at(-1)!.sequence):null,archiveFreesCapacity:true};
+  }
+
+  /** A read-only event watermark avoids materializing history for idle observer ticks. */
+  eventWatermark():number{this.ensureOpen();return Number(this.row('SELECT COALESCE(MAX(id),0) AS id FROM events')!.id);}
+
   snapshot(): Snapshot {
     this.ensureOpen();
     return this.persistence.readTransaction(() => this.readSnapshot());
   }
   private readSnapshot(): Snapshot {
-    const agents: Agent[] = this.rows('SELECT * FROM agents ORDER BY created_at,id').map(row => ({ id: String(row.id), name: String(row.name), instructions: String(row.instructions), workspaceId: String(row.workspace_id), enabled: Boolean(row.enabled), createdAt: Number(row.created_at) }));
-    const tasks: Task[] = this.rows('SELECT * FROM tasks ORDER BY created_at,id').map(row => ({ id: String(row.id), executionMode:row.execution_mode as 'simulation'|'live', agentId: String(row.agent_id), objective: String(row.objective), completionCriteria: String(row.completion_criteria), state: row.state as TaskState, revision: Number(row.revision), waitingReason: row.waiting_reason === null ? null : String(row.waiting_reason), scenario: row.scenario as Task['scenario'], checkpoint: Number(row.checkpoint), generation: Number(row.generation), createdAt: Number(row.created_at), updatedAt: Number(row.updated_at) }));
-    const messages: TaskMessage[] = this.rows('SELECT * FROM task_messages ORDER BY created_at,rowid').map(row => ({ id: String(row.id), taskId: String(row.task_id), role: row.role as TaskMessage['role'], content: String(row.content), createdAt: Number(row.created_at), ...(row.delivery_state ? {deliveryState: row.delivery_state as TaskMessage['deliveryState'], ...(row.incorporated_at !== null ? {incorporatedAt: Number(row.incorporated_at)} : {})} : {}) }));
-    const requests: InputRequest[] = this.rows("SELECT i.*,t.agent_id FROM input_requests i JOIN tasks t ON t.id=i.task_id WHERE i.type IN ('files','clarification','browser_handoff','permission_change') ORDER BY i.created_at,i.id").map(row => ({ id: String(row.id), taskId: String(row.task_id), agentId: String(row.agent_id), type: row.type as InputRequest['type'], title: String(row.title), reason: String(row.reason), state: row.state as InputRequest['state'], revision: Number(row.revision), response: row.response === null ? null : String(row.response), createdAt: Number(row.created_at) }));
+    const agents: Agent[] = this.rows('SELECT agents.*,EXISTS(SELECT 1 FROM agent_archives a WHERE a.agent_id=agents.id) AS archived FROM agents WHERE NOT EXISTS(SELECT 1 FROM agent_archives a WHERE a.agent_id=agents.id) ORDER BY created_at,id').map(row => ({ id: String(row.id), name: String(row.name), instructions: String(row.instructions), workspaceId: String(row.workspace_id), enabled: Boolean(row.enabled), archived:Boolean(row.archived), createdAt: Number(row.created_at) }));
+    const tasks: Task[] = this.rows('SELECT t.*,EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=t.id) AS archived FROM tasks t WHERE NOT EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=t.id) ORDER BY created_at,id').map(row => ({ id: String(row.id), executionMode:row.execution_mode as 'simulation'|'live', agentId: String(row.agent_id), objective: String(row.objective), completionCriteria: String(row.completion_criteria), state: row.state as TaskState, archived:Boolean(row.archived), revision: Number(row.revision), waitingReason: row.waiting_reason === null ? null : String(row.waiting_reason), scenario: row.scenario as Task['scenario'], checkpoint: Number(row.checkpoint), generation: Number(row.generation), createdAt: Number(row.created_at), updatedAt: Number(row.updated_at) }));
+    const messages: TaskMessage[] = this.rows('SELECT * FROM task_messages WHERE NOT EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=task_messages.task_id) ORDER BY created_at,rowid').map(row => ({ id: String(row.id), taskId: String(row.task_id), role: row.role as TaskMessage['role'], content: String(row.content), createdAt: Number(row.created_at), ...(row.delivery_state ? {deliveryState: row.delivery_state as TaskMessage['deliveryState'], ...(row.incorporated_at !== null ? {incorporatedAt: Number(row.incorporated_at)} : {})} : {}) }));
+    const requests: InputRequest[] = this.rows("SELECT i.*,t.agent_id,d.kind AS structured_kind FROM input_requests i JOIN tasks t ON t.id=i.task_id LEFT JOIN request_details d ON d.request_id=i.id WHERE NOT EXISTS(SELECT 1 FROM task_archives a WHERE a.task_id=t.id) AND i.type IN ('files','clarification','browser_handoff','permission_change') ORDER BY i.created_at,i.id").map(row => ({ id: String(row.id), taskId: String(row.task_id), agentId: String(row.agent_id), type: row.type as InputRequest['type'], title: String(row.title), reason: String(row.reason), state: row.state as InputRequest['state'], revision: Number(row.revision), response: row.response === null ? null : String(row.response), createdAt: Number(row.created_at), legacy:row.structured_kind===null }));
     const events: DomainEvent[] = this.rows(`SELECT * FROM (SELECT * FROM events ORDER BY id DESC LIMIT ${CAPACITY.snapshotEvents}) ORDER BY id`).map(row => ({ id: Number(row.id), type: String(row.type), aggregateId: String(row.aggregate_id), aggregateRevision: Number(row.aggregate_revision), payload: JSON.parse(String(row.payload)), createdAt: Number(row.created_at) }));
     return { agents, tasks, messages, requests, events, settings: this.settings(), runtime: { mode: tasks.some(t=>t.executionMode==='live')?(tasks.some(t=>t.executionMode==='simulation')?'mixed':'live'):'simulation', dataRoot: this.dataRoot, schemaVersion: SCHEMA_VERSION }, artifacts:this.artifacts.all(),taskArtifacts:this.artifacts.bindings(),workspaceSnapshots:this.artifacts.snapshots(),storage:this.artifacts.storage() };
   }

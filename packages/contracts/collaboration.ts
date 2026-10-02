@@ -45,7 +45,7 @@ export interface AgentMessageInput {
   taskIds: string[]; versionIds: string[]; idempotencyKey: string;
 }
 export type CollaborationCommand =
-  | { type: 'collaboration.state' }
+  | { type: 'collaboration.state'; agentId?:string }
   | { type: 'collaboration.policy'; taskId: string; revision: number; visibility: 'private' | 'shared'; summary: string; peerAgentIds: string[] }
   | { type: 'collaboration.dependency.add'; taskId: string; dependsOnTaskId: string; requiredVersionId: string | null }
   | { type: 'collaboration.dependency.remove'; taskId: string; dependsOnTaskId: string }

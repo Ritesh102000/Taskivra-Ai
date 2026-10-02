@@ -96,8 +96,17 @@ def load_guide():
             if block['type']=='heading':
                 count+=1;block['id']=section['id']+'-'+str(count)+'-'+slug(block['text'])
                 ids.add(block['id'])
-    for target in re.findall(r'href="#([^"]+)"',json.dumps(core)):
-        if target not in ids:raise ValueError('Unknown link destination: '+target)
+    def strings(value):
+        if isinstance(value, str): yield value
+        elif isinstance(value, list):
+            for item in value: yield from strings(item)
+        elif isinstance(value, dict):
+            for item in value.values(): yield from strings(item)
+    for text in strings(core):
+        for target in re.findall(r'href=[\"\']#([^\"\']+)[\"\']', text):
+            if target not in ids: raise ValueError('Unknown link destination: '+target)
+    package = json.loads((ROOT/'package.json').read_text())
+    if core['version'] != package['version']: raise ValueError('Guide version differs from application version')
     return core
 
 
@@ -185,7 +194,7 @@ class GuideDoc(BaseDocTemplate):
         if doc.page>1:
             c.setStrokeColor(LINE);c.setLineWidth(.6);c.line(MARGIN,H-38,W-MARGIN,H-38)
             c.setFont('GuideBold',8);c.setFillColor(TEAL);c.drawString(MARGIN,H-29,'TASKIVRA AI / BEGINNER GUIDE')
-            c.setFont('Guide',8);c.setFillColor(MUTED);c.drawRightString(W-MARGIN,H-29,'0.9.9 / LOCAL PRE-RELEASE')
+            c.setFont('Guide',8);c.setFillColor(MUTED);c.drawRightString(W-MARGIN,H-29,self.guide['version']+' / LOCAL PRE-RELEASE')
             c.setStrokeColor(LINE);c.line(MARGIN,37,W-MARGIN,37)
             c.setFont('Guide',8);c.setFillColor(TEAL);c.drawString(MARGIN,24,'Contents')
             c.linkRect('', 'contents',(MARGIN-2,20,MARGIN+43,34),relative=0,thickness=0)
@@ -246,7 +255,7 @@ def pdf_build(guide,path):
     doc.multiBuild(flow,maxPasses=5)
 
 
-def html_build(guide):
+def html_build(guide, destination=None):
     sections=[];nav=[]
     for i,section in enumerate(guide['sections'],1):
         nav.append(f'<li><a href="#{section["id"]}"><span class="nav-number">{i:02d}</span> {html.escape(section["title"])}</a></li>')
@@ -267,12 +276,15 @@ def html_build(guide):
     template=(ROOT/'guide-site/template.html').read_text()
     for key,value in {'GUIDE_CONTENT':'\n'.join(sections),'GUIDE_NAV':'<ol>'+'\n'.join(nav)+'</ol>','GUIDE_VERSION':guide['version'],'GUIDE_DATE':guide['date']}.items():template=template.replace('{{'+key+'}}',value)
     if '{{GUIDE_' in template:raise ValueError('Unresolved template token')
-    (ROOT/'guide-site/index.html').write_text(template)
+    Path(destination or ROOT/'guide-site/index.html').write_text(template)
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--html-only',action='store_true');args=parser.parse_args()
-    guide=load_guide();html_build(guide)
+    parser=argparse.ArgumentParser();parser.add_argument('--html-only',action='store_true');parser.add_argument('--validate',action='store_true');parser.add_argument('--html-out',type=Path);args=parser.parse_args()
+    guide=load_guide()
+    if args.validate:
+        print(json.dumps({'valid':True,'version':guide['version'],'date':guide['date'],'chapters':len(guide['sections'])}));return
+    html_build(guide,args.html_out)
     if not args.html_only:
         destination=ROOT/'output/pdf/Taskivra-AI-Guide.pdf';destination.parent.mkdir(parents=True,exist_ok=True)
         pdf_build(guide,destination);shutil.copyfile(destination,ROOT/'guide-site/Taskivra-AI-Guide.pdf')

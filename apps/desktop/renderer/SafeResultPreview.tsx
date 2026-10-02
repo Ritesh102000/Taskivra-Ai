@@ -25,7 +25,7 @@ export function SafeResultPreview({ preview }: { preview: ArtifactPreview }) {
       if (block.kind === 'code') return <pre key={i}><code>{block.text}</code></pre>;
       if (block.kind === 'heading') return <div key={i} role="heading" aria-level={Math.min(6, block.level + 1)} className={'result-heading level-' + block.level}><Inline text={block.text} /></div>;
       if (block.kind === 'quote') return <blockquote key={i}><Inline text={block.text} /></blockquote>;
-      if (block.kind === 'item') return <p key={i} className="result-list-item"><span aria-hidden="true">• </span><Inline text={block.text} /></p>;
+      if (block.kind === 'item') return <p key={i} className="result-list-item"><span aria-hidden="true">{block.marker || '•'} </span><Inline text={block.text} /></p>;
       return <p key={i}><Inline text={block.text} /></p>;
     })}</div>}
     <p className="result-note">Previewed as inert content. References are shown as text; external pages and images are not loaded.</p>

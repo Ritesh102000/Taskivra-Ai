@@ -1,6 +1,7 @@
 export type CodeLanguage = 'python' | 'node' | 'shell';
 export type CodeLifecycle = 'preparing' | 'running' | 'exporting' | 'stopping' | 'succeeded' | 'failed' | 'cancelled' | 'interrupted';
 export interface CodeExecution {
+  cleanupState?: 'pending' | 'resolved';
   id: string; taskId: string; agentId: string; origin: 'owner' | 'agent';
   runtime: CodeLanguage; source: string; command: string; cwd: '/workspace';
   lifecycle: CodeLifecycle; imageDigest: string | null; timeoutSeconds: number;
@@ -26,10 +27,15 @@ export interface CodeDependency {
 export interface CodeState {
   taskId: string; agentId: string; executions: CodeExecution[]; inputs: CodeInput[];
   workspaceRevision: number; activeExecutionId: string | null;
+  workspaceChangesError?:string;
+  workspaceChanges?:{revision:number;parentRevision:number|null;added:string[];removed:string[];modified:string[]};
+  effectiveLimits?:{resources:{memoryMiB:number;workspaceMiB:number;tmpMiB:number;pids:number;timeoutSeconds:number;logBytes:number;exportBytes:number;files:number};sourceBytes:number;storageBudgetBytes:number};
+  history?:{beforeExecutionId:string|null;hasMore:boolean};
   runtime: CodeRuntimeStatus; dependencies: CodeDependency[];
 }
 export type CodeCommand =
   | { type: 'code.state'; taskId: string }
+  | { type:'code.history';taskId:string;beforeExecutionId?:string;executionId?:string }
   | { type: 'code.execute'; taskId: string; runtime: CodeLanguage; source: string; timeoutSeconds: number; inputVersionIds: string[] }
   | { type: 'code.stop'; taskId: string; executionId: string }
   | { type: 'code.requestDependency'; taskId: string; runtime: 'python' | 'node'; packageName: string; version: string; reason: string }

@@ -56,10 +56,14 @@ export class ReadinessService {
   constructor(private options: { ports: ReadinessPorts; now?: () => number; timeoutMs?: number }) {}
   async handle(raw: unknown): Promise<ReadinessState> {
     const { target } = parseReadinessCommand(raw);
-    const required = await this.options.ports.resolve(target);
+    const timeout = Math.max(10, Math.min(15000, this.options.timeoutMs ?? 5000));
+    const deadline=Date.now()+timeout;
+    let resolveTimer:ReturnType<typeof setTimeout>|undefined;
+    let required:ReadinessRequirements;
+    try{required=await Promise.race([Promise.resolve().then(()=>this.options.ports.resolve(target)),new Promise<never>((_,reject)=>{resolveTimer=setTimeout(()=>reject(new ReadinessError('readiness_timeout','The readiness requirements could not be resolved in time. Retry the check; saved work is unchanged.')),timeout);})]);}
+    finally{if(resolveTimer)clearTimeout(resolveTimer);}
     const now = (this.options.now || Date.now)();
     const capabilities = [...new Set<ReadinessCapability>(['model', ...required.capabilities])];
-    const timeout = Math.max(10, Math.min(15000, this.options.timeoutMs ?? 5000));
     let codePromise: Promise<CodeRuntimeStatus> | undefined;
     const codeStatus = () => codePromise ||= this.options.ports.code ? Promise.resolve().then(() => this.options.ports.code!()) : Promise.reject(Error('not_available'));
     const approvedAccount = async (connector: 'gmail' | 'googleWorkspace', expected: string | undefined) => {
@@ -119,7 +123,7 @@ export class ReadinessService {
     const checks = await Promise.all(capabilities.map(async capability => {
       let timer: ReturnType<typeof setTimeout> | undefined;
       try {
-        return await Promise.race([run(capability), new Promise<never>((_, reject) => { timer = setTimeout(() => reject(Error('timeout')), timeout); })]);
+        return await Promise.race([run(capability), new Promise<never>((_, reject) => { timer = setTimeout(() => reject(Error('timeout')), Math.max(1,deadline-Date.now())); })]);
       } catch {
         return { id: capability, label: { model: 'Model', browser: 'Private browser', code: 'Isolated code runtime', gmail: 'Gmail connection', google_workspace: 'Google Drive connection', documents: 'PDF and spreadsheet reader', inputs: 'Required files' }[capability], status: 'unavailable' as const, blocking: true, detail: 'This status could not be checked. Saved work is unchanged; retry the check.', checkedAt: now };
       } finally { if (timer) clearTimeout(timer); }

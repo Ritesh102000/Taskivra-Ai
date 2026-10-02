@@ -15,7 +15,7 @@ import type {ModelAdapter,ModelRequest,ModelToolCall,ModelTurn,PreparedTurn} fro
 import {DEFAULT_MODEL} from '../../packages/model-adapters/pricing';
 import {EvidenceArchive,isSourceReceipt} from '../../packages/agent-loop/evidence';
 
-const call=(name:string,args:Record<string,unknown>={}):ModelToolCall=>({id:randomUUID(),name,arguments:args});
+const call=(name:string,args:Record<string,unknown>={}):ModelToolCall=>({id:randomUUID(),name,arguments:{...(name==='fleet_message'?{replyToMessageId:null}:{}),...(name==='fleet_context'?{beforeMessageId:null,messageId:null}:{}),...args}});
 function deferred(){let resolve!:()=>void;const promise=new Promise<void>(done=>{resolve=done;});return{promise,resolve};}
 async function until(check:()=>boolean,details:()=>unknown){const end=Date.now()+20000;while(Date.now()<end){if(check())return;await new Promise(done=>setTimeout(done,10));}assert.fail('The scripted local Fleet did not complete: '+JSON.stringify(details()));}
 type Launch=Parameters<BrowserRuntime['launch']>[0];
@@ -58,7 +58,7 @@ class LabModel implements ModelAdapter {
   assert.equal(signal.aborted,false);const request=this.pending.get(prepared.id)!,message=request.input.find(item=>item.role==='user'&&'content'in item)!;assert.ok(message&&'content'in message);const context=JSON.parse(message.content) as Context;this.contexts.push(context);
   assert.equal(context.fleet.mode,'local_website');assert.equal(context.fleet.targetUrl,FLEET_LAB_URL);assert.equal(context.project,null);assert.equal(context.browserActions,null);assert.equal(context.workflowInputs,null);assert.equal(context.securityReview,null);assert.deepEqual(context.collaboration.board,[]);assert.deepEqual(context.collaboration.sharedArtifacts,[]);assert.deepEqual(context.collaboration.inbox,[]);
   const names=new Set(request.tools.map(tool=>tool.name));for(const name of ['lab_open','lab_observe','lab_action','lab_command','lab_close','code_execute'])assert.ok(names.has(name),'Local Fleet lacks '+name);
-  for(const name of names)assert.ok(['read_file','evidence_list','evidence_read','user_request','save_report','finish','fleet_context','fleet_plan','fleet_claim','fleet_message','fleet_wait','lab_open','lab_observe','lab_action','lab_command','lab_close','code_execute'].includes(name),'Local Fleet exposed '+name);
+  for(const name of names)assert.ok(['read_file','read_file_range','evidence_list','evidence_read','user_request','save_report','finish','fleet_context','fleet_plan','fleet_claim','fleet_message','fleet_wait','lab_open','lab_observe','lab_action','lab_command','lab_close','code_execute'].includes(name),'Local Fleet exposed '+name);
   for(const name of ['browser_open','browser_observe','browser_request_action','gmail_search','browser_upload','send_agent_message','extract_file','host_shell'])assert.equal(names.has(name),false);
   assert.match(request.instructions,/## fleet-lab/);assert.match(request.instructions,/starts logged out/);assert.match(request.instructions,/code_execute is offline calculation/);assert.doesNotMatch(request.instructions,/There is no browser, network, code execution/);assert.doesNotMatch(request.instructions,/This is a static defensive review/);assert.equal(request.instructions.includes(PAGE_DATA_CANARY),false);
   // Condensing the local prompt must preserve authority, owner chronology,

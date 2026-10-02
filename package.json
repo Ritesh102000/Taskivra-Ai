@@ -1,6 +1,6 @@
 {
   "name": "agent-workspaces",
-  "version": "0.9.9",
+  "version": "0.10.0",
   "private": true,
   "description": "Mac agent workspaces with a cloud model loop, isolated browsers and container code",
   "type": "module",

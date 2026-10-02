@@ -1,3 +1,8 @@
+import {formatOfficeInWorker} from './report-format';
+import {IpcAdmission} from './ipc-admission';
+import {safeRecoveryFailure} from '../../../packages/recovery';
+import {DocumentError} from '../../../packages/documents';
+import {record,identity} from '../../../packages/contracts/live-validation';
 import {LocalLabController} from '../../../packages/local-lab';
 import {ElectronLabRuntime} from './lab-browser-runtime';
 import {FLEET_CHANNEL} from '../../../packages/contracts/fleet';
@@ -34,10 +39,11 @@ import { homedir } from 'node:os';
 import { join, resolve, extname } from 'node:path';
 import { Coordinator, CoordinatorError } from '../../../packages/coordinator/index';
 import { parseCommand, CommandValidationError } from '../../../packages/contracts/validation';
-import { CHANGED_CHANNEL, COMMAND_CHANNEL, FILES_CHANNEL, DROP_CHANNEL, PREVIEW_CHANNEL, BROWSER_CHANNEL, BROWSER_CHANGED_CHANNEL, CODE_CHANNEL, CODE_CHANGED_CHANNEL, REQUEST_CHANNEL, REQUEST_PICK_CHANNEL, REQUEST_CHANGED_CHANNEL, LIVE_CHANNEL, LIVE_CHANGED_CHANNEL, GMAIL_CHANNEL, GMAIL_CHANGED_CHANNEL, GMAIL_IMPORT_CHANNEL, COLLABORATION_CHANNEL, BROWSER_SETUP_CHANNEL } from '../../../packages/contracts/index';
+import { HISTORY_CHANNEL, GRANTS_CHANNEL, CHANGED_CHANNEL, COMMAND_CHANNEL, FILES_CHANNEL, DROP_CHANNEL, PREVIEW_CHANNEL, BROWSER_CHANNEL, BROWSER_CHANGED_CHANNEL, CODE_CHANNEL, CODE_CHANGED_CHANNEL, REQUEST_CHANNEL, REQUEST_PICK_CHANNEL, REQUEST_CHANGED_CHANNEL, LIVE_CHANNEL, LIVE_CHANGED_CHANNEL, GMAIL_CHANNEL, GMAIL_CHANGED_CHANNEL, GMAIL_IMPORT_CHANNEL, COLLABORATION_CHANNEL, BROWSER_SETUP_CHANNEL } from '../../../packages/contracts/index';
 import type { CommandResult } from '../../../packages/contracts/index';
 import { APP_URL, CONTENT_SECURITY_POLICY, isTrustedSender } from './security';
 import { FileController } from './file-controller';
+import {RepositorySnapshotError} from '../../../packages/repository-snapshot';
 import { DockerBrowserRuntimeFactory } from '../../../packages/browser-runtime/index';
 import { NativeChromeRuntime } from '../../../packages/native-browser';
 import { BrowserRuntimeRouter,BrowserSetupController } from './browser-setup-controller';
@@ -70,16 +76,20 @@ let window: BrowserWindow | null = null;
 let coordinator: Coordinator | null = null;
 let timer: ReturnType<typeof setInterval> | undefined;
 let lastEventId = -1;
-let requestWindowAt = Date.now();
-let requestCount = 0;
+const ipcAdmission=new IpcAdmission();
 let closing = false;
 let closeGoogle:(()=>Promise<void>)|undefined;
 let maintenanceGate = false;
 let sleepRequested = false;
 let sleepWork:Promise<unknown>=Promise.resolve();
 let maintenanceWork: Promise<unknown> = Promise.resolve();
+const registeredIpc=new Set<string>();
+const IPC_LIFECYCLE_EXCEPTIONS=new Set([RECOVERY_CHANNEL]);
 const pendingIpc = new Set<Promise<unknown>>();
 function registerIpc(channel:string, handler:Parameters<typeof ipcMain.handle>[1], track=true):void {
+  if(registeredIpc.has(channel))throw new Error('Duplicate IPC registration.');
+  if(track===IPC_LIFECYCLE_EXCEPTIONS.has(channel))throw new Error('IPC lifecycle policy mismatch.');
+  registeredIpc.add(channel);
   ipcMain.handle(channel, (event,...args)=> {
     const result=Promise.resolve().then(()=>handler(event,...args));
     if(track){pendingIpc.add(result);void result.finally(()=>pendingIpc.delete(result)).catch(()=>{});}
@@ -103,12 +113,13 @@ async function appMaintenance<T>(work:()=>Promise<T>):Promise<T> {
 
 function notifyChanges(): void {
   if (!coordinator || !window || window.isDestroyed()) return;
-  const snapshot = coordinator.handle({ type: 'snapshot' });
-  const latest = snapshot.events.reduce((max, event) => Math.max(max, event.id), 0);
+  try {
+  const latest = coordinator.eventWatermark();
   if (latest !== lastEventId) {
-    lastEventId = latest;
     window.webContents.send(CHANGED_CHANNEL);
+    lastEventId = latest;
   }
+  } catch { /* Observers cannot replace a committed command result; retry on the next tick. */ }
 }
 
 function bundledAssets(): Map<string, { bytes: Uint8Array; type: string }> {
@@ -215,8 +226,8 @@ async function launch(): Promise<void> {
       isMainFrame: frame === window.webContents.mainFrame, url: frame.url,
     })) return { ok: false, error: { code: 'permission_denied', message: 'This window cannot issue application commands.' } };
     const now = Date.now();
-    if (now - requestWindowAt > 5000) { requestWindowAt = now; requestCount = 0; }
-    if (++requestCount > 256) return { ok: false, error: { code: 'rate_limited', message: 'Too many requests. Try again in a few seconds.' } };
+
+    if(!ipcAdmission.admit(COMMAND_CHANNEL,raw,now)) return { ok: false, error: { code: 'rate_limited', message: 'Too many requests. Try again in a few seconds.' } };
     try {
       const command = parseCommand(raw);
       const snapshot = coordinator.handle(command);
@@ -232,21 +243,35 @@ async function launch(): Promise<void> {
   registerIpc(BROWSER_CHANNEL,async(event,raw:unknown)=>{
     const frame=event.senderFrame,current=coordinator;
     if(closing||maintenanceGate||coordinator?.maintenanceActive||!window||!current||!frame||!isTrustedSender({senderId:event.sender.id,trustedWebContentsId:window.webContents.id,isMainFrame:frame===window.webContents.mainFrame,url:frame.url}))return{ok:false,error:{code:'permission_denied',message:'This window cannot control browsers.'}};
-    const now=Date.now();if(now-requestWindowAt>5000){requestWindowAt=now;requestCount=0;}
-    if(++requestCount>256)return{ok:false,error:{code:'rate_limited',message:'Too many browser requests. Wait a moment and refresh.'}};
+    const now=Date.now();
+    if(!ipcAdmission.admit(BROWSER_CHANNEL,raw,now))return{ok:false,error:{code:'rate_limited',message:'Too many browser requests. Wait a moment and refresh.'}};
     try{return{ok:true,value:await current.browser.handle(raw)};}
     catch(error){if(error instanceof BrowserError||error instanceof CommandValidationError||error instanceof ArtifactError)return{ok:false,error:{code:error.code,message:error.message}};
       return{ok:false,error:{code:'browser_action_failed',message:'The browser action could not finish. Refresh the view before trying another action.'}};
     }finally{notifyChanges();}
+  });
+  registerIpc(HISTORY_CHANNEL,async(event,raw:unknown)=>{
+    const frame=event.senderFrame,current=coordinator;
+    if(closing||maintenanceGate||current?.maintenanceActive||!window||!current||!frame||!isTrustedSender({senderId:event.sender.id,trustedWebContentsId:window.webContents.id,isMainFrame:frame===window.webContents.mainFrame,url:frame.url}))return{ok:false,error:{code:'permission_denied',message:'This window cannot inspect task history.'}};
+    if(!ipcAdmission.admit(HISTORY_CHANNEL,raw,Date.now()))return{ok:false,error:{code:'rate_limited',message:'Wait a moment and refresh.'}};
+    try{return{ok:true,value:current.taskHistory(raw)};}catch(error){if(error instanceof CoordinatorError||error instanceof LiveError)return{ok:false,error:{code:error.code,message:error.message}};return{ok:false,error:{code:'history_failed',message:'Task history could not be read. Refresh before retrying.'}};}finally{if(raw&&typeof raw==='object'&&'type' in raw&&raw.type==='tasks.archive')notifyChanges();}
+  });
+  registerIpc(GRANTS_CHANNEL,async(event,raw:unknown)=>{
+    const frame=event.senderFrame,current=coordinator;
+    if(closing||maintenanceGate||current?.maintenanceActive||!window||!current||!frame||!isTrustedSender({senderId:event.sender.id,trustedWebContentsId:window.webContents.id,isMainFrame:frame===window.webContents.mainFrame,url:frame.url}))return{ok:false,error:{code:'permission_denied',message:'This window cannot review exact capability grants.'}};
+    if(!ipcAdmission.admit(GRANTS_CHANNEL,raw,Date.now()))return{ok:false,error:{code:'rate_limited',message:'Wait a moment and refresh.'}};
+    try{const c=record(raw,['type','taskId','requestId']);if(c.type==='grants.list'){record(raw,['type','taskId']);return{ok:true,value:c.taskId===null?current.requests.grants():current.requests.grants(identity(c.taskId))};}if(c.type==='grants.revoke'){record(raw,['type','requestId']);return{ok:true,value:current.requests.revokeGrant(identity(c.requestId))};}throw new CommandValidationError('Choose a supported grant action.');}
+    catch(error){if(error instanceof RequestError||error instanceof LiveError||error instanceof CommandValidationError)return{ok:false,error:{code:error.code,message:error.message}};return{ok:false,error:{code:'operation_failed',message:'The grant action could not finish. Refresh before retrying.'}};}
+    finally{notifyChanges();}
   });
   const modelConnection = new ModelConnectionController(credentials,async()=>Boolean(coordinator?.live.hasInFlightWork||coordinator?.snapshot().tasks.some(t=>t.executionMode==='live'&&['queued','running','pausing'].includes(t.state))));
   const providerController = new ProviderController(modelProviders,()=>Boolean(coordinator?.live.hasInFlightWork||coordinator?.snapshot().tasks.some(t=>t.executionMode==='live'&&['queued','running','pausing'].includes(t.state))));
   for(const channel of [FLEET_CHANNEL,SECURITY_REVIEW_CHANNEL,TASK_RECOVERY_CHANNEL,COLLABORATION_CHANNEL,BROWSER_SETUP_CHANNEL,WORKFLOWS_CHANNEL,GMAIL_REVIEW_CHANNEL,GOOGLE_WORKSPACE_CHANNEL,BROWSER_ACTIONS_CHANNEL,ROUTINES_CHANNEL,PROJECTS_CHANNEL,RESULTS_CHANNEL,READINESS_CHANNEL])registerIpc(channel,async(event,raw:unknown)=>{
     const frame=event.senderFrame,current=coordinator;
     if(closing||maintenanceGate||coordinator?.maintenanceActive||!window||!current||!frame||!isTrustedSender({senderId:event.sender.id,trustedWebContentsId:window.webContents.id,isMainFrame:frame===window.webContents.mainFrame,url:frame.url}))return{ok:false,error:{code:'permission_denied',message:'This window cannot change workspace coordination.'}};
-    const now=Date.now();if(now-requestWindowAt>5000){requestWindowAt=now;requestCount=0;}if(++requestCount>256)return{ok:false,error:{code:'rate_limited',message:'Wait a moment and refresh.'}};
+    const now=Date.now();if(!ipcAdmission.admit(channel,raw,now))return{ok:false,error:{code:'rate_limited',message:'Wait a moment and refresh.'}};
     try{if(channel===SECURITY_REVIEW_CHANNEL&&raw&&typeof raw==='object'&&'type' in raw&&raw.type==='securityReview.create')throw new SecurityReviewError('feature_retired','Use Fleets to start an automatic team. Existing review tasks and results are preserved.');return{ok:true,value:await(channel===FLEET_CHANNEL?current.fleets.handle(raw):channel===SECURITY_REVIEW_CHANNEL?current.securityReviews.handle(raw):channel===TASK_RECOVERY_CHANNEL?current.taskRecovery.handle(raw):channel===GMAIL_REVIEW_CHANNEL?gmailReview.handle(raw):channel===GOOGLE_WORKSPACE_CHANNEL?googleController.handle(raw):channel===BROWSER_ACTIONS_CHANNEL?current.browserActions.handle(raw):channel===ROUTINES_CHANNEL?current.routines.handle(raw):channel===PROJECTS_CHANNEL?current.handleProjects(raw,async()=>googleWorkspace.verifiedConnectedAccount()):channel===RESULTS_CHANNEL?current.results.handle(raw):channel===READINESS_CHANNEL?current.readiness.handle(raw):channel===WORKFLOWS_CHANNEL?current.workflows.handle(raw):channel===COLLABORATION_CHANNEL?current.collaboration.handle(raw):browserSetup.handle(raw))};}
-    catch(error){if(error instanceof FleetError||error instanceof SecurityReviewError||error instanceof GmailError||error instanceof GoogleWorkspaceError||error instanceof BrowserActionError||error instanceof RoutineError||error instanceof ProjectError||error instanceof ModelConnectionError||error instanceof ReadinessError||error instanceof ResultError||error instanceof WorkflowError||error instanceof CoordinatorError||error instanceof CollaborationError||error instanceof BrowserError||error instanceof CommandValidationError)return{ok:false,error:{code:error.code,message:error.message}};return{ok:false,error:{code:'operation_failed',message:'This change could not finish. Saved tasks and files are preserved.'}};}
+    catch(error){if(error instanceof FleetError||error instanceof SecurityReviewError||error instanceof GmailError||error instanceof GoogleWorkspaceError||error instanceof BrowserActionError||error instanceof RoutineError||error instanceof ProjectError||error instanceof ModelConnectionError||error instanceof ReadinessError||error instanceof DocumentError||error instanceof CredentialError||error instanceof ResultError||error instanceof WorkflowError||error instanceof CoordinatorError||error instanceof CollaborationError||error instanceof BrowserError||error instanceof CommandValidationError)return{ok:false,error:{code:error.code,message:error.message}};return{ok:false,error:{code:'operation_failed',message:'This change could not finish. Saved tasks and files are preserved.'}};}
     finally{notifyChanges();}
   });
   registerIpc(MODEL_CONNECTION_CHANNEL,async(event,raw:unknown)=>{
@@ -258,7 +283,7 @@ async function launch(): Promise<void> {
   registerIpc(MODEL_PROVIDERS_CHANNEL,async(event,raw:unknown)=>{
     const frame=event.senderFrame;
     if(closing||maintenanceGate||coordinator?.maintenanceActive||!window||!coordinator||!frame||!isTrustedSender({senderId:event.sender.id,trustedWebContentsId:window.webContents.id,isMainFrame:frame===window.webContents.mainFrame,url:frame.url}))return{ok:false,error:{code:'busy',message:'Wait for the current workspace change before updating model connections.'}};
-    const now=Date.now();if(now-requestWindowAt>5000){requestWindowAt=now;requestCount=0;}if(++requestCount>256)return{ok:false,error:{code:'rate_limited',message:'Wait a moment and refresh.'}};
+    const now=Date.now();if(!ipcAdmission.admit(MODEL_PROVIDERS_CHANNEL,raw,now))return{ok:false,error:{code:'rate_limited',message:'Wait a moment and refresh.'}};
     try {
       // State only reads immutable metadata and Keychain presence; it never writes or contacts a model.
       if(raw&&typeof raw==='object'&&!Array.isArray(raw)&&(raw as {type?:unknown}).type==='providers.state')return{ok:true,value:await providerController.handle(raw)};
@@ -274,8 +299,8 @@ async function launch(): Promise<void> {
     const frame = event.senderFrame, current = coordinator;
     if (closing || maintenanceGate || coordinator?.maintenanceActive || !window || !current || !frame || !isTrustedSender({ senderId: event.sender.id, trustedWebContentsId: window.webContents.id, isMainFrame: frame === window.webContents.mainFrame, url: frame.url })) return { ok: false, error: { code: 'permission_denied', message: 'This window cannot execute code.' } };
     const now = Date.now();
-    if (now - requestWindowAt > 5000) { requestWindowAt = now; requestCount = 0; }
-    if (++requestCount > 256) return { ok: false, error: { code: 'rate_limited', message: 'Too many execution requests. Wait a moment and refresh code status.' } };
+
+    if(!ipcAdmission.admit(CODE_CHANNEL,raw,now)) return { ok: false, error: { code: 'rate_limited', message: 'Too many execution requests. Wait a moment and refresh code status.' } };
     try { return { ok: true, value: await current.code.handle(raw) }; }
     catch (error) {
       if (error instanceof CodeError || error instanceof CommandValidationError || error instanceof ArtifactError) return { ok: false, error: { code: error.code, message: error.message } };
@@ -301,8 +326,8 @@ async function launch(): Promise<void> {
   for (const channel of [GMAIL_CHANNEL, GMAIL_IMPORT_CHANNEL]) registerIpc(channel, async (event, raw: unknown) => {
     const frame = event.senderFrame;
     if (closing || maintenanceGate || coordinator?.maintenanceActive || !window || !coordinator || !frame || !isTrustedSender({ senderId: event.sender.id, trustedWebContentsId: window.webContents.id, isMainFrame: frame === window.webContents.mainFrame, url: frame.url })) return { ok: false, error: { code: 'permission_denied', message: 'This window cannot configure Gmail.' } };
-    const now = Date.now(); if (now - requestWindowAt > 5000) { requestWindowAt = now; requestCount = 0; }
-    if (++requestCount > 256) return { ok: false, error: { code: 'rate_limited', message: 'Too many connection requests. Wait a moment and refresh.' } };
+    const now = Date.now();
+    if(!ipcAdmission.admit(channel,raw,now)) return { ok: false, error: { code: 'rate_limited', message: 'Too many connection requests. Wait a moment and refresh.' } };
     try { return { ok: true, value: await (channel === GMAIL_IMPORT_CHANNEL ? gmailConnection.importClient(raw) : gmailConnection.handle(raw)) }; }
     catch (error) {
       if (error instanceof GmailError || error instanceof GmailControllerError) return { ok: false, error: { code: error.code, message: error.message } };
@@ -333,8 +358,8 @@ async function launch(): Promise<void> {
       const frame = event.senderFrame;
       if (closing || maintenanceGate || coordinator?.maintenanceActive || !window || !coordinator || !frame || !isTrustedSender({ senderId: event.sender.id, trustedWebContentsId: window.webContents.id, isMainFrame: frame === window.webContents.mainFrame, url: frame.url })) return { ok: false, error: { code: 'permission_denied', message: 'This window cannot operate live tasks or requests.' } };
       const now = Date.now();
-      if (now - requestWindowAt > 5000) { requestWindowAt = now; requestCount = 0; }
-      if (++requestCount > 256) return { ok: false, error: { code: 'rate_limited', message: 'Too many requests. Wait a moment and refresh.' } };
+
+      if(!ipcAdmission.admit(channel,raw,now)) return { ok: false, error: { code: 'rate_limited', message: 'Too many requests. Wait a moment and refresh.' } };
       try { return { ok: true, value: await handler(raw) }; }
       catch (error) {
         if (error instanceof FleetError || error instanceof LiveError || error instanceof RequestError || error instanceof CommandValidationError || error instanceof ArtifactError || error instanceof CoordinatorError || error instanceof ModelAdapterError || error instanceof CredentialError || error instanceof WorkflowError || error instanceof ResultError) return { ok: false, error: { code: error.code, message: error.message } };
@@ -347,6 +372,7 @@ async function launch(): Promise<void> {
     });
   }
   const files = new FileController(coordinator, {
+    async pickFolder(){if(!window)return null;const selected=await dialog.showOpenDialog(window,{title:'Review a bounded repository snapshot',buttonLabel:'Preview folder',message:'Read a small local source pilot, then review captured paths and exclusions before saving. Nothing is sent to a model.',properties:['openDirectory','noResolveAliases']});return selected.canceled?null:selected.filePaths[0]||null;},
     async pick(target, singleFile) {
       if (!window) return [];
       const recipient = target.scope === 'shared' ? 'Personal workspace · shared files' : coordinator?.snapshot().agents.find(agent => agent.id === target.agentId)?.name || 'Selected agent';
@@ -375,16 +401,16 @@ async function launch(): Promise<void> {
       const frame = event.senderFrame;
       if (closing || maintenanceGate || coordinator?.maintenanceActive || !window || !frame || !isTrustedSender({ senderId: event.sender.id, trustedWebContentsId: window.webContents.id, isMainFrame: frame === window.webContents.mainFrame, url: frame.url })) return { ok: false, error: { code: 'permission_denied', message: 'This window cannot access workspace files.' } };
       const now = Date.now();
-      if (now - requestWindowAt > 5000) { requestWindowAt = now; requestCount = 0; }
-      if (++requestCount > 256) return { ok: false, error: { code: 'rate_limited', message: 'Too many requests. Try again in a few seconds.' } };
+
+      if(!ipcAdmission.admit(channel,raw,now)) return { ok: false, error: { code: 'rate_limited', message: 'Too many requests. Try again in a few seconds.' } };
       try { return { ok: true, value: await handler(raw) }; }
       catch (error) {
-        if (error instanceof CommandValidationError || error instanceof ArtifactError) return { ok: false, error: { code: error.code, message: error.message } };
+        if (error instanceof CommandValidationError || error instanceof ArtifactError || error instanceof RepositorySnapshotError) return { ok: false, error: { code: error.code, message: error.message } };
         return { ok: false, error: { code: 'operation_failed', message: 'The file operation did not finish. Existing committed files are preserved.' } };
       } finally { notifyChanges(); }
     });
   }
-  const reportExport = new ReportExportController({results:coordinator.results,artifacts:coordinator.artifacts,renderPdf:renderIsolatedReportPdf,saveDialog:async(suggestedName,format)=>{
+  const reportExport = new ReportExportController({results:coordinator.results,artifacts:coordinator.artifacts,renderPdf:renderIsolatedReportPdf,formatOffice:(source,format)=>formatOfficeInWorker(join(app.getAppPath(),'dist/main/report-format-worker.cjs'),source,format),saveDialog:async(suggestedName,format)=>{
     if(!window||closing)return null;
     const result=await dialog.showSaveDialog(window,{title:'Export a formatted report',defaultPath:suggestedName,buttonLabel:'Export report',properties:['createDirectory','showOverwriteConfirmation','dontAddToRecent'],filters:[{name:format==='pdf'?'PDF document':format==='docx'?'Word document':'Excel workbook',extensions:[format]}]});
     return result.canceled?null:result.filePath||null;
@@ -392,7 +418,7 @@ async function launch(): Promise<void> {
   registerIpc(REPORT_EXPORT_CHANNEL,async(event,raw:unknown)=>{
     const frame=event.senderFrame;
     if(closing||maintenanceGate||coordinator?.maintenanceActive||!window||!coordinator||!frame||!isTrustedSender({senderId:event.sender.id,trustedWebContentsId:window.webContents.id,isMainFrame:frame===window.webContents.mainFrame,url:frame.url}))return{ok:false,error:{code:'permission_denied',message:'This window cannot export reports.'}};
-    const now=Date.now();if(now-requestWindowAt>5000){requestWindowAt=now;requestCount=0;}if(++requestCount>256)return{ok:false,error:{code:'rate_limited',message:'Wait a moment before starting another export.'}};
+    const now=Date.now();if(!ipcAdmission.admit(REPORT_EXPORT_CHANNEL,raw,now))return{ok:false,error:{code:'rate_limited',message:'Wait a moment before starting another export.'}};
     try{return{ok:true,value:await reportExport.handle(raw)};}
     catch(error){if(error instanceof ResultError||error instanceof ArtifactError||error instanceof LiveError)return{ok:false,error:{code:error.code,message:error.message}};return{ok:false,error:{code:'report_export_failed',message:'The report could not be exported. Choose a supported saved result and a writable destination; the source file is preserved.'}};}
   });
@@ -405,7 +431,7 @@ async function launch(): Promise<void> {
     const frame=event.senderFrame;
     if(closing||maintenanceGate||!window||!coordinator||!frame||!isTrustedSender({senderId:event.sender.id,trustedWebContentsId:window.webContents.id,isMainFrame:frame===window.webContents.mainFrame,url:frame.url}))return{ok:false,error:{code:'busy',message:'Recovery is unavailable while another checkpoint is running.'}};
     try{return{ok:true,value:await appMaintenance(()=>recovery.handle(raw))};}
-    catch{return{ok:false,error:{code:'recovery_failed',message:'Recovery could not finish. Check free space and choose a complete backup or a writable destination. Existing files have been preserved.'}};}
+    catch(error){return{ok:false,error:safeRecoveryFailure(error)};}
   },false);
   powerMonitor.on('suspend',()=>{
     if(closing||!coordinator)return;
